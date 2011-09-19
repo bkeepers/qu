@@ -6,6 +6,10 @@ module Qu
       handle_signals
     end
 
+    def running?
+      @running
+    end
+
     def handle_signals
       %W(INT TRAP).each do |sig|
         trap(sig) do
