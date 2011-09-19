@@ -10,7 +10,7 @@ module Qu
   extend SingleForwardable
   extend self
 
-  def_delegators :backend, :enqueue, :length, :queues, :reserve
+  def_delegators :backend, :enqueue, :length, :queues, :reserve, :clear
 
   def backend=(backend)
     @backend = backend
