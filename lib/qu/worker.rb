@@ -1,7 +1,21 @@
 module Qu
   class Worker
     def initialize(*queues)
+      @running = true
       @queues = queues.flatten
+      handle_signals
+    end
+
+    def handle_signals
+      %W(INT TRAP).each do |sig|
+        trap(sig) do
+          if running?
+            @running = false
+          else
+            raise Interrupt
+          end
+        end
+      end
     end
 
     def queues
@@ -17,6 +31,12 @@ module Qu
     def work
       job = Qu.reserve(self)
       job.perform
+    end
+
+    def start
+      while running? do
+        work
+      end
     end
   end
 end
