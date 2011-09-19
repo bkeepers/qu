@@ -43,4 +43,10 @@ describe Qu::Worker do
       subject.work_off
     end
   end
+
+  describe 'running?' do
+    it 'should default to false' do
+      subject.running?.should be_false
+    end
+  end
 end

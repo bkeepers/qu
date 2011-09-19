@@ -1,9 +1,7 @@
 module Qu
   class Worker
     def initialize(*queues)
-      @running = true
       @queues = queues.flatten
-      handle_signals
     end
 
     def running?
@@ -38,9 +36,9 @@ module Qu
     end
 
     def start
-      while running? do
-        work
-      end
+      handle_signals
+      @running = true
+      work while running?
     end
   end
 end
