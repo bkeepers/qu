@@ -31,8 +31,7 @@ module Qu
     end
 
     def work
-      job = Qu.reserve(self)
-      job.perform
+      Qu.reserve(self).perform
     end
 
     def start

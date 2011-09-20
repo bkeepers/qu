@@ -1,15 +1,13 @@
-class SimpleJob < Qu::Job
-  def perform
+class SimpleJob
+  def self.perform
   end
 end
 
-class CustomQueue < Qu::Job
-  queue :custom
+class CustomQueue
+  @queue = :custom
 end
 
 shared_examples_for 'a backend' do
-  let(:job) { SimpleJob }
-
   before(:all) do
     Qu.backend = described_class.new
   end
@@ -20,29 +18,29 @@ shared_examples_for 'a backend' do
 
   describe 'enqueue' do
     it 'should return a job id' do
-      subject.enqueue(job).should_not be_nil
+      subject.enqueue(SimpleJob).should be_instance_of(Qu::Job)
     end
 
     it 'should add a job to the queue' do
-      subject.enqueue(job)
+      job = subject.enqueue(SimpleJob)
+      job.queue.should == 'default'
       subject.length(job.queue).should == 1
     end
 
     it 'should add queue to list of queues' do
       subject.queues.should == []
-      subject.enqueue job
+      job = subject.enqueue(SimpleJob)
       subject.queues.should == [job.queue]
     end
 
     it 'should assign a different job id for the same job enqueue multiple times' do
-      id = subject.enqueue(job)
-      subject.enqueue(job.clone).should_not == id
+      subject.enqueue(SimpleJob).id.should_not == subject.enqueue(SimpleJob).id
     end
   end
 
   describe 'clear' do
     it 'should clear jobs for given queue' do
-      subject.enqueue job
+      job = subject.enqueue SimpleJob
       subject.length(job.queue).should == 1
       subject.clear(job.queue)
       subject.length(job.queue).should == 0
@@ -50,49 +48,46 @@ shared_examples_for 'a backend' do
     end
 
     it 'should not clear jobs for a different queue' do
-      subject.enqueue job
+      job = subject.enqueue SimpleJob
       subject.clear('other')
       subject.length(job.queue).should == 1
     end
 
     it 'should clear all queues without any args' do
-      subject.enqueue job
-      job.stub!(:queue).and_return('other')
-      subject.enqueue job
-      subject.length(job.queue).should == 1
-      subject.length('other').should == 1
+      subject.enqueue(SimpleJob).queue.should == 'default'
+      subject.enqueue(CustomQueue).queue.should == 'custom'
+      subject.length('default').should == 1
+      subject.length('custom').should == 1
       subject.clear
-      subject.length(job.queue).should == 0
-      subject.length('other').should == 0
+      subject.length('default').should == 0
+      subject.length('custom').should == 0
     end
   end
 
   describe 'reserve' do
-    let(:worker) { Qu::Worker.new(job.queue) }
+    let(:worker) { Qu::Worker.new('default') }
 
     before do
-      @id = subject.enqueue job
+      @job = subject.enqueue SimpleJob
     end
 
     it 'should return next job' do
-      subject.reserve(worker).id.should == @id
+      subject.reserve(worker).id.should == @job.id
     end
 
     it 'should not return an already reserved job' do
-      another_job = SimpleJob
-      subject.enqueue another_job
-
+      another_job = subject.enqueue SimpleJob
       subject.reserve(worker).id.should_not == subject.reserve(worker).id
     end
 
     it 'should return next job in given queues' do
       subject.enqueue SimpleJob
-      job_id = subject.enqueue CustomQueue
+      job = subject.enqueue CustomQueue
       subject.enqueue SimpleJob
 
       worker = Qu::Worker.new('custom', 'default')
 
-      subject.reserve(worker).id.should == job_id
+      subject.reserve(worker).id.should == job.id
     end
 
     it 'should not return job from different queue' do

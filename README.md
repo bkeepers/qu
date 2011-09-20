@@ -16,14 +16,10 @@
 
 ## API
 
-    Qu.length('presentations')
-    Qu.work_off # work off all jobs until there are none
-    Qu.clear
+    class ProcessPresentation < Qu::Job.new(:)
+      @queue = :mailers
 
-    class ProcessPresentation < Qu::Job.new(:presentation_id)
-      queue :mailers
-
-      def perform
+      def self.perform(presentation_id)
         presentation = Presentation.find(presentation_id)
         # work here
       end
@@ -31,17 +27,21 @@
 
     job_id = Qu.enqueue ProcessPresentation, @presentation.id
 
+    Qu.length('presentations')
+    Qu.work_off # work off all jobs until there are none
+    Qu.clear
+
     ProcessPresentation.create(:presentation_id => 1)
 
     Qu::Worker.new(*%w(presentations slides *)).start # or work_off
 
 ## ToDo
 
-* worker.work
 * add job back on queue when worker dies
-* use queue specified in job class
 * configurable exception handling
 * callbacks (enqueue, process, error)
 * make poll timer configurable
 * logger
 * autoconfigure heroku connections
+* API compatibility with Resque.reserve(queue)
+* Job.create

@@ -23,17 +23,17 @@ module Qu
       end
 
       def enqueue(klass, *args)
-        id = BSON::ObjectId.new
-        jobs(klass.queue).insert({:_id => id, :class => klass.to_s, :args => args})
-        self[:queues].update({:name => klass.queue}, {:name => klass.queue}, :upsert => true)
-        id
+        job = Qu::Job.new(BSON::ObjectId.new, klass, args)
+        jobs(job.queue).insert({:_id => job.id, :class => job.klass.to_s, :args => job.args})
+        self[:queues].update({:name => job.queue}, {:name => job.queue}, :upsert => true)
+        job
       end
 
       def reserve(worker, options = {:block => true})
         worker.queues.each do |queue|
           begin
             doc = jobs(queue).find_and_modify(:remove => true)
-            return Job.load(doc['_id'], doc['class'], doc['args'])
+            return Job.new(doc['_id'], doc['class'], doc['args'])
           rescue ::Mongo::OperationFailure
             # No jobs in the queue
           end

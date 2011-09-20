@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Qu::Worker do
-  let(:job) { SimpleJob.new }
+  let(:job) { Qu::Job.new('1', SimpleJob, []) }
 
   describe 'queues' do
     before do
@@ -27,7 +27,7 @@ describe Qu::Worker do
     end
 
     it 'should reserve a job' do
-      Qu.should_receive(:reserve).with(subject)
+      Qu.should_receive(:reserve).with(subject).and_return(job)
       subject.work
     end
 
@@ -39,7 +39,7 @@ describe Qu::Worker do
 
   describe 'work_off' do
     it 'should work all jobs off the queue' do
-      Qu.should_receive(:reserve).with(subject, :block => false).and_return(job, job, job, nil)
+      Qu.should_receive(:reserve).exactly(4).times.with(subject, :block => false).and_return(job, job, job, nil)
       subject.work_off
     end
   end

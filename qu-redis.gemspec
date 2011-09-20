@@ -15,5 +15,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency 'redis'
+  s.add_dependency 'simple_uuid'
   s.add_dependency 'qu', Qu::VERSION
 end

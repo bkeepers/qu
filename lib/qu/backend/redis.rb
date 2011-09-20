@@ -1,4 +1,5 @@
 require 'redis'
+require 'simple_uuid'
 
 module Qu
   module Backend
@@ -8,12 +9,11 @@ module Qu
       end
 
       def enqueue(klass, *args)
-        data = encode('class' => klass.to_s, 'args' => args)
-        id = unique_id(data)
-        redis.set("job:#{id}", data)
-        redis.rpush("queue:#{klass.queue}", id)
-        redis.sadd('queues', klass.queue)
-        id
+        job = Job.new(SimpleUUID::UUID.new.to_guid, klass, args)
+        redis.set("job:#{job.id}", encode('class' => job.klass.to_s, 'args' => job.args))
+        redis.rpush("queue:#{job.queue}", job.id)
+        redis.sadd('queues', job.queue)
+        job
       end
 
       def length(queue)
@@ -43,16 +43,9 @@ module Qu
         if id
           data = decode(redis.get("job:#{id}"))
           redis.del("job:#{id}")
-          Job.load(id, data['class'], data['args'])
+          Job.new(id, data['class'], data['args'])
         end
       end
-
-    private
-
-      def unique_id(data)
-        Digest::MD5.hexdigest("#{Time.now.to_f} - #{rand} - #{data}")
-      end
-
     end
   end
 end

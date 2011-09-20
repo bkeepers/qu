@@ -1,31 +1,24 @@
 module Qu
   class Job
-    attr_accessor :id
+    attr_accessor :id, :klass, :args
 
-    def self.queue(name = nil)
-      @queue = name.to_s if name
-      @queue ||= 'default'
+    def initialize(id, klass, args)
+      @id, @args = id, args
+
+      @klass = klass.is_a?(Class) ? klass : constantize(klass)
     end
 
-    def self.with(*params)
-      Class.new(Qu::Job) do
-        attr_reader *params
-
-        class_eval <<-EOF, __FILE__, __LINE__
-          def initialize(#{params.join(', ')})
-            #{params.map {|p| "@#{p}"}.join(', ')} = #{params.join(', ')}
-          end
-        EOF
-      end
+    def queue
+      (klass.instance_variable_get(:@queue) || 'default').to_s
     end
 
-    def self.load(id, class_name, args)
-      constantize(class_name).new(*args).tap {|job| job.id = id }
+    def perform
+      klass.perform(*args)
     end
 
   protected
 
-    def self.constantize(class_name)
+    def constantize(class_name)
       constant = Object
       class_name.split('::').each do |name|
         constant = constant.const_get(name) || constant.const_missing(name)
