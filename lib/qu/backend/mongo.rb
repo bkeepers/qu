@@ -45,15 +45,6 @@ module Qu
         end
       end
 
-      def release(job)
-
-      end
-
-      def delete(job)
-
-      end
-
-
     private
 
       def jobs(queue)

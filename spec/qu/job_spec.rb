@@ -50,23 +50,4 @@ describe Qu::Job do
       Qu::Job.load('1', 'MyJob', ['a']).arg.should == 'a'
     end
   end
-
-  # describe 'encode' do
-  #   it 'should json encode the class and args' do
-  #     MultiJson.decode(subject.encode).should == {'klass' => 'SimpleJob', 'args' => [1, 2]}
-  #   end
-  # end
-  #
-  # describe 'attributes' do
-  #   it 'should return a hash of attributes' do
-  #     subject.attributes.should == {'klass' => 'SimpleJob', 'args' => [1, 2]}
-  #   end
-  # end
-  #
-  # describe 'perform' do
-  #   it 'should call .perform on the class' do
-  #     SimpleJob.should_receive(:perform).with(1, 2)
-  #     subject.perform
-  #   end
-  # end
 end
