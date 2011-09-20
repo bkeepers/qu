@@ -3,6 +3,7 @@ gemspec :name => 'qu'
 
 group :mongo do
   gemspec :name => 'qu-mongo', :development_group => :mongo
+  gem 'bson_ext'
 end
 
 group :redis do
