@@ -8,6 +8,8 @@ class CustomQueue
 end
 
 shared_examples_for 'a backend' do
+  let(:worker) { Qu::Worker.new('default') }
+
   before(:all) do
     Qu.backend = described_class.new
   end
@@ -62,11 +64,25 @@ shared_examples_for 'a backend' do
       subject.length('default').should == 0
       subject.length('custom').should == 0
     end
+
+    it 'should clear failed queue without any args' do
+      job = subject.enqueue SimpleJob
+      subject.failed(job, Exception.new)
+      subject.length('failed').should == 1
+      subject.clear
+      subject.length('failed').should == 0
+    end
+
+    it 'should not clear failed queue with specified queues' do
+      job = subject.enqueue SimpleJob
+      subject.failed(job, Exception.new)
+      subject.length('failed').should == 1
+      subject.clear('default')
+      subject.length('failed').should == 1
+    end
   end
 
   describe 'reserve' do
-    let(:worker) { Qu::Worker.new('default') }
-
     before do
       @job = subject.enqueue SimpleJob
     end
@@ -114,6 +130,58 @@ shared_examples_for 'a backend' do
       SystemTimer.timeout(count, &block)
     rescue Timeout::Error
       nil
+    end
+  end
+
+  describe 'failed' do
+    let(:job) { Qu::Job.new('1', SimpleJob, []) }
+
+    it 'should add to failure queue' do
+      subject.failed(job, Exception.new)
+      subject.length('failed').should == 1
+    end
+
+    it 'should not add failed queue to the list of queues' do
+      subject.failed(job, Exception.new)
+      subject.queues.should_not include('failed')
+    end
+  end
+
+  describe 'requeue' do
+    context 'with a failed job' do
+      before do
+        subject.enqueue(SimpleJob)
+        @job = subject.reserve(worker)
+        subject.failed(@job, Exception.new)
+      end
+
+      it 'should add the job back on the queue' do
+        subject.length(@job.queue).should == 0
+        subject.requeue(@job.id)
+        subject.length(@job.queue).should == 1
+
+        job = subject.reserve(worker)
+        job.should be_instance_of(Qu::Job)
+        job.id.should == @job.id
+        job.klass.should == @job.klass
+        job.args.should == @job.args
+      end
+
+      it 'should remove the job from the failed jobs' do
+        subject.length('failed').should == 1
+        subject.requeue(@job.id)
+        subject.length('failed').should == 0
+      end
+
+      it 'should return the job' do
+        subject.requeue(@job.id).id.should == @job.id
+      end
+    end
+
+    context 'without a failed job' do
+      it 'should return false' do
+        subject.requeue('1').should be_false
+      end
     end
   end
 end

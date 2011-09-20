@@ -14,6 +14,8 @@ module Qu
 
     def perform
       klass.perform(*args)
+    rescue Exception => e
+      Qu.backend.failed(self, e)
     end
 
   protected
@@ -25,7 +27,6 @@ module Qu
       end
       constant
     end
-
 
   end
 end

@@ -7,7 +7,8 @@ module Qu
         @database ||= ::Mongo::Connection.new.db('qu')
       end
 
-      def clear(queue = queues)
+      def clear(queue = nil)
+        queue ||= queues + ['failed']
         Array(queue).each do |q|
           jobs(q).drop
           self[:queues].remove({:name => q})
@@ -43,6 +44,18 @@ module Qu
           sleep 5
           retry
         end
+      end
+
+      def failed(job, error)
+        jobs('failed').insert(:_id => job.id, :class => job.klass.to_s, :args => job.args, :queue => job.queue)
+      end
+
+      def requeue(id)
+        doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true)
+        jobs(doc.delete('queue')).insert(doc)
+        Job.new(doc['_id'], doc['class'], doc['args'])
+      rescue ::Mongo::OperationFailure
+        false
       end
 
     private

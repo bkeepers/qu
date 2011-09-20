@@ -20,7 +20,8 @@ module Qu
         redis.llen("queue:#{queue}")
       end
 
-      def clear(queue = queues)
+      def clear(queue = nil)
+        queue ||= queues + ['failed']
         Array(queue).each do |q|
           redis.srem('queues', q)
           redis.del("queue:#{q}")
@@ -40,12 +41,32 @@ module Qu
           queues.detect {|queue| id = redis.lpop(queue) }
         end
 
-        if id
-          data = decode(redis.get("job:#{id}"))
-          redis.del("job:#{id}")
+        get(id) if id
+      end
+
+      def failed(job, error)
+        redis.rpush("queue:failed", job.id)
+      end
+
+      def requeue(id)
+        if job = get(id)
+          redis.lrem('queue:failed', 1, id)
+          redis.rpush("queue:#{job.queue}", id)
+          job
+        else
+          false
+        end
+      end
+
+    private
+
+      def get(id)
+        if data = redis.get("job:#{id}")
+          data = decode(data)
           Job.new(id, data['class'], data['args'])
         end
       end
+
     end
   end
 end

@@ -26,9 +26,25 @@ describe Qu::Job do
   end
 
   describe 'perform' do
+    subject { Qu::Job.new('1', SimpleJob, ['a', 'b']) }
+
     it 'should call .perform on job class with args' do
       SimpleJob.should_receive(:perform).with('a', 'b')
-      Qu::Job.new('1', SimpleJob, ['a', 'b']).perform
+      subject.perform
     end
+
+    context 'when the job raises an error' do
+      let(:error) { Exception.new("Some kind of error") }
+
+      before do
+        SimpleJob.stub!(:perform).and_raise(error)
+      end
+
+      it 'should call failed on backend' do
+        Qu.backend.should_receive(:failed).with(subject, error)
+        subject.perform
+      end
+    end
+
   end
 end
