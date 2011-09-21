@@ -26,10 +26,16 @@ describe Qu::Job do
   end
 
   describe 'perform' do
-    subject { Qu::Job.new('1', SimpleJob, ['a', 'b']) }
+    subject { Qu::Job.new('1', SimpleJob, []) }
 
     it 'should call .perform on job class with args' do
+      subject.args = ['a', 'b']
       SimpleJob.should_receive(:perform).with('a', 'b')
+      subject.perform
+    end
+
+    it 'should call completed on backend' do
+      Qu.backend.should_receive(:completed)
       subject.perform
     end
 
@@ -42,6 +48,11 @@ describe Qu::Job do
 
       it 'should call failed on backend' do
         Qu.backend.should_receive(:failed).with(subject, error)
+        subject.perform
+      end
+
+      it 'should not call completed on backend' do
+        Qu.backend.should_not_receive(:completed)
         subject.perform
       end
     end

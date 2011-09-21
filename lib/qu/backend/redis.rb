@@ -48,6 +48,10 @@ module Qu
         redis.rpush("queue:failed", job.id)
       end
 
+      def completed(job)
+        redis.del("job:#{job.id}")
+      end
+
       def requeue(id)
         if job = get(id)
           redis.lrem('queue:failed', 1, id)

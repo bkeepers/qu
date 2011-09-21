@@ -147,6 +147,12 @@ shared_examples_for 'a backend' do
     end
   end
 
+  describe 'completed' do
+    it 'should be defined' do
+      subject.respond_to?(:completed).should be_true
+    end
+  end
+
   describe 'requeue' do
     context 'with a failed job' do
       before do

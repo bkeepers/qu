@@ -50,6 +50,9 @@ module Qu
         jobs('failed').insert(:_id => job.id, :class => job.klass.to_s, :args => job.args, :queue => job.queue)
       end
 
+      def completed(job)
+      end
+
       def requeue(id)
         doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true)
         jobs(doc.delete('queue')).insert(doc)

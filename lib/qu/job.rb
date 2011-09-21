@@ -16,6 +16,8 @@ module Qu
       klass.perform(*args)
     rescue Exception => e
       Qu.backend.failed(self, e)
+    else
+      Qu.backend.completed(self)
     end
 
   protected
