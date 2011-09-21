@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files -- lib | grep redis`.split("\n")
   s.require_paths = ["lib"]
 
-  s.add_dependency 'redis'
+  s.add_dependency 'redis-namespace'
   s.add_dependency 'simple_uuid'
   s.add_dependency 'qu', Qu::VERSION
 end

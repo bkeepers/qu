@@ -1,11 +1,18 @@
-require 'redis'
+require 'redis-namespace'
 require 'simple_uuid'
 
 module Qu
   module Backend
     class Redis < Base
+      attr_accessor :namespace
+
+      def initialize
+        self.namespace = :qu
+      end
+
       def redis
-        @redis ||= ::Redis.connect
+        @redis ||= Qu.connection ||
+          ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL']))
       end
 
       def enqueue(klass, *args)
