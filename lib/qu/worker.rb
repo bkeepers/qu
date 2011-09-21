@@ -1,10 +1,11 @@
 module Qu
   class Worker
-    attr_accessor :current_job
+    attr_accessor :current_job, :queues
 
     def initialize(*queues)
       @queues = queues.flatten
       self.attributes = @queues.pop if @queues.last.is_a?(Hash)
+      @queues << 'default' if @queues.empty?
     end
 
     def attributes=(attrs)
@@ -14,7 +15,7 @@ module Qu
     end
 
     def attributes
-      {'hostname' => hostname, 'pid' => pid, 'queues' => @queues}
+      {'hostname' => hostname, 'pid' => pid, 'queues' => queues}
     end
 
     def running?
@@ -31,10 +32,6 @@ module Qu
           end
         end
       end
-    end
-
-    def queues
-      @queues.map {|q| q == '*' ? Qu.queues.sort : q }.flatten.uniq
     end
 
     def work_off
@@ -63,7 +60,7 @@ module Qu
     end
 
     def id
-      "#{hostname}:#{pid}:#{@queues.join(',')}"
+      "#{hostname}:#{pid}:#{queues.join(',')}"
     end
 
     def pid

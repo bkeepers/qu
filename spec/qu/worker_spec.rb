@@ -4,20 +4,10 @@ describe Qu::Worker do
   let(:job) { Qu::Job.new('1', SimpleJob, []) }
 
   describe 'queues' do
-    before do
-      Qu.stub!(:queues).and_return(%w(c a b))
-    end
-
-    it 'should use all queues from backend with an asterisk' do
-      Qu::Worker.new('*').queues.should == %w(a b c)
-    end
-
-    it 'should append other queues with an asterisk' do
-      Qu::Worker.new('b', '*').queues.should == %w(b a c)
-    end
-
-    it 'should properly handle queues passed as an array to the initializer' do
-      Qu::Worker.new(%w(b *)).queues.should == %w(b a c)
+    it 'should use default if none specified' do
+      Qu::Worker.new.queues.should == ['default']
+      Qu::Worker.new('default').queues.should == ['default']
+      Qu::Worker.new(['default']).queues.should == ['default']
     end
   end
 
