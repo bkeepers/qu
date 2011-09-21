@@ -1,6 +1,9 @@
 module Qu
   class Worker
-    attr_accessor :current_job, :queues
+    attr_accessor :queues
+
+    class Abort < Exception
+    end
 
     def initialize(*queues)
       @queues = queues.flatten
@@ -18,19 +21,9 @@ module Qu
       {'hostname' => hostname, 'pid' => pid, 'queues' => queues}
     end
 
-    def running?
-      @running
-    end
-
     def handle_signals
-      %W(INT TRAP).each do |sig|
-        trap(sig) do
-          if running?
-            stop
-          else
-            raise Interrupt
-          end
-        end
+      %W(INT TERM).each do |sig|
+        trap(sig) { raise Abort }
       end
     end
 
@@ -41,21 +34,22 @@ module Qu
     end
 
     def work
-      self.current_job = Qu.reserve(self)
-      self.current_job.perform
-      self.current_job = nil
+      job = Qu.reserve(self)
+      job.perform
+    rescue Abort
+      Qu.backend.release(job) if job
+      raise
     end
 
     def start
+      Qu.logger.info "Starting worker #{id}"
       handle_signals
       Qu.backend.register_worker(self)
-      @running = true
-      work while running?
-    end
-
-    def stop
-      @running = false
-      Qu.backend.release(current_job) if current_job
+      loop { work }
+    rescue Abort => e
+      # Ok, we'll shut down, but give us a sec
+    ensure
+      Qu.logger.info "Stopping worker #{id}"
       Qu.backend.unregister_worker(self)
     end
 

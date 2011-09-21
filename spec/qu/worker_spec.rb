@@ -26,13 +26,17 @@ describe Qu::Worker do
       subject.work
     end
 
-    it 'assigns the current job' do
-      job.stub(:perform) { sleep 0.2 }
-      t = Thread.new { subject.work }
-      subject.current_job.should == job
-      t.join
-      subject.current_job.should be_nil
+    context 'when being aborted' do
+      before do
+        job.stub(:perform).and_raise(Qu::Worker::Abort)
+      end
+
+      it 'should release the job and re-raise the error' do
+        Qu.backend.should_receive(:release).with(job)
+        lambda { subject.work }.should raise_error(Qu::Worker::Abort)
+      end
     end
+
   end
 
   describe 'work_off' do
@@ -42,46 +46,24 @@ describe Qu::Worker do
     end
   end
 
-  describe 'running?' do
-    it 'should default to false' do
-      subject.running?.should be_false
-    end
-  end
-
   describe 'start' do
     before do
-      subject.stub(:running?).and_return(false)
+      subject.stub(:loop)
     end
 
-    it 'should register worker with the backend' do
+    it 'should register worker' do
       Qu.backend.should_receive(:register_worker).with(subject)
       subject.start
     end
-  end
 
-  describe 'stop' do
-    it 'should unregister worker' do
-      Qu.backend.should_receive(:unregister_worker)
-      subject.stop
-    end
-
-    it 'should set running to false' do
-      subject.instance_variable_set(:@running, true)
-      subject.running?.should be_true
-      subject.stop
-      subject.running?.should be_false
-    end
-
-    context 'with a job being processed' do
-      let(:job) { Qu::Job.new('1', SimpleJob, []) }
-
+    context 'when aborting' do
       before do
-        subject.current_job = job
+        subject.stub(:loop).and_raise(Qu::Worker::Abort)
       end
 
-      it 'should release the job' do
-        Qu.backend.should_receive(:release).with(job)
-        subject.stop
+      it 'should unregister worker' do
+        Qu.backend.should_receive(:unregister_worker).with(subject)
+        subject.start
       end
     end
   end
