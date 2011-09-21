@@ -16,6 +16,7 @@ shared_examples_for 'a backend' do
 
   before do
     subject.clear
+    subject.clear_workers
   end
 
   describe 'enqueue' do
@@ -188,6 +189,44 @@ shared_examples_for 'a backend' do
       it 'should return false' do
         subject.requeue('1').should be_false
       end
+    end
+  end
+
+  describe 'register_worker' do
+    let(:worker) { Qu::Worker.new('default') }
+
+    it 'should add worker to array of workers' do
+      subject.register_worker(worker)
+      subject.workers.size.should == 1
+      subject.workers.first.attributes.should == worker.attributes
+    end
+  end
+
+  describe 'clear_workers' do
+    before { subject.register_worker Qu::Worker.new('default') }
+
+    it 'should remove workers' do
+      subject.workers.size.should == 1
+      subject.clear_workers
+      subject.workers.size.should == 0
+    end
+  end
+
+  describe 'unregister_worker' do
+    before { subject.register_worker Qu::Worker.new('default') }
+
+    it 'should remove worker' do
+      subject.unregister_worker(worker.id)
+      subject.workers.size.should == 0
+    end
+
+    it 'should not remove other workers' do
+      other_worker = Qu::Worker.new('other')
+      subject.register_worker(other_worker)
+      subject.workers.size.should == 2
+      subject.unregister_worker(other_worker.id)
+      subject.workers.size.should == 1
+      subject.workers.first.id.should == worker.id
     end
   end
 end

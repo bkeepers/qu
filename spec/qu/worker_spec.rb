@@ -49,4 +49,70 @@ describe Qu::Worker do
       subject.running?.should be_false
     end
   end
+
+  describe 'start' do
+    before do
+      subject.stub(:running?).and_return(false)
+    end
+
+    it 'should register worker with the backend' do
+      Qu.backend.should_receive(:register_worker).with(subject)
+      subject.start
+    end
+  end
+
+  describe 'stop' do
+    it 'should unregister worker' do
+      Qu.backend.should_receive(:unregister_worker)
+      subject.stop
+    end
+
+    it 'should set running to false' do
+      subject.instance_variable_set(:@running, true)
+      subject.running?.should be_true
+      subject.stop
+      subject.running?.should be_false
+    end
+  end
+
+  describe 'pid' do
+    it 'should equal process id' do
+      subject.pid.should == Process.pid
+    end
+
+    it 'should use provided pid' do
+      Qu::Worker.new(:pid => 1).pid.should == 1
+    end
+  end
+
+  describe 'id' do
+    it 'should return hostname, pid, and queues' do
+      worker = Qu::Worker.new('a', 'b', :hostname => 'quspec', :pid => 123)
+      worker.id.should == 'quspec:123:a,b'
+    end
+
+    it 'should not expand star in queue names' do
+      Qu::Worker.new('a', '*').id.should =~ /a,*/
+    end
+  end
+
+  describe 'hostname' do
+    it 'should get hostname' do
+      subject.hostname.should_not be_empty
+    end
+
+    it 'should use provided hostname' do
+      Qu::Worker.new(:hostname => 'quspec').hostname.should == 'quspec'
+    end
+  end
+
+  describe 'attributes' do
+    let(:attrs) do
+      {'hostname' => 'omgbbq', 'pid' => 987, 'queues' => ['a', '*']}
+    end
+
+    it 'should return hash of attributes' do
+      Qu::Worker.new(attrs).attributes.should == attrs
+    end
+  end
 end

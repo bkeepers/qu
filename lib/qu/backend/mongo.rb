@@ -61,6 +61,24 @@ module Qu
         false
       end
 
+      def register_worker(worker)
+        self[:workers].insert(worker.attributes.merge(:id => worker.id))
+      end
+
+      def unregister_worker(id)
+        self[:workers].remove(:id => id)
+      end
+
+      def workers
+        self[:workers].find.map do |doc|
+          Qu::Worker.new(doc)
+        end
+      end
+
+      def clear_workers
+        self[:workers].drop
+      end
+
     private
 
       def jobs(queue)

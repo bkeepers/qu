@@ -62,7 +62,31 @@ module Qu
         end
       end
 
+      def register_worker(worker)
+        redis.set("worker:#{worker.id}", encode(worker.attributes))
+        redis.sadd(:workers, worker.id)
+      end
+
+      def unregister_worker(id)
+        redis.del("worker:#{id}")
+        redis.srem('workers', id)
+      end
+
+      def workers
+        Array(redis.smembers(:workers)).map { |id| worker(id) }.compact
+      end
+
+      def clear_workers
+        while id = redis.spop(:workers)
+          redis.del("worker:#{id}")
+        end
+      end
+
     private
+
+      def worker(id)
+        Qu::Worker.new(decode(redis.get("worker:#{id}")))
+      end
 
       def get(id)
         if data = redis.get("job:#{id}")

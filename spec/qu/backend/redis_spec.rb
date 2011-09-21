@@ -15,4 +15,14 @@ describe Qu::Backend::Redis do
       subject.redis.exists("job:#{job.id}").should be_false
     end
   end
+
+  describe 'clear_workers' do
+    before { subject.register_worker worker }
+
+    it 'should delete worker key' do
+      subject.redis.get("worker:#{worker.id}").should_not be_nil
+      subject.clear_workers
+      subject.redis.get("worker:#{worker.id}").should be_nil
+    end
+  end
 end
