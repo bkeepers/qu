@@ -44,6 +44,10 @@ module Qu
         get(id) if id
       end
 
+      def release(job)
+        redis.rpush("queue:#{job.queue}", job.id)
+      end
+
       def failed(job, error)
         redis.rpush("queue:failed", job.id)
       end

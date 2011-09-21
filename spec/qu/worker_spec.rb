@@ -35,6 +35,14 @@ describe Qu::Worker do
       job.should_receive(:perform)
       subject.work
     end
+
+    it 'assigns the current job' do
+      job.stub(:perform) { sleep 0.2 }
+      t = Thread.new { subject.work }
+      subject.current_job.should == job
+      t.join
+      subject.current_job.should be_nil
+    end
   end
 
   describe 'work_off' do
@@ -72,6 +80,19 @@ describe Qu::Worker do
       subject.running?.should be_true
       subject.stop
       subject.running?.should be_false
+    end
+
+    context 'with a job being processed' do
+      let(:job) { Qu::Job.new('1', SimpleJob, []) }
+
+      before do
+        subject.current_job = job
+      end
+
+      it 'should release the job' do
+        Qu.backend.should_receive(:release).with(job)
+        subject.stop
+      end
     end
   end
 

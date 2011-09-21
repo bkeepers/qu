@@ -46,6 +46,10 @@ module Qu
         end
       end
 
+      def release(job)
+        jobs(job.queue).insert({:_id => job.id, :class => job.klass.to_s, :args => job.args})
+      end
+
       def failed(job, error)
         jobs('failed').insert(:_id => job.id, :class => job.klass.to_s, :args => job.args, :queue => job.queue)
       end

@@ -154,6 +154,19 @@ shared_examples_for 'a backend' do
     end
   end
 
+  describe 'release' do
+    before do
+      subject.enqueue SimpleJob
+    end
+
+    it 'should add the job back on the queue' do
+      job = subject.reserve(worker)
+      subject.length(job.queue).should == 0
+      subject.release(job)
+      subject.length(job.queue).should == 1
+    end
+  end
+
   describe 'requeue' do
     context 'with a failed job' do
       before do

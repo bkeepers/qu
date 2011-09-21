@@ -1,5 +1,7 @@
 module Qu
   class Worker
+    attr_accessor :current_job
+
     def initialize(*queues)
       @queues = queues.flatten
       self.attributes = @queues.pop if @queues.last.is_a?(Hash)
@@ -42,7 +44,9 @@ module Qu
     end
 
     def work
-      Qu.reserve(self).perform
+      self.current_job = Qu.reserve(self)
+      self.current_job.perform
+      self.current_job = nil
     end
 
     def start
@@ -54,6 +58,7 @@ module Qu
 
     def stop
       @running = false
+      Qu.backend.release(current_job) if current_job
       Qu.backend.unregister_worker(self)
     end
 
