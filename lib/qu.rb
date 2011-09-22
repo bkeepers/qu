@@ -1,4 +1,5 @@
 require 'qu/version'
+require 'qu/failure'
 require 'qu/job'
 require 'qu/backend/base'
 
@@ -11,6 +12,8 @@ module Qu
   extend self
 
   def_delegators :backend, :enqueue, :length, :queues, :reserve, :clear
+
+  attr_accessor :failure
 
   def backend=(backend)
     @backend = backend

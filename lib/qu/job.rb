@@ -19,6 +19,7 @@ module Qu
       Qu.backend.release(self)
       raise
     rescue Exception => e
+      Qu.failure.create(self, e) if Qu.failure
       Qu.backend.failed(self, e)
     end
 

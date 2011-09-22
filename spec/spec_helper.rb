@@ -7,5 +7,6 @@ RSpec.configure do |config|
   config.before do
     Qu.backend = mock('a backend', :reserve => nil, :failed => nil, :completed => nil,
       :register_worker => nil, :unregister_worker => nil)
+    Qu.failure = nil
   end
 end
