@@ -15,6 +15,9 @@ module Qu
     def perform
       klass.perform(*args)
       Qu.backend.completed(self)
+    rescue Qu::Worker::Abort
+      Qu.backend.release(self)
+      raise
     rescue Exception => e
       Qu.backend.failed(self, e)
     end

@@ -39,6 +39,17 @@ describe Qu::Job do
       subject.perform
     end
 
+    context 'when being aborted' do
+      before do
+        SimpleJob.stub(:perform).and_raise(Qu::Worker::Abort)
+      end
+
+      it 'should release the job and re-raise the error' do
+        Qu.backend.should_receive(:release).with(subject)
+        lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
+      end
+    end
+
     context 'when the job raises an error' do
       let(:error) { Exception.new("Some kind of error") }
 

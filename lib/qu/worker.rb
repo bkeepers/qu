@@ -36,9 +36,6 @@ module Qu
     def work
       job = Qu.reserve(self)
       job.perform
-    rescue Abort
-      Qu.backend.release(job) if job
-      raise
     end
 
     def start

@@ -25,18 +25,6 @@ describe Qu::Worker do
       job.should_receive(:perform)
       subject.work
     end
-
-    context 'when being aborted' do
-      before do
-        job.stub(:perform).and_raise(Qu::Worker::Abort)
-      end
-
-      it 'should release the job and re-raise the error' do
-        Qu.backend.should_receive(:release).with(job)
-        lambda { subject.work }.should raise_error(Qu::Worker::Abort)
-      end
-    end
-
   end
 
   describe 'work_off' do
