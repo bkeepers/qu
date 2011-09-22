@@ -12,19 +12,23 @@ module Qu
       class ExceptionData < ::Exceptional::ExceptionData
         def initialize(job, exception)
           @job = job
-          super(exception, 'Qu')
-        end
-
-        def framework
-          'qu'
+          super(exception)
         end
 
         def extra_stuff
           {
-            'id'    => @job.id,
-            'queue' => @job.queue,
-            'args'  => @job.args,
-            'class' => @job.klass.to_s
+            'request' => {
+              'parameters' => {
+                'id'    => @job.id,
+                'queue' => @job.queue,
+                'args'  => @job.args,
+                'class' => @job.klass.to_s
+              }
+            },
+
+            'rescue_block' => {
+              'name'    => @job.klass.to_s
+            }
           }
         end
       end

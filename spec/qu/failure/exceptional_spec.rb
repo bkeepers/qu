@@ -9,15 +9,18 @@ describe Qu::Failure::Exceptional do
 
     it 'should include job data in the request' do
       subject.extra_stuff.should == {
-        'id'    => '123',
-        'queue' => 'default',
-        'args'  => ['987'],
-        'class' => 'SimpleJob'
+        'request' => {
+          'parameters' => {
+            'id'    => '123',
+            'queue' => 'default',
+            'args'  => ['987'],
+            'class' => 'SimpleJob'
+          }
+        },
+        'rescue_block' => {
+          'name'    => 'SimpleJob'
+        }
       }
-    end
-
-    it 'should set the framework' do
-      subject.framework.should == 'qu'
     end
   end
 
