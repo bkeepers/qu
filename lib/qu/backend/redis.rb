@@ -10,10 +10,10 @@ module Qu
         self.namespace = :qu
       end
 
-      def redis
-        @redis ||= Qu.connection ||
-          ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL']))
+      def connection
+        @connection ||= ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL']))
       end
+      alias_method :redis, :connection
 
       def enqueue(klass, *args)
         job = Job.new(SimpleUUID::UUID.new.to_guid, klass, args)

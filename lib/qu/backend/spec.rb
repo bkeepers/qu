@@ -242,4 +242,16 @@ shared_examples_for 'a backend' do
       subject.workers.first.id.should == worker.id
     end
   end
+
+  describe 'connection=' do
+    it 'should allow setting the connection' do
+      connection = mock('a connection')
+      subject.connection = connection
+      subject.connection.should == connection
+    end
+
+    it 'should provide a default connection' do
+      subject.connection.should_not be_nil
+    end
+  end
 end

@@ -3,9 +3,22 @@ require 'mongo'
 module Qu
   module Backend
     class Mongo < Base
-      def database
-        @database ||= ::Mongo::Connection.new.db('qu')
+      def connection
+        @connection ||= begin
+          uri = URI.parse(ENV['MONGOHQ_URL'].to_s)
+          database = uri.path.empty? ? 'qu' : uri.path[1..-1]
+          options = {}
+          if uri.password
+            options[:auths] = [{
+              'db_name'  => database,
+              'username' => uri.user,
+              'password' => uri.password
+            }]
+          end
+          ::Mongo::Connection.new(uri.host, uri.port, options).db(database)
+        end
       end
+      alias_method :database, :connection
 
       def clear(queue = nil)
         queue ||= queues + ['failed']
