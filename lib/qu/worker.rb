@@ -39,14 +39,12 @@ module Qu
     end
 
     def start
-      Qu.logger.info "Starting worker #{id}"
       handle_signals
       Qu.backend.register_worker(self)
       loop { work }
     rescue Abort => e
       # Ok, we'll shut down, but give us a sec
     ensure
-      Qu.logger.info "Stopping worker #{id}"
       Qu.backend.unregister_worker(self)
     end
 
