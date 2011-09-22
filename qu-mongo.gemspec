@@ -16,4 +16,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'mongo'
   s.add_dependency 'qu', Qu::VERSION
+
+  s.add_development_dependency 'bson_ext'
 end

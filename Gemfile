@@ -1,13 +1,12 @@
 source "http://rubygems.org"
 gemspec :name => 'qu'
 
-group :mongo do
-  gemspec :name => 'qu-mongo', :development_group => :mongo
-  gem 'bson_ext'
-end
+Dir['qu-*.gemspec'].each do |gemspec|
+  plugin = gemspec.scan(/qu-(.*)\.gemspec/).to_s
 
-group :redis do
-  gemspec :name => 'qu-redis', :development_group => :redis
+  group plugin do
+    gemspec(:name => "qu-#{plugin}", :development_group => plugin)
+  end
 end
 
 group :test do
