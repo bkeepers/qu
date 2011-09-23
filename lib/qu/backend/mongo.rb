@@ -32,7 +32,7 @@ module Qu
         self[:queues].find.map {|doc| doc['name'] }
       end
 
-      def length(queue)
+      def length(queue = 'default')
         jobs(queue).count
       end
 

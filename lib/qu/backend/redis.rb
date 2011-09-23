@@ -23,7 +23,7 @@ module Qu
         job
       end
 
-      def length(queue)
+      def length(queue = 'default')
         redis.llen("queue:#{queue}")
       end
 

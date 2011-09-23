@@ -41,6 +41,14 @@ shared_examples_for 'a backend' do
     end
   end
 
+  describe 'length' do
+    it 'should use the default queue by default' do
+      subject.length.should == 0
+      subject.enqueue(SimpleJob)
+      subject.length.should == 1
+    end
+  end
+
   describe 'clear' do
     it 'should clear jobs for given queue' do
       job = subject.enqueue SimpleJob
