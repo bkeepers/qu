@@ -23,3 +23,5 @@ module Qu
     block.call(self)
   end
 end
+
+require 'qu/railtie' if defined?(Rails)
