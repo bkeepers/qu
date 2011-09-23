@@ -1,47 +1,134 @@
-## Features
+# Qu
 
-* Multiple backends (redis, mongo, sql)
+Qu is a Ruby library for queuing and processing background jobs. It is heavily inspired by delayed_job and Resque.
+
+Qu was created to overcome some shortcomings in the existing queuing libraries that we experienced at [Ordered List](http://orderedlist.com) while building [SpeakerDeck](http://speakerdeck.com), [Gaug.es](http://get.gaug.es) and [Harmony](http://get.harmonyapp.com). The advantages of Qu are:
+
+* Multiple backends (redis, mongo)
+* Jobs are requeued when worker is killed
 * Resque-like API
-* …
 
 ## Installation
 
-    gem 'qu-redis'
+### Rails
 
-    Qu.configure do |c|
-      c.connection = Redis.new
-      c.fork       = false
-      c.poll       = 20 # for backends that need to poll instead of blocking
-    end
+Decide which backend you want to use and add the gem for it to your `Gemfile`.
 
-## API
+``` ruby
+gem 'qu-redis'
+```
 
-    class ProcessPresentation < Qu::Job.new(:)
-      @queue = :mailers
+That's all you need to do!
 
-      def self.perform(presentation_id)
-        presentation = Presentation.find(presentation_id)
-        # work here
-      end
-    end
+## Usage
 
-    job_id = Qu.enqueue ProcessPresentation, @presentation.id
+Jobs are any class that responds to the `.perform` method:
 
-    Qu.length('presentations')
-    Qu.work_off # work off all jobs until there are none
-    Qu.clear
+``` ruby
+class ProcessPresentation
+  def self.perform(presentation_id)
+    presentation = Presentation.find(presentation_id)
+    presentation.process!
+  end
+end
+```
 
-    ProcessPresentation.create(:presentation_id => 1)
+You can add a job to the queue by calling the `enqueue` method:
 
-    Qu::Worker.new(*%w(presentations slides *)).start # or work_off
+``` ruby
+job = Qu.enqueue ProcessPresentation, @presentation.id
+puts "Enqueued job #{job.id}"
+```
 
-## ToDo
+Any additional parameters passed to the `enqueue` method will be passed on to the `perform` method of your job class. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. So don't try to pass in an ActiveRecord object.
 
-* add job back on queue when worker dies
-* configurable exception handling
-* callbacks (enqueue, process, error)
-* make poll timer configurable
-* logger
-* autoconfigure heroku connections
-* API compatibility with Resque.reserve(queue)
-* Job.create
+Processing the jobs on the queue can be done with a Rake task:
+
+``` sh
+$ bundle exec rake qu:work
+```
+
+You can easily inspect the queue or clear it:
+
+``` ruby
+puts "Jobs on the queue:", Qu.length
+Qu.clear
+```
+
+### Queues
+
+The `default` queue is used, um…by default. Jobs that don't specify a queue will be placed in that queue, and workers that don't specify a queue will work on that queue.
+
+However, if you have some background jobs that are more or less important, or some that take longer than others, you may want to consider using multiple queues. You can have workers dedicated to specific queues, or simply tell all your workers to work on the most important queue first.
+
+Jobs can be placed in a specific queue by setting the queue variable:
+
+``` ruby
+class CallThePresident
+  @queue = :urgent
+
+  def self.perform(message)
+    # …
+  end
+end
+```
+
+You can then tell workers to work on this queue by passing an environment variable
+
+``` sh
+$ bundle exec rake qu:work QUEUES=urgent,default
+```
+
+Note that if you still want your worker to process the default queue, you must specify it. Queues will be process in the order they are specified.
+
+You can also get the length or clear a specific queue:
+
+``` ruby
+Qu.length(:urgent)
+Qu.clear(:urgent)
+```
+
+## Configuration
+
+Most of the configuration for Qu should be automatic. It will also automatically detect ENV variables from Heroku for backend connections, so you shouldn't need to do anything to configure the backend.
+
+However, if you do need to customize it, you can by calling the `Qu.configure`:
+
+``` ruby
+Qu.configure do |c|
+  c.connection = Redis::Namespace.new('myapp:qu', :redis => Redis.connect)
+end
+```
+
+## Why another queuing library?
+
+Resque and delayed_job are both great, but both of them have shortcomings that can be frustrating in production applications.
+
+delayed_job was a brilliantly simple pioneer in the world of database-backed queues. While most asynchronous queuing systems were tending toward the overly complex, but there are a few of the flaws:
+
+* Occasionally fails silently.
+* Use of priority instead of separate named queues.
+* Contention in the ActiveRecord backend with multiple workers. Occasionally the same job gets performed by multiple workers.
+
+Resque, the wiser relative of delayed_job, fixes most of those issues. But in doing so, it forces some of its beliefs on you, and sometimes those beliefs just don't make sense for your environment. Here are some of the flaws of Resque:
+
+* Redis is a great queue backend, but it doesn't make sense for every environment.
+* Workers lose jobs when they are forced to quit. This has especially been an issue on Heroku.
+* Forking before each job prevents memory leaks, but it is terribly inefficient in environments with a lot of fast jobs (the resque-jobs-per-fork plugin alleviates this)
+
+Those shortcomings lead us to write Qu. It is not perfect, but we hope to overcome the issues we faced with other queuing libraries.
+
+## Contributing
+
+If you find what looks like a bug:
+
+1. Search the "mailing list":http://groups.google.com/group/qu-users to see if anyone else had the same issue.
+2. Check the "GitHub issue tracker":http://github.com/bkeepers/qu/issues/ to see if anyone else has reported issue.
+3. If you don't see anything, create an issue with information on how to reproduce it.
+
+If you want to contribute an enhancement or a fix:
+
+1. Fork the project on GitHub.
+2. Make your changes with tests.
+3. Commit the changes without making changes to the Rakefile, Gemfile, gemspec, or any other files that aren't related to your enhancement or fix
+4. Send a pull request.
