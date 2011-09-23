@@ -17,7 +17,7 @@ task :release => :build do
   sh "git tag v#{Qu::VERSION}"
   sh "git push origin master"
   sh "git push origin v#{Qu::VERSION}"
-  sh "gem push pkg/*.gem"
+  sh "ls pkg/*.gem | xargs -n 1 gem push"
 end
 
 require 'rspec/core/rake_task'
