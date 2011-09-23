@@ -8,6 +8,12 @@ Qu was created to overcome some shortcomings in the existing queuing libraries t
 * Jobs are requeued when worker is killed
 * Resque-like API
 
+## Information & Help
+
+* Find more information on the [Wiki](https://github.com/bkeepers/qu/wiki).
+* Post to the [Google Group](http://groups.google.com/group/qu-users) for help or questions.
+* See the [issue tracker](https://github.com/bkeepers/qu/issues) for known issues or to report an issue.
+
 ## Installation
 
 ### Rails
@@ -122,8 +128,8 @@ Those shortcomings lead us to write Qu. It is not perfect, but we hope to overco
 
 If you find what looks like a bug:
 
-1. Search the "mailing list":http://groups.google.com/group/qu-users to see if anyone else had the same issue.
-2. Check the "GitHub issue tracker":http://github.com/bkeepers/qu/issues/ to see if anyone else has reported issue.
+1. Search the [mailing list](http://groups.google.com/group/qu-users) to see if anyone else had the same issue.
+2. Check the [GitHub issue tracker](http://github.com/bkeepers/qu/issues/) to see if anyone else has reported issue.
 3. If you don't see anything, create an issue with information on how to reproduce it.
 
 If you want to contribute an enhancement or a fix:
