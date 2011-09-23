@@ -5,3 +5,7 @@ namespace :qu do
     Qu::Worker.new(*queues).start
   end
 end
+
+# Convenience tasks compatibility
+task 'jobs:work'   => 'qu:work'
+task 'resque:work' => 'qu:work'
