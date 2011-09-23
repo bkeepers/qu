@@ -104,7 +104,7 @@ end
 
 Resque and delayed_job are both great, but both of them have shortcomings that can be frustrating in production applications.
 
-delayed_job was a brilliantly simple pioneer in the world of database-backed queues. While most asynchronous queuing systems were tending toward the overly complex, but there are a few of the flaws:
+delayed_job was a brilliantly simple pioneer in the world of database-backed queues. While most asynchronous queuing systems were tending toward overly complex, it made use of your existing database and just worked. But there are a few flaws:
 
 * Occasionally fails silently.
 * Use of priority instead of separate named queues.
