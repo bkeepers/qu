@@ -11,15 +11,15 @@ module Qu
   extend SingleForwardable
   extend self
 
-  def_delegators :backend, :enqueue, :length, :queues, :reserve, :clear
+  attr_accessor :backend, :failure
 
-  attr_accessor :failure
-
-  def backend=(backend)
-    @backend = backend
-  end
+  def_delegators :backend, :enqueue, :length, :queues, :reserve, :clear, :connection=
 
   def backend
-    @backend ||= Backend::Redis.new
+    @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
+  end
+
+  def configure(&block)
+    block.call(self)
   end
 end
