@@ -20,6 +20,7 @@ module Qu
         redis.set("job:#{job.id}", encode('class' => job.klass.to_s, 'args' => job.args))
         redis.rpush("queue:#{job.queue}", job.id)
         redis.sadd('queues', job.queue)
+        logger.debug { "Enqueued job #{job.id} for #{job.klass} with: #{job.args.inspect}" }
         job
       end
 
@@ -29,7 +30,9 @@ module Qu
 
       def clear(queue = nil)
         queue ||= queues + ['failed']
+        logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
+          logger.debug "Clearing queue #{q}"
           redis.srem('queues', q)
           redis.del("queue:#{q}")
         end
@@ -41,6 +44,8 @@ module Qu
 
       def reserve(worker, options = {:block => true})
         queues = worker.queues.map {|q| "queue:#{q}" }
+
+        logger.debug { "Reserving job in queues #{queues.inspect}"}
 
         if options[:block]
           id = redis.blpop(*queues.push(0))[1]
@@ -64,6 +69,7 @@ module Qu
       end
 
       def requeue(id)
+        logger.debug "Requeuing job #{id}"
         if job = get(id)
           redis.lrem('queue:failed', 1, id)
           redis.rpush("queue:#{job.queue}", id)
@@ -74,11 +80,13 @@ module Qu
       end
 
       def register_worker(worker)
+        logger.debug "Registering worker #{worker.id}"
         redis.set("worker:#{worker.id}", encode(worker.attributes))
         redis.sadd(:workers, worker.id)
       end
 
       def unregister_worker(id)
+        logger.debug "Unregistering worker #{id}"
         redis.del("worker:#{id}")
         redis.srem('workers', id)
       end
@@ -88,7 +96,9 @@ module Qu
       end
 
       def clear_workers
+        logger.info "Clearing workers"
         while id = redis.spop(:workers)
+          logger.debug "Clearing worker #{id}"
           redis.del("worker:#{id}")
         end
       end

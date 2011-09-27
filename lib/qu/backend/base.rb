@@ -3,6 +3,7 @@ require 'multi_json'
 module Qu
   module Backend
     class Base
+      include Logger
       attr_accessor :connection
 
     private

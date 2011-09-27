@@ -22,7 +22,9 @@ module Qu
 
       def clear(queue = nil)
         queue ||= queues + ['failed']
+        logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
+          logger.debug "Clearing queue #{q}"
           jobs(q).drop
           self[:queues].remove({:name => q})
         end
@@ -40,12 +42,15 @@ module Qu
         job = Qu::Job.new(BSON::ObjectId.new, klass, args)
         jobs(job.queue).insert({:_id => job.id, :class => job.klass.to_s, :args => job.args})
         self[:queues].update({:name => job.queue}, {:name => job.queue}, :upsert => true)
+        logger.debug { "Enqueued job #{job.id} for #{job.klass} with: #{job.args.inspect}" }
         job
       end
 
       def reserve(worker, options = {:block => true})
         worker.queues.each do |queue|
           begin
+            logger.debug { "Reserving job in queue #{queue}" }
+
             doc = jobs(queue).find_and_modify(:remove => true)
             return Job.new(doc['_id'], doc['class'], doc['args'])
           rescue ::Mongo::OperationFailure
@@ -71,6 +76,7 @@ module Qu
       end
 
       def requeue(id)
+        logger.debug "Requeuing job #{id}"
         doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true)
         jobs(doc.delete('queue')).insert(doc)
         Job.new(doc['_id'], doc['class'], doc['args'])
@@ -79,10 +85,12 @@ module Qu
       end
 
       def register_worker(worker)
+        logger.debug "Registering worker #{worker.id}"
         self[:workers].insert(worker.attributes.merge(:id => worker.id))
       end
 
       def unregister_worker(id)
+        logger.debug "Unregistering worker #{id}"
         self[:workers].remove(:id => id)
       end
 
@@ -93,6 +101,7 @@ module Qu
       end
 
       def clear_workers
+        logger.info "Clearing workers"
         self[:workers].drop
       end
 

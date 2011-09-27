@@ -1,5 +1,7 @@
 module Qu
   class Job
+    include Logger
+
     attr_accessor :id, :klass, :args
 
     def initialize(id, klass, args)
@@ -16,9 +18,11 @@ module Qu
       klass.perform(*args)
       Qu.backend.completed(self)
     rescue Qu::Worker::Abort
+      logger.debug "Releasing job #{id}"
       Qu.backend.release(self)
       raise
     rescue Exception => e
+      log_exception(e)
       Qu.failure.create(self, e) if Qu.failure
       Qu.backend.failed(self, e)
     end

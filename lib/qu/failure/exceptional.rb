@@ -3,9 +3,14 @@ require 'exceptional'
 module Qu
   module Failure
     class Exceptional
+      extend Logger
+
       def self.create(job, exception)
         if ::Exceptional::Config.should_send_to_api?
+          logger.debug "Reporting error to Exceptional"
           ::Exceptional::Remote.error(ExceptionData.new(job, exception))
+        else
+          logger.debug "Not reporting error to exceptional"
         end
       end
 

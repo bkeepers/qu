@@ -1,9 +1,11 @@
 require 'qu/version'
+require 'qu/logger'
 require 'qu/failure'
 require 'qu/job'
 require 'qu/backend/base'
 
 require 'forwardable'
+require 'logger'
 
 module Qu
   autoload :Worker, 'qu/worker'
@@ -11,7 +13,7 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure
+  attr_accessor :backend, :failure, :logger
 
   def_delegators :backend, :enqueue, :length, :queues, :reserve, :clear, :connection=
 
@@ -22,6 +24,11 @@ module Qu
   def configure(&block)
     block.call(self)
   end
+end
+
+Qu.configure do |c|
+  c.logger = Logger.new(STDOUT)
+  c.logger.level = Logger::INFO
 end
 
 require 'qu/railtie' if defined?(Rails)

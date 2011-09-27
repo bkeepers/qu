@@ -10,3 +10,5 @@ RSpec.configure do |config|
     Qu.failure = nil
   end
 end
+
+Qu.logger = Logger.new('/dev/null')

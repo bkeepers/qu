@@ -1,5 +1,7 @@
 module Qu
   class Worker
+    include Logger
+
     attr_accessor :queues
 
     class Abort < Exception
@@ -22,23 +24,34 @@ module Qu
     end
 
     def handle_signals
+      logger.debug "Worker #{id} registering traps for INT and TERM signals"
       %W(INT TERM).each do |sig|
-        trap(sig) { raise Abort }
+        trap(sig) do
+          logger.info "Worker #{id} received #{sig}, shutting down"
+          raise Abort
+        end
       end
     end
 
     def work_off
+      logger.debug "Worker #{id} working of all jobs"
       while job = Qu.reserve(self, :block => false)
+        logger.info "Worker #{id} reserved job #{job.id}"
         job.perform
+        logger.debug "Worker #{id} completed job #{job.id}"
       end
     end
 
     def work
+      logger.debug "Worker #{id} waiting for next job"
       job = Qu.reserve(self)
+      logger.info "Worker #{id} reserved job #{job.id}"
       job.perform
+      logger.debug "Worker #{id} completed job #{job.id}"
     end
 
     def start
+      logger.warn "Worker #{id} starting"
       handle_signals
       Qu.backend.register_worker(self)
       loop { work }
@@ -46,10 +59,11 @@ module Qu
       # Ok, we'll shut down, but give us a sec
     ensure
       Qu.backend.unregister_worker(self)
+      logger.debug "Worker #{id} done"
     end
 
     def id
-      "#{hostname}:#{pid}:#{queues.join(',')}"
+      @id ||= "#{hostname}:#{pid}:#{queues.join(',')}"
     end
 
     def pid
