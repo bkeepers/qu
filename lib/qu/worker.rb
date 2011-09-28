@@ -36,7 +36,7 @@ module Qu
     def work_off
       logger.debug "Worker #{id} working of all jobs"
       while job = Qu.reserve(self, :block => false)
-        logger.info "Worker #{id} reserved job #{job.id}"
+        logger.debug "Worker #{id} reserved job #{job.id}"
         job.perform
         logger.debug "Worker #{id} completed job #{job.id}"
       end
@@ -45,7 +45,7 @@ module Qu
     def work
       logger.debug "Worker #{id} waiting for next job"
       job = Qu.reserve(self)
-      logger.info "Worker #{id} reserved job #{job.id}"
+      logger.debug "Worker #{id} reserved job #{job.id}"
       job.perform
       logger.debug "Worker #{id} completed job #{job.id}"
     end
