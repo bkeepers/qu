@@ -15,9 +15,9 @@ module Qu
       end
       alias_method :redis, :connection
 
-      def enqueue(klass, *args)
-        payload = Payload.new(SimpleUUID::UUID.new.to_guid, klass, args)
-        redis.set("job:#{payload.id}", encode('class' => payload.klass.to_s, 'args' => payload.args))
+      def enqueue(payload)
+        payload.id = SimpleUUID::UUID.new.to_guid
+        redis.set("job:#{payload.id}", encode('klass' => payload.klass.to_s, 'args' => payload.args))
         redis.rpush("queue:#{payload.queue}", payload.id)
         redis.sadd('queues', payload.queue)
         logger.debug { "Enqueued job #{payload.id} for #{payload.klass} with: #{payload.args.inspect}" }
@@ -112,7 +112,7 @@ module Qu
       def get(id)
         if data = redis.get("job:#{id}")
           data = decode(data)
-          Payload.new(id, data['class'], data['args'])
+          Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
         end
       end
 

@@ -1,13 +1,18 @@
+require 'ostruct'
+
 module Qu
-  class Payload
+  class Payload < OpenStruct
     include Logger
 
-    attr_accessor :id, :klass, :args
+    undef_method :id
 
-    def initialize(id, klass, args)
-      @id, @args = id, args
+    def initialize(options = {})
+      super
+      self.args ||= []
+    end
 
-      @klass = klass.is_a?(Class) ? klass : constantize(klass)
+    def klass
+      constantize(super)
     end
 
     def queue
@@ -30,6 +35,8 @@ module Qu
   protected
 
     def constantize(class_name)
+      return unless class_name
+      return class_name if class_name.is_a?(Class)
       constant = Object
       class_name.split('::').each do |name|
         constant = constant.const_get(name) || constant.const_missing(name)

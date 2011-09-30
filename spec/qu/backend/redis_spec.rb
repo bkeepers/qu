@@ -8,7 +8,7 @@ describe Qu::Backend::Redis do
 
   describe 'completed' do
     it 'should delete job' do
-      subject.enqueue(SimpleJob)
+      subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
       job = subject.reserve(worker)
       subject.redis.exists("job:#{job.id}").should be_true
       subject.completed(job)

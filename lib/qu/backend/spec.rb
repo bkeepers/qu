@@ -9,6 +9,7 @@ end
 
 shared_examples_for 'a backend' do
   let(:worker) { Qu::Worker.new('default') }
+  let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   before(:all) do
     Qu.backend = described_class.new
@@ -20,38 +21,43 @@ shared_examples_for 'a backend' do
   end
 
   describe 'enqueue' do
-    it 'should return a job id' do
-      subject.enqueue(SimpleJob).should be_instance_of(Qu::Payload)
+    it 'should return a payload' do
+      subject.enqueue(payload).should be_instance_of(Qu::Payload)
+    end
+
+    it 'should set the payload id' do
+      subject.enqueue(payload)
+      payload.id.should_not be_nil
     end
 
     it 'should add a job to the queue' do
-      payload = subject.enqueue(SimpleJob)
+      subject.enqueue(payload)
       payload.queue.should == 'default'
       subject.length(payload.queue).should == 1
     end
 
     it 'should add queue to list of queues' do
       subject.queues.should == []
-      payload = subject.enqueue(SimpleJob)
+      subject.enqueue(payload)
       subject.queues.should == [payload.queue]
     end
 
     it 'should assign a different job id for the same job enqueue multiple times' do
-      subject.enqueue(SimpleJob).id.should_not == subject.enqueue(SimpleJob).id
+      subject.enqueue(payload).id.should_not == subject.enqueue(payload).id
     end
   end
 
   describe 'length' do
     it 'should use the default queue by default' do
       subject.length.should == 0
-      subject.enqueue(SimpleJob)
+      subject.enqueue(payload)
       subject.length.should == 1
     end
   end
 
   describe 'clear' do
     it 'should clear jobs for given queue' do
-      payload = subject.enqueue SimpleJob
+      subject.enqueue payload
       subject.length(payload.queue).should == 1
       subject.clear(payload.queue)
       subject.length(payload.queue).should == 0
@@ -59,14 +65,14 @@ shared_examples_for 'a backend' do
     end
 
     it 'should not clear jobs for a different queue' do
-      payload = subject.enqueue SimpleJob
+      subject.enqueue(payload)
       subject.clear('other')
       subject.length(payload.queue).should == 1
     end
 
     it 'should clear all queues without any args' do
-      subject.enqueue(SimpleJob).queue.should == 'default'
-      subject.enqueue(CustomQueue).queue.should == 'custom'
+      subject.enqueue(payload).queue.should == 'default'
+      subject.enqueue(Qu::Payload.new(:klass => CustomQueue)).queue.should == 'custom'
       subject.length('default').should == 1
       subject.length('custom').should == 1
       subject.clear
@@ -75,7 +81,7 @@ shared_examples_for 'a backend' do
     end
 
     it 'should clear failed queue without any args' do
-      payload = subject.enqueue SimpleJob
+      subject.enqueue(payload)
       subject.failed(payload, Exception.new)
       subject.length('failed').should == 1
       subject.clear
@@ -83,7 +89,7 @@ shared_examples_for 'a backend' do
     end
 
     it 'should not clear failed queue with specified queues' do
-      payload = subject.enqueue SimpleJob
+      subject.enqueue(payload)
       subject.failed(payload, Exception.new)
       subject.length('failed').should == 1
       subject.clear('default')
@@ -93,26 +99,26 @@ shared_examples_for 'a backend' do
 
   describe 'reserve' do
     before do
-      @payload = subject.enqueue SimpleJob
+      subject.enqueue(payload)
     end
 
     it 'should return next job' do
-      subject.reserve(worker).id.should == @payload.id
+      subject.reserve(worker).id.should == payload.id
     end
 
     it 'should not return an already reserved job' do
-      subject.enqueue SimpleJob
+      subject.enqueue(payload)
       subject.reserve(worker).id.should_not == subject.reserve(worker).id
     end
 
     it 'should return next job in given queues' do
-      subject.enqueue SimpleJob
-      payload = subject.enqueue CustomQueue
-      subject.enqueue SimpleJob
+      subject.enqueue(payload.dup)
+      custom = subject.enqueue(Qu::Payload.new(:klass => CustomQueue))
+      subject.enqueue(payload.dup)
 
       worker = Qu::Worker.new('custom', 'default')
 
-      subject.reserve(worker).id.should == payload.id
+      subject.reserve(worker).id.should == custom.id
     end
 
     it 'should not return job from different queue' do
@@ -143,7 +149,7 @@ shared_examples_for 'a backend' do
   end
 
   describe 'failed' do
-    let(:payload) { Qu::Payload.new('1', SimpleJob, []) }
+    let(:payload) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
 
     it 'should add to failure queue' do
       subject.failed(payload, Exception.new)
@@ -164,11 +170,11 @@ shared_examples_for 'a backend' do
 
   describe 'release' do
     before do
-      subject.enqueue SimpleJob
+      subject.enqueue(payload)
     end
 
     it 'should add the job back on the queue' do
-      payload = subject.reserve(worker)
+      subject.reserve(worker).id.should == payload.id
       subject.length(payload.queue).should == 0
       subject.release(payload)
       subject.length(payload.queue).should == 1
@@ -178,31 +184,31 @@ shared_examples_for 'a backend' do
   describe 'requeue' do
     context 'with a failed job' do
       before do
-        subject.enqueue(SimpleJob)
-        @payload = subject.reserve(worker)
-        subject.failed(@payload, Exception.new)
+        subject.enqueue(payload)
+        subject.reserve(worker).id.should == payload.id
+        subject.failed(payload, Exception.new)
       end
 
       it 'should add the job back on the queue' do
-        subject.length(@payload.queue).should == 0
-        subject.requeue(@payload.id)
-        subject.length(@payload.queue).should == 1
+        subject.length(payload.queue).should == 0
+        subject.requeue(payload.id)
+        subject.length(payload.queue).should == 1
 
-        payload = subject.reserve(worker)
-        payload.should be_instance_of(Qu::Payload)
-        payload.id.should == @payload.id
-        payload.klass.should == @payload.klass
-        payload.args.should == @payload.args
+        p = subject.reserve(worker)
+        p.should be_instance_of(Qu::Payload)
+        p.id.should == payload.id
+        p.klass.should == payload.klass
+        p.args.should == payload.args
       end
 
       it 'should remove the job from the failed jobs' do
         subject.length('failed').should == 1
-        subject.requeue(@payload.id)
+        subject.requeue(payload.id)
         subject.length('failed').should == 0
       end
 
       it 'should return the job' do
-        subject.requeue(@payload.id).id.should == @payload.id
+        subject.requeue(payload.id).id.should == payload.id
       end
     end
 

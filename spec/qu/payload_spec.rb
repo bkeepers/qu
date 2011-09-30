@@ -5,28 +5,36 @@ describe Qu::Payload do
     @queue = :custom
   end
 
+  it 'should default id to nil' do
+    Qu::Payload.new.id.should == nil
+  end
+
+  it 'should allow id to be set' do
+    Qu::Payload.new(:id => 5).id.should == 5
+  end
+
   describe 'queue' do
     it 'should default to "default"' do
-      Qu::Payload.new('1', SimpleJob, []).queue.should == 'default'
+      Qu::Payload.new.queue.should == 'default'
     end
 
     it 'should get queue from instance variable' do
-      Qu::Payload.new('1', MyJob, []).queue.should == 'custom'
+      Qu::Payload.new(:klass => MyJob).queue.should == 'custom'
     end
   end
 
   describe 'klass' do
     it 'should constantize string' do
-      Qu::Payload.new('1', 'MyJob', []).klass.should == MyJob
+      Qu::Payload.new(:klass => 'MyJob').klass.should == MyJob
     end
 
     it 'should find namespaced class' do
-      Qu::Payload.new('1', 'Qu::Payload', []).klass.should == Qu::Payload
+      Qu::Payload.new(:klass => 'Qu::Payload').klass.should == Qu::Payload
     end
   end
 
   describe 'perform' do
-    subject { Qu::Payload.new('1', SimpleJob, []) }
+    subject { Qu::Payload.new(:klass => SimpleJob) }
 
     it 'should call .perform on class with args' do
       subject.args = ['a', 'b']

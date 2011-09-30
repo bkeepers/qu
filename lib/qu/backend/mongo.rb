@@ -38,9 +38,9 @@ module Qu
         jobs(queue).count
       end
 
-      def enqueue(klass, *args)
-        payload = Payload.new(BSON::ObjectId.new, klass, args)
-        jobs(payload.queue).insert({:_id => payload.id, :class => payload.klass.to_s, :args => payload.args})
+      def enqueue(payload)
+        payload.id = BSON::ObjectId.new
+        jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
         self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
         logger.debug { "Enqueued job #{payload.id} for #{payload.klass} with: #{payload.args.inspect}" }
         payload
@@ -52,7 +52,8 @@ module Qu
             logger.debug { "Reserving job in queue #{queue}" }
 
             doc = jobs(queue).find_and_modify(:remove => true)
-            return Payload.new(doc['_id'], doc['class'], doc['args'])
+            doc['id'] = doc.delete('_id')
+            return Payload.new(doc)
           rescue ::Mongo::OperationFailure
             # No jobs in the queue
           end
@@ -65,11 +66,11 @@ module Qu
       end
 
       def release(payload)
-        jobs(payload.queue).insert({:_id => payload.id, :class => payload.klass.to_s, :args => payload.args})
+        jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
       end
 
       def failed(payload, error)
-        jobs('failed').insert(:_id => payload.id, :class => payload.klass.to_s, :args => payload.args, :queue => payload.queue)
+        jobs('failed').insert(:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args, :queue => payload.queue)
       end
 
       def completed(payload)
@@ -79,7 +80,8 @@ module Qu
         logger.debug "Requeuing job #{id}"
         doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true)
         jobs(doc.delete('queue')).insert(doc)
-        Payload.new(doc['_id'], doc['class'], doc['args'])
+        doc['id'] = doc.delete('_id')
+        Payload.new(doc)
       rescue ::Mongo::OperationFailure
         false
       end
