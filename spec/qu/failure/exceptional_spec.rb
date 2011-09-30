@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'qu-exceptional'
 
 describe Qu::Failure::Exceptional do
-  let(:job) { Qu::Job.new('123', SimpleJob, ['987']) }
+  let(:job) { Qu::Payload.new('123', SimpleJob, ['987']) }
 
   describe Qu::Failure::Exceptional::ExceptionData do
     subject { Qu::Failure::Exceptional::ExceptionData.new(job, Exception.new) }

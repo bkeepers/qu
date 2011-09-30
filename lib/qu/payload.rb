@@ -1,5 +1,5 @@
 module Qu
-  class Job
+  class Payload
     include Logger
 
     attr_accessor :id, :klass, :args

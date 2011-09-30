@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Qu::Worker do
-  let(:job) { Qu::Job.new('1', SimpleJob, []) }
+  let(:job) { Qu::Payload.new('1', SimpleJob, []) }
 
   describe 'queues' do
     it 'should use default if none specified' do

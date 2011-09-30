@@ -16,12 +16,12 @@ module Qu
       alias_method :redis, :connection
 
       def enqueue(klass, *args)
-        job = Job.new(SimpleUUID::UUID.new.to_guid, klass, args)
-        redis.set("job:#{job.id}", encode('class' => job.klass.to_s, 'args' => job.args))
-        redis.rpush("queue:#{job.queue}", job.id)
-        redis.sadd('queues', job.queue)
-        logger.debug { "Enqueued job #{job.id} for #{job.klass} with: #{job.args.inspect}" }
-        job
+        payload = Payload.new(SimpleUUID::UUID.new.to_guid, klass, args)
+        redis.set("job:#{payload.id}", encode('class' => payload.klass.to_s, 'args' => payload.args))
+        redis.rpush("queue:#{payload.queue}", payload.id)
+        redis.sadd('queues', payload.queue)
+        logger.debug { "Enqueued job #{payload.id} for #{payload.klass} with: #{payload.args.inspect}" }
+        payload
       end
 
       def length(queue = 'default')
@@ -56,24 +56,24 @@ module Qu
         get(id) if id
       end
 
-      def release(job)
-        redis.rpush("queue:#{job.queue}", job.id)
+      def release(payload)
+        redis.rpush("queue:#{payload.queue}", payload.id)
       end
 
-      def failed(job, error)
-        redis.rpush("queue:failed", job.id)
+      def failed(payload, error)
+        redis.rpush("queue:failed", payload.id)
       end
 
-      def completed(job)
-        redis.del("job:#{job.id}")
+      def completed(payload)
+        redis.del("job:#{payload.id}")
       end
 
       def requeue(id)
         logger.debug "Requeuing job #{id}"
-        if job = get(id)
+        if payload = get(id)
           redis.lrem('queue:failed', 1, id)
-          redis.rpush("queue:#{job.queue}", id)
-          job
+          redis.rpush("queue:#{payload.queue}", id)
+          payload
         else
           false
         end
@@ -112,7 +112,7 @@ module Qu
       def get(id)
         if data = redis.get("job:#{id}")
           data = decode(data)
-          Job.new(id, data['class'], data['args'])
+          Payload.new(id, data['class'], data['args'])
         end
       end
 

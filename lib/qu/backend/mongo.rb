@@ -39,11 +39,11 @@ module Qu
       end
 
       def enqueue(klass, *args)
-        job = Qu::Job.new(BSON::ObjectId.new, klass, args)
-        jobs(job.queue).insert({:_id => job.id, :class => job.klass.to_s, :args => job.args})
-        self[:queues].update({:name => job.queue}, {:name => job.queue}, :upsert => true)
-        logger.debug { "Enqueued job #{job.id} for #{job.klass} with: #{job.args.inspect}" }
-        job
+        payload = Payload.new(BSON::ObjectId.new, klass, args)
+        jobs(payload.queue).insert({:_id => payload.id, :class => payload.klass.to_s, :args => payload.args})
+        self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
+        logger.debug { "Enqueued job #{payload.id} for #{payload.klass} with: #{payload.args.inspect}" }
+        payload
       end
 
       def reserve(worker, options = {:block => true})
@@ -52,7 +52,7 @@ module Qu
             logger.debug { "Reserving job in queue #{queue}" }
 
             doc = jobs(queue).find_and_modify(:remove => true)
-            return Job.new(doc['_id'], doc['class'], doc['args'])
+            return Payload.new(doc['_id'], doc['class'], doc['args'])
           rescue ::Mongo::OperationFailure
             # No jobs in the queue
           end
@@ -64,22 +64,22 @@ module Qu
         end
       end
 
-      def release(job)
-        jobs(job.queue).insert({:_id => job.id, :class => job.klass.to_s, :args => job.args})
+      def release(payload)
+        jobs(payload.queue).insert({:_id => payload.id, :class => payload.klass.to_s, :args => payload.args})
       end
 
-      def failed(job, error)
-        jobs('failed').insert(:_id => job.id, :class => job.klass.to_s, :args => job.args, :queue => job.queue)
+      def failed(payload, error)
+        jobs('failed').insert(:_id => payload.id, :class => payload.klass.to_s, :args => payload.args, :queue => payload.queue)
       end
 
-      def completed(job)
+      def completed(payload)
       end
 
       def requeue(id)
         logger.debug "Requeuing job #{id}"
         doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true)
         jobs(doc.delete('queue')).insert(doc)
-        Job.new(doc['_id'], doc['class'], doc['args'])
+        Payload.new(doc['_id'], doc['class'], doc['args'])
       rescue ::Mongo::OperationFailure
         false
       end
