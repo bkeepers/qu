@@ -9,3 +9,6 @@ end
 # Convenience tasks compatibility
 task 'jobs:work'   => 'qu:work'
 task 'resque:work' => 'qu:work'
+
+# No-op task in case it doesn't already exist
+task :environment
