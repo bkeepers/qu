@@ -47,21 +47,24 @@ module Qu
       end
 
       def reserve(worker, options = {:block => true})
-        worker.queues.each do |queue|
-          begin
-            logger.debug { "Reserving job in queue #{queue}" }
+        loop do
+          worker.queues.each do |queue|
+            begin
+              logger.debug { "Reserving job in queue #{queue}" }
 
-            doc = jobs(queue).find_and_modify(:remove => true)
-            doc['id'] = doc.delete('_id')
-            return Payload.new(doc)
-          rescue ::Mongo::OperationFailure
-            # No jobs in the queue
+              doc = jobs(queue).find_and_modify(:remove => true)
+              doc['id'] = doc.delete('_id')
+              return Payload.new(doc)
+            rescue ::Mongo::OperationFailure
+              # No jobs in the queue
+            end
           end
-        end
 
-        if options[:block]
-          sleep 5
-          retry
+          if options[:block]
+            sleep 5
+          else
+            break
+          end
         end
       end
 
