@@ -42,7 +42,7 @@ module Qu
         payload.id = BSON::ObjectId.new
         jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
         self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
-        logger.debug { "Enqueued job #{payload.id} for #{payload.klass} with: #{payload.args.inspect}" }
+        logger.debug { "Enqueued job #{payload}" }
         payload
       end
 

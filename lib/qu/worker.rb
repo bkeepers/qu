@@ -36,18 +36,18 @@ module Qu
     def work_off
       logger.debug "Worker #{id} working of all jobs"
       while job = Qu.reserve(self, :block => false)
-        logger.debug "Worker #{id} reserved job #{job.id}"
+        logger.debug "Worker #{id} reserved job #{job}"
         job.perform
-        logger.debug "Worker #{id} completed job #{job.id}"
+        logger.debug "Worker #{id} completed job #{job}"
       end
     end
 
     def work
       logger.debug "Worker #{id} waiting for next job"
       job = Qu.reserve(self)
-      logger.debug "Worker #{id} reserved job #{job.id}"
+      logger.debug "Worker #{id} reserved job #{job}"
       job.perform
-      logger.debug "Worker #{id} completed job #{job.id}"
+      logger.debug "Worker #{id} completed job #{job}"
     end
 
     def start

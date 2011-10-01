@@ -20,7 +20,7 @@ module Qu
         redis.set("job:#{payload.id}", encode('klass' => payload.klass.to_s, 'args' => payload.args))
         redis.rpush("queue:#{payload.queue}", payload.id)
         redis.sadd('queues', payload.queue)
-        logger.debug { "Enqueued job #{payload.id} for #{payload.klass} with: #{payload.args.inspect}" }
+        logger.debug { "Enqueued job #{payload}" }
         payload
       end
 

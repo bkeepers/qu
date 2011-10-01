@@ -23,13 +23,18 @@ module Qu
       klass.perform(*args)
       Qu.backend.completed(self)
     rescue Qu::Worker::Abort
-      logger.debug "Releasing job #{id}"
+      logger.debug "Releasing job #{self}"
       Qu.backend.release(self)
       raise
     rescue Exception => e
+      logger.fatal "Job #{self} failed"
       log_exception(e)
       Qu.failure.create(self, e) if Qu.failure
       Qu.backend.failed(self, e)
+    end
+
+    def to_s
+      "#{id}:#{klass}:#{args.inspect}"
     end
 
   protected
