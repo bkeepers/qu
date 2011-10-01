@@ -4,7 +4,7 @@ module Qu
   class Payload < OpenStruct
     include Logger
 
-    undef_method :id
+    undef_method(:id) if method_defined?(:id)
 
     def initialize(options = {})
       super
