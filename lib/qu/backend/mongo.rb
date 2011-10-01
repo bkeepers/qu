@@ -49,14 +49,15 @@ module Qu
       def reserve(worker, options = {:block => true})
         loop do
           worker.queues.each do |queue|
-            begin
-              logger.debug { "Reserving job in queue #{queue}" }
+            logger.debug { "Reserving job in queue #{queue}" }
 
-              doc = jobs(queue).find_and_modify(:remove => true)
-              doc['id'] = doc.delete('_id')
-              return Payload.new(doc)
+            begin
+              if doc = jobs(queue).find_and_modify(:remove => true)
+                doc['id'] = doc.delete('_id')
+                return Payload.new(doc)
+              end
             rescue ::Mongo::OperationFailure
-              # No jobs in the queue
+              # No jobs in the queue (MongoDB <2)
             end
           end
 
@@ -81,7 +82,7 @@ module Qu
 
       def requeue(id)
         logger.debug "Requeuing job #{id}"
-        doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true)
+        doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true) || raise(::Mongo::OperationFailure)
         jobs(doc.delete('queue')).insert(doc)
         doc['id'] = doc.delete('_id')
         Payload.new(doc)
