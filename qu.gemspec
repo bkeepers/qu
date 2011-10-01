@@ -2,7 +2,7 @@
 $:.push File.expand_path("../lib", __FILE__)
 require "qu/version"
 
-plugins = Dir['qu-*.gemspec'].map {|gemspec| gemspec.scan(/qu-(.*)\.gemspec/).to_s }.join('\|')
+plugins = Dir['qu-*.gemspec'].map {|gemspec| gemspec.scan(/qu-(.*)\.gemspec/).flatten.first }.join('\|')
 
 Gem::Specification.new do |s|
   s.name        = "qu"

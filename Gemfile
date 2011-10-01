@@ -2,7 +2,7 @@ source "http://rubygems.org"
 gemspec :name => 'qu'
 
 Dir['qu-*.gemspec'].each do |gemspec|
-  plugin = gemspec.scan(/qu-(.*)\.gemspec/).to_s
+  plugin = gemspec.scan(/qu-(.*)\.gemspec/).flatten.first
 
   group plugin do
     gemspec(:name => "qu-#{plugin}", :development_group => plugin)

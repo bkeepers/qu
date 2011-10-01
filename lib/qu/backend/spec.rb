@@ -1,3 +1,8 @@
+unless defined?(SystemTimer)
+  require 'timeout'
+  SystemTimer = Timeout
+end
+
 class SimpleJob
   def self.perform
   end
