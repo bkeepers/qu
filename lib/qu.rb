@@ -13,7 +13,7 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure, :logger
+  attr_accessor :backend, :failure, :logger, :max_retries_on_connection_failure, :retry_frequency_on_connection_failure
 
   def_delegators :backend, :length, :queues, :reserve, :clear, :connection=
 
@@ -33,6 +33,8 @@ end
 Qu.configure do |c|
   c.logger = Logger.new(STDOUT)
   c.logger.level = Logger::INFO
+  c.max_retries_on_connection_failure = 5
+  c.retry_frequency_on_connection_failure = 1
 end
 
 require 'qu/railtie' if defined?(Rails)

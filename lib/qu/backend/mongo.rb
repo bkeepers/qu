@@ -118,8 +118,24 @@ module Qu
       end
 
       def [](name)
-        database["qu.#{name}"]
+        rescue_connection_failure do
+          database["qu:#{name}"]
+        end
       end
+      
+      
+      def rescue_connection_failure
+        retries = 0
+        begin
+          yield
+        rescue ::Mongo::ConnectionFailure => ex
+          retries += 1
+          raise ex if retries > Qu.max_retries_on_connection_failure
+          sleep(Qu.retry_frequency_on_connection_failure * retries)
+          retry
+        end
+      end
+      
     end
   end
 end
