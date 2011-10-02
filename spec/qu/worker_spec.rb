@@ -52,7 +52,20 @@ describe Qu::Worker do
       it 'should unregister worker' do
         Qu.backend.should_receive(:unregister_worker).with(subject)
         subject.start
+      end  
+    end
+    
+    context "unregister dead workers (crash recovery)" do
+      let(:worker) { Qu::Worker.new }
+      
+      it "prune dead worker" do
+        Qu.backend.register_worker(worker)
+        Qu.backend.stub(:workers).and_return([worker])
+        
+        Qu.backend.should_receive(:unregister_worker).with(worker)
+        subject.start
       end
+      
     end
   end
 
