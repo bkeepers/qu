@@ -95,9 +95,9 @@ module Qu
         self[:workers].insert(worker.attributes.merge(:id => worker.id))
       end
 
-      def unregister_worker(id)
-        logger.debug "Unregistering worker #{id}"
-        self[:workers].remove(:id => id)
+      def unregister_worker(worker)
+        logger.debug "Unregistering worker #{worker.id}"
+        self[:workers].remove(:id => worker.id)
       end
 
       def workers

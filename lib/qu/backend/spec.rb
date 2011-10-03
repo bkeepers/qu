@@ -225,8 +225,6 @@ shared_examples_for 'a backend' do
   end
 
   describe 'register_worker' do
-    let(:worker) { Qu::Worker.new('default') }
-
     it 'should add worker to array of workers' do
       subject.register_worker(worker)
       subject.workers.size.should == 1
@@ -245,10 +243,10 @@ shared_examples_for 'a backend' do
   end
 
   describe 'unregister_worker' do
-    before { subject.register_worker Qu::Worker.new('default') }
+    before { subject.register_worker(worker) }
 
     it 'should remove worker' do
-      subject.unregister_worker(worker.id)
+      subject.unregister_worker(worker)
       subject.workers.size.should == 0
     end
 
@@ -256,7 +254,7 @@ shared_examples_for 'a backend' do
       other_worker = Qu::Worker.new('other')
       subject.register_worker(other_worker)
       subject.workers.size.should == 2
-      subject.unregister_worker(other_worker.id)
+      subject.unregister_worker(other_worker)
       subject.workers.size.should == 1
       subject.workers.first.id.should == worker.id
     end

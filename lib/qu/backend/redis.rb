@@ -85,10 +85,10 @@ module Qu
         redis.sadd(:workers, worker.id)
       end
 
-      def unregister_worker(id)
-        logger.debug "Unregistering worker #{id}"
-        redis.del("worker:#{id}")
-        redis.srem('workers', id)
+      def unregister_worker(worker)
+        logger.debug "Unregistering worker #{worker.id}"
+        redis.del("worker:#{worker.id}")
+        redis.srem('workers', worker.id)
       end
 
       def workers
