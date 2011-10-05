@@ -1,0 +1,15 @@
+0.1.1 - 2011-10-02
+
+  Bug Fixes:
+
+    * Fixes for Ruby 1.9
+    * Fix Mongo backend against MongoDB 2.0
+    * Fix #unregister_worker
+    * Add no-op environment task (so rake tasks will work in non-rails environment)
+
+  Enhancements:
+
+    * Forward rake tasks for jobs:work and resque:work to qu:work
+    * Added logging
+
+  https://github.com/bkeepers/qu/compare/v0.1.0...v0.1.1
