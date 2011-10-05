@@ -1,3 +1,10 @@
+0.1.2 - 2011-10-05
+
+  Bug Fixes:
+
+    * Build gem with Ruby 1.8 to avoid YAML errors (http://blog.rubygems.org/2011/08/31/shaving-the-yaml-yacc.html)
+
+
 0.1.1 - 2011-10-02
 
   Bug Fixes:
