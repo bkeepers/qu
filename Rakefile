@@ -14,7 +14,7 @@ end
 
 desc 'Tags version, pushes to remote, and pushes gem'
 task :release => :build do
-  sh "git tag v#{Qu::VERSION}"
+  exec 'git', 'tag', '-m', changelog, "v#{Qu::VERSION}"
   sh "git push origin master"
   sh "git push origin v#{Qu::VERSION}"
   sh "ls pkg/*.gem | xargs -n 1 gem push"
@@ -41,6 +41,10 @@ namespace :spec do
   end
 
   task :backends => Backends
+end
+
+def changelog
+  File.read('ChangeLog').split("\n\n\n", 2).first
 end
 
 task :default => :spec
