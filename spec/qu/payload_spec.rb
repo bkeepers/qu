@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe Qu::Payload do
-  class MyJob
-    @queue = :custom
-  end
-
   it 'should default id to nil' do
     Qu::Payload.new.id.should == nil
   end
@@ -18,14 +14,14 @@ describe Qu::Payload do
       Qu::Payload.new.queue.should == 'default'
     end
 
-    it 'should get queue from instance variable' do
-      Qu::Payload.new(:klass => MyJob).queue.should == 'custom'
+    it 'should get queue from klass' do
+      Qu::Payload.new(:klass => CustomQueue).queue.should == 'custom'
     end
   end
 
   describe 'klass' do
     it 'should constantize string' do
-      Qu::Payload.new(:klass => 'MyJob').klass.should == MyJob
+      Qu::Payload.new(:klass => 'CustomQueue').klass.should == CustomQueue
     end
 
     it 'should find namespaced class' do
@@ -36,9 +32,11 @@ describe Qu::Payload do
   describe 'perform' do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
-    it 'should call .perform on class with args' do
-      subject.args = ['a', 'b']
-      SimpleJob.should_receive(:perform).with('a', 'b')
+    it 'should load job and call perform' do
+      job = mock('job instance')
+      job.should_receive(:perform)
+      SimpleJob.should_receive(:load).with(subject).and_return(job)
+
       subject.perform
     end
 
@@ -49,7 +47,7 @@ describe Qu::Payload do
 
     context 'when being aborted' do
       before do
-        SimpleJob.stub(:perform).and_raise(Qu::Worker::Abort)
+        SimpleJob.any_instance.stub(:perform).and_raise(Qu::Worker::Abort)
       end
 
       it 'should release the job and re-raise the error' do
@@ -62,7 +60,7 @@ describe Qu::Payload do
       let(:error) { Exception.new("Some kind of error") }
 
       before do
-        SimpleJob.stub!(:perform).and_raise(error)
+        SimpleJob.any_instance.stub(:perform).and_raise(error)
       end
 
       it 'should call failed on backend' do

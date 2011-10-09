@@ -3,13 +3,13 @@ unless defined?(SystemTimer)
   SystemTimer = Timeout
 end
 
-class SimpleJob
-  def self.perform
+class SimpleJob < Qu::Job
+  def perform
   end
 end
 
-class CustomQueue
-  @queue = :custom
+class CustomQueue < Qu::Job
+  queue :custom
 end
 
 shared_examples_for 'a backend' do

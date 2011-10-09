@@ -2,6 +2,7 @@ require 'qu/version'
 require 'qu/logger'
 require 'qu/failure'
 require 'qu/payload'
+require 'qu/job'
 require 'qu/backend/base'
 
 require 'forwardable'
