@@ -1,5 +1,8 @@
 module Qu
   class Job
+    include Qu::Hooks
+    define_hooks :perform, :complete, :release, :failure
+
     attr_accessor :payload
 
     def self.queue(name = nil)

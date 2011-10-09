@@ -29,19 +29,41 @@ describe Qu::Payload do
     end
   end
 
+  describe 'job' do
+    subject { Qu::Payload.new(:klass => SimpleJob) }
+
+    it 'should load the job' do
+      SimpleJob.should_receive(:load).with(subject)
+      subject.job
+    end
+
+    it 'should return the job' do
+      subject.job.should be_instance_of(SimpleJob)
+    end
+  end
+
   describe 'perform' do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
-    it 'should load job and call perform' do
-      job = mock('job instance')
-      job.should_receive(:perform)
-      SimpleJob.should_receive(:load).with(subject).and_return(job)
+    it 'should call perform on job' do
+      subject.job.should_receive(:perform)
+      subject.perform
+    end
 
+    it 'should run perform hooks' do
+      subject.job.stub(:run_hook).and_yield
+      subject.job.should_receive(:run_hook).with(:perform)
       subject.perform
     end
 
     it 'should call completed on backend' do
       Qu.backend.should_receive(:completed)
+      subject.perform
+    end
+
+    it 'should run complete hooks' do
+      subject.job.stub(:run_hook).and_yield
+      subject.job.should_receive(:run_hook).with(:complete)
       subject.perform
     end
 
@@ -52,6 +74,12 @@ describe Qu::Payload do
 
       it 'should release the job and re-raise the error' do
         Qu.backend.should_receive(:release).with(subject)
+        lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
+      end
+
+      it 'should run release hook' do
+        subject.job.stub(:run_hook).and_yield
+        subject.job.should_receive(:run_hook).with(:release)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
     end
@@ -78,6 +106,13 @@ describe Qu::Payload do
         Qu.failure.should_receive(:create).with(subject, error)
         subject.perform
       end
+
+      it 'should run failure hook with exception' do
+        subject.job.stub(:run_hook).and_yield
+        subject.job.should_receive(:run_hook).with(:failure, error)
+        subject.perform
+      end
+
     end
 
   end

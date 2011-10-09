@@ -1,6 +1,14 @@
 require 'spec_helper'
 
 describe Qu::Job do
+  %w(perform complete failure release).each do |hook|
+    it "should define hooks for #{hooks}" do
+      Qu::Job.should respond_to("before_#{hook}")
+      Qu::Job.should respond_to("around_#{hook}")
+      Qu::Job.should respond_to("after_#{hook}")
+    end
+  end
+
   describe '.queue' do
     it 'should allow setting the queue name' do
       CustomQueue.queue.should == 'custom'
