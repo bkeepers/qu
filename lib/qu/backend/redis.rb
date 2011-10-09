@@ -33,8 +33,11 @@ module Qu
         logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
           logger.debug "Clearing queue #{q}"
+          while id = redis.lpop("queue:#{q}")
+            logger.debug "Clearing job #{id}"
+            redis.del("job:#{id}")
+          end
           redis.srem('queues', q)
-          redis.del("queue:#{q}")
         end
       end
 

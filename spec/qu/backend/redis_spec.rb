@@ -6,6 +6,10 @@ describe Qu::Backend::Redis do
 
   let(:worker) { Qu::Worker.new('default') }
 
+  before do
+    ENV.delete('REDISTOGO_URL')
+  end
+
   describe 'completed' do
     it 'should delete job' do
       subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
@@ -43,6 +47,15 @@ describe Qu::Backend::Redis do
     it 'should allow customizing the namespace' do
       subject.namespace = :foobar
       subject.connection.namespace.should == :foobar
+    end
+  end
+
+  describe 'clear' do
+    it 'should delete jobs' do
+      job = subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
+      subject.redis.exists("job:#{job.id}").should be_true
+      subject.clear
+      subject.redis.exists("job:#{job.id}").should be_false
     end
   end
 end
