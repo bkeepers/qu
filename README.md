@@ -23,6 +23,11 @@ Decide which backend you want to use and add the gem for it to your `Gemfile`.
 ``` ruby
 gem 'qu-redis'
 ```
+If you are using a version of Rails that does not support Railtie (so, not Rails 3), you need to create a rake task to load the Qu tasks. So, create `lib/tasks/qu.rake` with the contents
+
+``` ruby
+require 'qu/tasks'
+```
 
 That's all you need to do!
 
