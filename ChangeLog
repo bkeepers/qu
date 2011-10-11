@@ -7,6 +7,12 @@
   Enhancements:
 
     * Added support for Rails 2
+    * Retry connection failures in Mongo backend and added two config options:
+
+        Qu.configure do |c|
+          c.backend.max_retries = 10      # default: 5
+          c.backend.retry_frequency = 5   # default: 1
+        end
 
 0.1.2 - 2011-10-05
 
