@@ -22,6 +22,37 @@ describe Qu::Backend::Mongo do
       subject.connection.connection.host_to_try.should == ['host', 10060]
       subject.connection.connection.auths.should == [{'db_name' => 'quspec', 'username' => 'user', 'password' => 'pw'}]
     end
+    
+    context "Connection Failure" do
+      let(:retries_number) { 3 }
+      let(:retries_frequency) { 5 }
+      
+      before do
+        Qu.max_retries_on_connection_failure = retries_number
+        Qu.retry_frequency_on_connection_failure = retries_frequency
+        
+        Mongo::DB.any_instance.stub(:[]).and_raise(Mongo::ConnectionFailure)
+        subject.stub(:sleep)
+      end
+      
+      it "raise error" do
+        expect { subject.queues }.to raise_error(Mongo::ConnectionFailure)
+      end
+      
+      it "trying to reconect" do
+        subject.database.should_receive(:[]).exactly(4).times.and_raise(Mongo::ConnectionFailure)
+        expect { subject.queues }.to raise_error
+      end
+      
+      it "sleep between tries" do
+        subject.should_receive(:sleep).with(5).ordered
+        subject.should_receive(:sleep).with(10).ordered
+        subject.should_receive(:sleep).with(15).ordered
+        
+        expect { subject.queues }.to raise_error
+      end
+       
+    end
   end
 
   describe 'reserve' do
