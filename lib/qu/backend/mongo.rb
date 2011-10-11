@@ -10,9 +10,13 @@ module Qu
       # Seconds to wait before try to reconnect after connection failure (default: 1)
       attr_accessor :retry_frequency
 
+      # Seconds to wait before looking for more jobs when the queue is empty (default: 5)
+      attr_accessor :poll_frequency
+
       def initialize
-        self.max_retries = 5
+        self.max_retries     = 5
         self.retry_frequency = 1
+        self.poll_frequency  = 5
       end
 
       def connection
@@ -74,7 +78,7 @@ module Qu
           end
 
           if options[:block]
-            sleep 5
+            sleep poll_frequency
           else
             break
           end
@@ -142,7 +146,7 @@ module Qu
         rescue ::Mongo::ConnectionFailure => ex
           retries += 1
           raise ex if retries > max_retries
-          sleep(retry_frequency * retries)
+          sleep retry_frequency * retries
           retry
         end
       end

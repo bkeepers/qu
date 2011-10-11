@@ -1,3 +1,9 @@
+unreleased
+
+  Enhancements:
+
+    * Added `poll_frequency` config for mongo backend
+
 0.1.3 - 2011-10-10
 
   Bug Fixes:
