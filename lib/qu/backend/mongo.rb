@@ -3,6 +3,22 @@ require 'mongo'
 module Qu
   module Backend
     class Mongo < Base
+
+      # Number of times to retry connection on connection failure (default: 5)
+      attr_accessor :max_retries
+
+      # Seconds to wait before try to reconnect after connection failure (default: 1)
+      attr_accessor :retry_frequency
+
+      # Seconds to wait before looking for more jobs when the queue is empty (default: 5)
+      attr_accessor :poll_frequency
+
+      def initialize
+        self.max_retries     = 5
+        self.retry_frequency = 1
+        self.poll_frequency  = 5
+      end
+
       def connection
         @connection ||= begin
           uri = URI.parse(ENV['MONGOHQ_URL'].to_s)
@@ -62,7 +78,7 @@ module Qu
           end
 
           if options[:block]
-            sleep 5
+            sleep poll_frequency
           else
             break
           end
@@ -118,8 +134,23 @@ module Qu
       end
 
       def [](name)
-        database["qu.#{name}"]
+        rescue_connection_failure do
+          database["qu:#{name}"]
+        end
       end
+
+      def rescue_connection_failure
+        retries = 0
+        begin
+          yield
+        rescue ::Mongo::ConnectionFailure => ex
+          retries += 1
+          raise ex if retries > max_retries
+          sleep retry_frequency * retries
+          retry
+        end
+      end
+
     end
   end
 end

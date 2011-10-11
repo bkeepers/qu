@@ -16,15 +16,29 @@ Qu was created to overcome some shortcomings in the existing queuing libraries t
 
 ## Installation
 
-### Rails
+### Rails 3
 
-Decide which backend you want to use and add the gem for it to your `Gemfile`.
+Decide which backend you want to use and add the gem to your `Gemfile`.
 
 ``` ruby
 gem 'qu-redis'
 ```
 
 That's all you need to do!
+
+### Rails 2
+
+Decide which backend you want to use and add the gem to `config.gems` in `environment.rb`:
+
+``` ruby
+config.gem 'qu-redis'
+````
+
+To load the rake tasks, add the following to your `Rakefile`:
+
+``` ruby
+require 'qu/tasks'
+```
 
 ## Usage
 
