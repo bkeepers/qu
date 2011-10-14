@@ -146,6 +146,20 @@ shared_examples_for 'a backend' do
       end.should be_true
     end
 
+    it 'should properly persist args' do
+      subject.clear
+      payload.args = ['a', 'b']
+      subject.enqueue(payload)
+      subject.reserve(worker).args.should == ['a', 'b']
+    end
+
+    it 'should properly persist a hash argument' do
+      subject.clear
+      payload.args = [{:a => 1, :b => 2}]
+      subject.enqueue(payload)
+      subject.reserve(worker).args.should == [{'a' => 1, 'b' => 2}]
+    end
+
     def timeout(count = 0.1, &block)
       SystemTimer.timeout(count, &block)
     rescue Timeout::Error
