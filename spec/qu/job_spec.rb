@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Qu::Job do
-  %w(perform complete failure release).each do |hook|
+  %w(enqueue perform complete failure release).each do |hook|
     it "should define hooks for #{hooks}" do
       Qu::Job.should respond_to("before_#{hook}")
       Qu::Job.should respond_to("around_#{hook}")
@@ -55,10 +55,22 @@ describe Qu::Job do
       Qu.backend.should_receive(:enqueue) do |payload|
         payload.should be_instance_of(Qu::Payload)
         payload.klass.should == SimpleJob
-        payload.args.should == [9,8]
+        payload.args.should == [9]
       end
 
-      SimpleJob.create(9, 8)
+      SimpleJob.create(9)
+    end
+
+    it 'should run enqueue hoook' do
+      SimpleJob.any_instance.should_receive(:run_hook).with(:enqueue).and_yield
+      SimpleJob.create(9)
+    end
+
+    it 'should not enqueue job if hook halts' do
+      SimpleJob.any_instance.stub(:run_hook)
+      Qu.backend.should_not_receive(:enqueue)
+
+      SimpleJob.create(9)
     end
   end
 end

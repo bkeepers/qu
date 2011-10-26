@@ -1,7 +1,7 @@
 module Qu
   class Job
     include Qu::Hooks
-    define_hooks :perform, :complete, :release, :failure
+    define_hooks :enqueue, :perform, :complete, :release, :failure
 
     attr_accessor :payload
 
@@ -18,7 +18,9 @@ module Qu
     end
 
     def self.create(*args)
-      Qu.backend.enqueue Payload.new(:klass => self, :args => args)
+      Payload.new(:klass => self, :args => args).tap do |payload|
+        payload.job.run_hook(:enqueue) { Qu.backend.enqueue payload }
+      end
     end
   end
 end
