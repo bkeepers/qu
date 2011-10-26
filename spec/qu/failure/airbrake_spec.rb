@@ -9,16 +9,11 @@ describe Qu::Failure::Airbrake do
   describe ".extra_stuff" do
     it 'should return job data' do
       described_class.extra_stuff(job).should == {
-        'request' => {
-          'parameters' => {
-            'id'    => '123',
-            'queue' => 'default',
-            'args'  => ['987'],
-            'class' => 'SimpleJob'
-          }
-        },
-        'rescue_block' => {
-          'name'    => 'SimpleJob'
+        :parameters => {
+          :id     => '123',
+          :queue  => 'default',
+          :args   => ['987'],
+          :class  => 'SimpleJob'
         }
       }
     end

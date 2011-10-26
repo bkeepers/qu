@@ -12,17 +12,11 @@ module Qu
       
       def self.extra_stuff job
         {
-          'request' => {
-            'parameters' => {
-              'id'    => job.id,
-              'queue' => job.queue,
-              'args'  => job.args,
-              'class' => job.klass.to_s
-            }            
-          },
-
-          'rescue_block' => {
-            'name'    => job.klass.to_s
+          :parameters => {
+            :id     => job.id,
+            :queue  => job.queue,
+            :args   => job.args,
+            :class  => job.klass.to_s
           }
         }
       end
