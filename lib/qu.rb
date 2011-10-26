@@ -28,7 +28,8 @@ module Qu
   end
 
   def enqueue(klass, *args)
-    backend.enqueue Payload.new(:klass => klass, :args => args)
+    warn "[DEPRECATION] `Qu.enqueue` is deprecated. Use `#{klass}.create(#{args.map {|a| a.inspect }.join(',')})` instead."
+    klass.create(*args)
   end
 end
 

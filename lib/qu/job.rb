@@ -16,5 +16,9 @@ module Qu
         job.send :initialize, *payload.args
       end
     end
+
+    def self.create(*args)
+      Qu.backend.enqueue Payload.new(:klass => self, :args => args)
+    end
   end
 end

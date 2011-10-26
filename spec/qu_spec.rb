@@ -9,13 +9,8 @@ describe Qu do
   end
 
   describe 'enqueue' do
-    it 'should call enqueue on backend with a payload' do
-      Qu.backend.should_receive(:enqueue) do |payload|
-        payload.should be_instance_of(Qu::Payload)
-        payload.klass.should == SimpleJob
-        payload.args.should == [9,8]
-      end
-
+    it 'should call create on backend the class' do
+      SimpleJob.should_receive(:create).with(9, 8)
       Qu.enqueue SimpleJob, 9, 8
     end
   end

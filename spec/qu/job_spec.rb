@@ -49,4 +49,16 @@ describe Qu::Job do
       payload.foo.should == :bar
     end
   end
+
+  describe 'create' do
+    it 'should call enqueue on backend with a payload' do
+      Qu.backend.should_receive(:enqueue) do |payload|
+        payload.should be_instance_of(Qu::Payload)
+        payload.klass.should == SimpleJob
+        payload.args.should == [9,8]
+      end
+
+      SimpleJob.create(9, 8)
+    end
+  end
 end
