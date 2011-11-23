@@ -51,7 +51,7 @@ class ProcessPresentation < Qu::Job
   end
 
   def perform
-    presentation.process!
+    @presentation.process!
   end
 end
 ```
