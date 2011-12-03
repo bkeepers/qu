@@ -112,7 +112,7 @@ shared_examples_for 'a backend' do
     end
 
     it 'should not return an already reserved job' do
-      subject.enqueue(payload)
+      subject.enqueue(payload.dup)
       subject.reserve(worker).id.should_not == subject.reserve(worker).id
     end
 
