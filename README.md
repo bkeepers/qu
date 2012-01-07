@@ -121,6 +121,14 @@ Qu.configure do |c|
 end
 ```
 
+## Tests
+
+If you prefer to have jobs processed immediatly in your tests, there is an `Immediate` backend that will perform the job instead of enqueuing it. In your test helper, require qu-immediate:
+
+``` ruby
+require 'qu-immediate'
+```
+
 ## Why another queuing library?
 
 Resque and delayed_job are both great, but both of them have shortcomings that can be frustrating in production applications.

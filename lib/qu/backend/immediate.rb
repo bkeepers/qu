@@ -5,9 +5,14 @@ module Qu
         payload.perform
       end
 
-      def completed(payload); end
-      def release(payload); end
-      def failed(payload, error); end
+      def completed(payload)
+      end
+
+      def release(payload)
+      end
+
+      def failed(payload, error)
+      end
     end
   end
 end
