@@ -92,7 +92,7 @@ module Qu
       def failed(payload, error)
         doc = {
           :_id => payload.id, :klass => payload.klass.to_s, :args => payload.args, :queue => payload.queue,
-          exception: error.class.to_s, error: error.to_s, backtrace: error.backtrace
+          exception: error.class.to_s, error: error.to_s, backtrace: Array(error.backtrace).join("\n")
         }
         jobs('failed').insert(doc)
       end

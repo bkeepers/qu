@@ -64,7 +64,7 @@ describe Qu::Backend::Mongo do
       jobs.should_receive(:insert) do |attrs|
         attrs[:exception].should eql 'Exception'
         attrs[:error].should eql 'an error'
-        attrs[:backtrace].should eql nil
+        attrs[:backtrace].should eql ''
       end
       subject.failed(payload, Exception.new('an error'))
     end
