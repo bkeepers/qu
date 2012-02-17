@@ -220,6 +220,15 @@ shared_examples_for 'a backend' do
         p.args.should == payload.args
       end
 
+      it 'should remove the exception, error and backtrace' do
+        subject.requeue(payload.id)
+        p = subject.reserve(worker)
+        p.should be_instance_of(Qu::Payload)
+        p.exception.should be_nil
+        p.error.should be_nil
+        p.backtrace.should be_nil
+      end
+
       it 'should remove the job from the failed jobs' do
         subject.length('failed').should == 1
         subject.requeue(payload.id)
