@@ -55,6 +55,21 @@ describe Qu::Backend::Mongo do
     end
   end
 
+  describe 'failure' do
+    let(:payload) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
+
+    it 'should store the exception, error and backtrace' do
+      jobs = mock('jobs')
+      subject.stub(:jobs).and_return(jobs)
+      jobs.should_receive(:insert) do |attrs|
+        attrs[:exception].should eql 'Exception'
+        attrs[:error].should eql 'an error'
+        attrs[:backtrace].should eql ''
+      end
+      subject.failed(payload, Exception.new('an error'))
+    end
+  end
+
   describe 'reserve' do
     let(:worker) { Qu::Worker.new }
 

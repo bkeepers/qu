@@ -90,7 +90,11 @@ module Qu
       end
 
       def failed(payload, error)
-        jobs('failed').insert(:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args, :queue => payload.queue)
+        doc = {
+          :_id => payload.id, :klass => payload.klass.to_s, :args => payload.args, :queue => payload.queue,
+          exception: error.class.to_s, error: error.to_s, backtrace: Array(error.backtrace).join("\n")
+        }
+        jobs('failed').insert(doc)
       end
 
       def completed(payload)
@@ -99,6 +103,7 @@ module Qu
       def requeue(id)
         logger.debug "Requeuing job #{id}"
         doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true) || raise(::Mongo::OperationFailure)
+        doc.delete_if {|k,v| %w[backtrace error exception].include? k }
         jobs(doc.delete('queue')).insert(doc)
         doc['id'] = doc.delete('_id')
         Payload.new(doc)
