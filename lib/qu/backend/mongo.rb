@@ -20,7 +20,7 @@ module Qu
 
       def connection= db
         super
-        db.create_collection 'qu:profiling', :capped => true, :max => 512
+        db.create_collection 'qu.profiling', :capped => true, :max => 512
       end
 
       def connection
@@ -171,12 +171,12 @@ module Qu
     private
 
       def jobs(queue)
-        self["queue:#{queue}"]
+        self["queue.#{queue}"]
       end
 
       def [](name)
         rescue_connection_failure do
-          database["qu:#{name}"]
+          database["qu.#{name}"]
         end
       end
 
