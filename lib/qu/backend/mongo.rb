@@ -20,7 +20,7 @@ module Qu
 
       def connection= db
         super
-        db.create_collection 'qu.profiling', :capped => true, :max => 512
+        db.create_collection 'qu.profiling', :capped => true, :size => 128*1024*1024
       end
 
       def connection
@@ -41,11 +41,11 @@ module Qu
       alias_method :database, :connection
 
       def progress payload, value
-        jobs(payload.queue).update { :_id => payload.id }, '$set' => { :progress => value.to_i }
+        jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :progress => value.to_i })
       end
 
       def status payload, value
-        jobs(payload.queue).update { :_id => payload.id }, '$set' => { :status => value }
+        jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :status => value })
       end
 
       def clear(queue = nil)
@@ -111,7 +111,7 @@ module Qu
       end
 
       def release(payload)
-        jobs(payload.queue).update { :_id => payload.id }, '$set' => { :state => 'enq' }
+        jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :state => 'enq' })
       end
 
       def failed(payload, error)
@@ -129,7 +129,10 @@ module Qu
       end
 
       def profile doc, data={}
-        self['profiling'].insert(data.merge(:payload => payload))
+        doc.delete 'state'
+        doc.delete 'progress'
+        doc.delete 'status'
+        self['profiling'].insert(data.merge(:payload => doc))
       end
 
       def requeue queue, id=nil
