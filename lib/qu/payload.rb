@@ -20,7 +20,11 @@ module Qu
     end
 
     def perform
-      klass.perform(*args)
+      if klass.include? Job
+        klass.new(self).perform *args
+      else
+        klass.perform *args
+      end
       Qu.backend.completed(self)
     rescue Qu::Worker::Abort
       logger.debug "Releasing job #{self}"

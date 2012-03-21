@@ -9,6 +9,7 @@ require 'logger'
 
 module Qu
   autoload :Worker, 'qu/worker'
+  autoload :Job, 'qu/job'
 
   extend SingleForwardable
   extend self

@@ -71,7 +71,8 @@ module Qu
         redis.del("job:#{payload.id}")
       end
 
-      def requeue(id)
+      def requeue queue, id=nil
+        id = queue.id unless id
         logger.debug "Requeuing job #{id}"
         if payload = get(id)
           redis.lrem('queue:failed', 1, id)

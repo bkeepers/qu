@@ -3,7 +3,6 @@ require 'mongo'
 module Qu
   module Backend
     class Mongo < Base
-
       # Number of times to retry connection on connection failure (default: 5)
       attr_accessor :max_retries
 
@@ -17,6 +16,11 @@ module Qu
         self.max_retries     = 5
         self.retry_frequency = 1
         self.poll_frequency  = 5
+      end
+
+      def connection= db
+        super
+        db.create_collection 'qu:profiling', :capped => true, :max => 512
       end
 
       def connection
@@ -36,13 +40,20 @@ module Qu
       end
       alias_method :database, :connection
 
+      def progress payload, value
+        jobs(payload.queue).update { :_id => payload.id }, '$set' => { :progress => value.to_i }
+      end
+
+      def status payload, value
+        jobs(payload.queue).update { :_id => payload.id }, '$set' => { :status => value }
+      end
+
       def clear(queue = nil)
-        queue ||= queues + ['failed']
         logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
           logger.debug "Clearing queue #{q}"
-          jobs(q).drop
-          self[:queues].remove({:name => q})
+          jobs(q).remove status: 'enq'
+          self[:queues].remove({:name => q}) if length(q).zero?
         end
       end
 
@@ -56,7 +67,11 @@ module Qu
 
       def enqueue(payload)
         payload.id = BSON::ObjectId.new
-        jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
+        jobs(payload.queue).insert(
+          :_id => payload.id,
+          :klass => payload.klass.to_s, :args => payload.args,
+          :added_at => Time.now,
+          :state => 'enq')
         self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
         logger.debug { "Enqueued job #{payload}" }
         payload
@@ -66,9 +81,19 @@ module Qu
         loop do
           worker.queues.each do |queue|
             logger.debug { "Reserving job in queue #{queue}" }
+            c = jobs queue
+            c.ensure_index [['state', Mongo::ASCENDING]]
 
             begin
-              if doc = jobs(queue).find_and_modify(:remove => true)
+              doc = c.find_and_modify(
+                :new => true,
+                :query => { :state => 'enq' },
+                :update => {
+                  '$inc' => { :tries => 1 },
+                  '$set' => {
+                    :state => 'run',
+                    :started_at => Time.now }})
+              if doc
                 doc['id'] = doc.delete('_id')
                 return Payload.new(doc)
               end
@@ -86,22 +111,38 @@ module Qu
       end
 
       def release(payload)
-        jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
+        jobs(payload.queue).update { :_id => payload.id }, '$set' => { :state => 'enq' }
       end
 
       def failed(payload, error)
-        jobs('failed').insert(:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args, :queue => payload.queue)
+        doc = jobs(payload.queue).find_and_modify(
+          :query => { :_id => payload.id },
+          :update => { '$set' => { :state => 'die' }})
+        profile doc, :runtime => Time.now - doc['started_at'], :failed => true
       end
 
       def completed(payload)
+        doc = jobs(payload.queue).find_and_modify(
+          :query => { :_id => payload.id },
+          :remove => true)
+        profile doc, :runtime => Time.now - doc['started_at'], :failed => false
       end
 
-      def requeue(id)
+      def profile doc, data={}
+        self['profiling'].insert(data.merge(:payload => payload))
+      end
+
+      def requeue queue, id=nil
+        queue, id = queue.queue, queue.id unless id
+
         logger.debug "Requeuing job #{id}"
-        doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true) || raise(::Mongo::OperationFailure)
-        jobs(doc.delete('queue')).insert(doc)
+        doc = jobs(queue).find_and_modify(
+          :query => { :_id => id },
+          :update => { '$set' => { :state => 'enq' }})
+        return false unless doc
+
         doc['id'] = doc.delete('_id')
-        Payload.new(doc)
+        Payload.new doc
       rescue ::Mongo::OperationFailure
         false
       end
@@ -150,7 +191,6 @@ module Qu
           retry
         end
       end
-
     end
   end
 end

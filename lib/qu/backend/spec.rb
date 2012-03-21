@@ -210,7 +210,7 @@ shared_examples_for 'a backend' do
 
       it 'should add the job back on the queue' do
         subject.length(payload.queue).should == 0
-        subject.requeue(payload.id)
+        subject.requeue(payload.queue, payload.id)
         subject.length(payload.queue).should == 1
 
         p = subject.reserve(worker)
@@ -222,18 +222,18 @@ shared_examples_for 'a backend' do
 
       it 'should remove the job from the failed jobs' do
         subject.length('failed').should == 1
-        subject.requeue(payload.id)
+        subject.requeue(payload.queue, payload.id)
         subject.length('failed').should == 0
       end
 
       it 'should return the job' do
-        subject.requeue(payload.id).id.should == payload.id
+        subject.requeue(payload.queue, payload.id).id.should == payload.id
       end
     end
 
     context 'without a failed job' do
       it 'should return false' do
-        subject.requeue('1').should be_false
+        subject.requeue('default', '1').should be_false
       end
     end
   end
