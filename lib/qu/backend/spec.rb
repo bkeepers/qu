@@ -85,20 +85,12 @@ shared_examples_for 'a backend' do
       subject.length('custom').should == 0
     end
 
-    it 'should clear failed queue without any args' do
+    it 'should keep failed jobs' do
       subject.enqueue(payload)
       subject.failed(payload, Exception.new)
-      subject.length('failed').should == 1
+      subject.length('default').should == 1
       subject.clear
-      subject.length('failed').should == 0
-    end
-
-    it 'should not clear failed queue with specified queues' do
-      subject.enqueue(payload)
-      subject.failed(payload, Exception.new)
-      subject.length('failed').should == 1
-      subject.clear('default')
-      subject.length('failed').should == 1
+      subject.jobs('default').count == 1
     end
   end
 
@@ -170,14 +162,22 @@ shared_examples_for 'a backend' do
   describe 'failed' do
     let(:payload) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
 
-    it 'should add to failure queue' do
+    it 'should be kept in queue' do
+      subject.enqueue(payload)
       subject.failed(payload, Exception.new)
-      subject.length('failed').should == 1
+      subject.jobs('default').count.should == 1
     end
 
-    it 'should not add failed queue to the list of queues' do
+    it 'should not be counted by length' do
+      subject.enqueue(payload)
       subject.failed(payload, Exception.new)
-      subject.queues.should_not include('failed')
+      length('default').count.should == 0
+    end
+
+    it 'should have a failed state' do
+      payload = subject.enqueue(payload)
+      subject.failed(payload, Exception.new)
+      subject.jobs('default').find_one(:_id => payload.id).state.should == 'die'
     end
   end
 
@@ -218,12 +218,6 @@ shared_examples_for 'a backend' do
         p.id.should == payload.id
         p.klass.should == payload.klass
         p.args.should == payload.args
-      end
-
-      it 'should remove the job from the failed jobs' do
-        subject.length('failed').should == 1
-        subject.requeue(payload.queue, payload.id)
-        subject.length('failed').should == 0
       end
 
       it 'should return the job' do

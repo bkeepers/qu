@@ -62,7 +62,7 @@ module Qu
       end
 
       def length(queue = 'default')
-        jobs(queue).count
+        jobs(queue).find(:state => { '$ne' => 'die' }).count
       end
 
       def enqueue(payload)
