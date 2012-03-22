@@ -82,7 +82,7 @@ module Qu
           worker.queues.each do |queue|
             logger.debug { "Reserving job in queue #{queue}" }
             c = jobs queue
-            c.ensure_index [['state', Mongo::ASCENDING]]
+            c.ensure_index [['state', ::Mongo::ASCENDING]]
 
             begin
               doc = c.find_and_modify(
@@ -129,9 +129,9 @@ module Qu
       end
 
       def profile doc, data={}
-        doc.delete 'state'
-        doc.delete 'progress'
-        doc.delete 'status'
+        for key in %w(state progress status added_at) do
+          doc.delete key
+        end
         self['profiling'].insert(data.merge(:payload => doc))
       end
 
