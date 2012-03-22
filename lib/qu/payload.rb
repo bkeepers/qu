@@ -21,7 +21,7 @@ module Qu
 
     def perform
       if klass.include? Job
-        klass.new(self).perform *args
+        klass.new.perform_with_payload self, *args
       else
         klass.perform *args
       end

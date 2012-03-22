@@ -1,7 +1,8 @@
 module Qu
-  class Job
-    def initialize payload
+  module Job
+    def perform_with_payload payload, *args
       @_qu_payload = payload
+      perform *args
     end
 
     def progress value
