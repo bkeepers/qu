@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Qu by bkeepers</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Qu</h1>
+        <p>a Ruby library for queuing and processing background jobs.</p>
+        <p class="view"><a href="https://github.com/bkeepers/qu">View the Project on GitHub <small>bkeepers/qu</small></a></p>
+        <ul>
+          <li><a href="https://github.com/bkeepers/qu/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/bkeepers/qu/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/bkeepers/qu">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Qu</h1>
+
+<p>Qu is a Ruby library for queuing and processing background jobs. It is heavily inspired by delayed_job and Resque.</p>
+
+<p>Qu was created to overcome some shortcomings in the existing queuing libraries that we experienced at <a href="http://orderedlist.com">Ordered List</a> while building <a href="http://speakerdeck.com">SpeakerDeck</a>, <a href="http://get.gaug.es">Gaug.es</a> and <a href="http://get.harmonyapp.com">Harmony</a>. The advantages of Qu are:</p>
+
+<ul>
+<li>Multiple backends (redis, mongo)</li>
+<li>Jobs are requeued when worker is killed</li>
+<li>Resque-like API</li>
+</ul><h2>Information &amp; Help</h2>
+
+<ul>
+<li>Find more information on the <a href="https://github.com/bkeepers/qu/wiki">Wiki</a>.</li>
+<li>Post to the <a href="http://groups.google.com/group/qu-users">Google Group</a> for help or questions.</li>
+<li>See the <a href="https://github.com/bkeepers/qu/issues">issue tracker</a> for known issues or to report an issue.</li>
+</ul><h2>Installation</h2>
+
+<h3>Rails 3</h3>
+
+<p>Decide which backend you want to use and add the gem to your <code>Gemfile</code>.</p>
+
+<div class="highlight">
+<pre><span class="n">gem</span> <span class="s1">'qu-redis'</span>
+</pre>
+</div>
+
+
+<p>That's all you need to do!</p>
+
+<h3>Rails 2</h3>
+
+<p>Decide which backend you want to use and add the gem to <code>config.gems</code> in <code>environment.rb</code>:</p>
+
+<div class="highlight">
+<pre><span class="n">config</span><span class="o">.</span><span class="n">gem</span> <span class="s1">'qu-redis'</span>
+</pre>
+</div>
+
+
+<p>To load the rake tasks, add the following to your <code>Rakefile</code>:</p>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s1">'qu/tasks'</span>
+</pre>
+</div>
+
+
+<h2>Usage</h2>
+
+<p>Jobs are any class that responds to the <code>.perform</code> method:</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">ProcessPresentation</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">perform</span><span class="p">(</span><span class="n">presentation_id</span><span class="p">)</span>
+    <span class="n">presentation</span> <span class="o">=</span> <span class="no">Presentation</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">presentation_id</span><span class="p">)</span>
+    <span class="n">presentation</span><span class="o">.</span><span class="n">process!</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>You can add a job to the queue by calling the <code>enqueue</code> method:</p>
+
+<div class="highlight">
+<pre><span class="n">job</span> <span class="o">=</span> <span class="no">Qu</span><span class="o">.</span><span class="n">enqueue</span> <span class="no">ProcessPresentation</span><span class="p">,</span> <span class="vi">@presentation</span><span class="o">.</span><span class="n">id</span>
+<span class="nb">puts</span> <span class="s2">"Enqueued job </span><span class="si">#{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span>
+</pre>
+</div>
+
+
+<p>Any additional parameters passed to the <code>enqueue</code> method will be passed on to the <code>perform</code> method of your job class. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. So don't try to pass in an ActiveRecord object.</p>
+
+<p>Processing the jobs on the queue can be done with a Rake task:</p>
+
+<div class="highlight">
+<pre><span class="nv">$ </span>bundle <span class="nb">exec </span>rake qu:work
+</pre>
+</div>
+
+
+<p>You can easily inspect the queue or clear it:</p>
+
+<div class="highlight">
+<pre><span class="nb">puts</span> <span class="s2">"Jobs on the queue:"</span><span class="p">,</span> <span class="no">Qu</span><span class="o">.</span><span class="n">length</span>
+<span class="no">Qu</span><span class="o">.</span><span class="n">clear</span>
+</pre>
+</div>
+
+
+<h3>Queues</h3>
+
+<p>The <code>default</code> queue is used, um…by default. Jobs that don't specify a queue will be placed in that queue, and workers that don't specify a queue will work on that queue.</p>
+
+<p>However, if you have some background jobs that are more or less important, or some that take longer than others, you may want to consider using multiple queues. You can have workers dedicated to specific queues, or simply tell all your workers to work on the most important queue first.</p>
+
+<p>Jobs can be placed in a specific queue by setting the queue variable:</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">CallThePresident</span>
+  <span class="vi">@queue</span> <span class="o">=</span> <span class="ss">:urgent</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">perform</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="c1"># …</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>You can then tell workers to work on this queue by passing an environment variable</p>
+
+<div class="highlight">
+<pre><span class="nv">$ </span>bundle <span class="nb">exec </span>rake qu:work <span class="nv">QUEUES</span><span class="o">=</span>urgent,default
+</pre>
+</div>
+
+
+<p>Note that if you still want your worker to process the default queue, you must specify it. Queues will be process in the order they are specified.</p>
+
+<p>You can also get the length or clear a specific queue:</p>
+
+<div class="highlight">
+<pre><span class="no">Qu</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="ss">:urgent</span><span class="p">)</span>
+<span class="no">Qu</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="ss">:urgent</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<h2>Configuration</h2>
+
+<p>Most of the configuration for Qu should be automatic. It will also automatically detect ENV variables from Heroku for backend connections, so you shouldn't need to do anything to configure the backend.</p>
+
+<p>However, if you do need to customize it, you can by calling the <code>Qu.configure</code>:</p>
+
+<div class="highlight">
+<pre><span class="no">Qu</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+  <span class="n">c</span><span class="o">.</span><span class="n">connection</span>  <span class="o">=</span> <span class="no">Redis</span><span class="o">::</span><span class="no">Namespace</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'myapp:qu'</span><span class="p">,</span> <span class="ss">:redis</span> <span class="o">=&gt;</span> <span class="no">Redis</span><span class="o">.</span><span class="n">connect</span><span class="p">)</span>
+  <span class="n">c</span><span class="o">.</span><span class="n">logger</span>      <span class="o">=</span> <span class="no">Logger</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'log/qu.log'</span><span class="p">)</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<h2>Tests</h2>
+
+<p>If you prefer to have jobs processed immediatly in your tests, there is an <code>Immediate</code> backend that will perform the job instead of enqueuing it. In your test helper, require qu-immediate:</p>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s1">'qu-immediate'</span>
+</pre>
+</div>
+
+
+<h2>Why another queuing library?</h2>
+
+<p>Resque and delayed_job are both great, but both of them have shortcomings that can be frustrating in production applications.</p>
+
+<p>delayed_job was a brilliantly simple pioneer in the world of database-backed queues. While most asynchronous queuing systems were tending toward overly complex, it made use of your existing database and just worked. But there are a few flaws:</p>
+
+<ul>
+<li>Occasionally fails silently.</li>
+<li>Use of priority instead of separate named queues.</li>
+<li>Contention in the ActiveRecord backend with multiple workers. Occasionally the same job gets performed by multiple workers.</li>
+</ul><p>Resque, the wiser relative of delayed_job, fixes most of those issues. But in doing so, it forces some of its beliefs on you, and sometimes those beliefs just don't make sense for your environment. Here are some of the flaws of Resque:</p>
+
+<ul>
+<li>Redis is a great queue backend, but it doesn't make sense for every environment.</li>
+<li>Workers lose jobs when they are forced to quit. This has especially been an issue on Heroku.</li>
+<li>Forking before each job prevents memory leaks, but it is terribly inefficient in environments with a lot of fast jobs (the resque-jobs-per-fork plugin alleviates this)</li>
+</ul><p>Those shortcomings lead us to write Qu. It is not perfect, but we hope to overcome the issues we faced with other queuing libraries.</p>
+
+<h2>Contributing</h2>
+
+<p>If you find what looks like a bug:</p>
+
+<ol>
+<li>Search the <a href="http://groups.google.com/group/qu-users">mailing list</a> to see if anyone else had the same issue.</li>
+<li>Check the <a href="http://github.com/bkeepers/qu/issues/">GitHub issue tracker</a> to see if anyone else has reported issue.</li>
+<li>If you don't see anything, create an issue with information on how to reproduce it.</li>
+</ol><p>If you want to contribute an enhancement or a fix:</p>
+
+<ol>
+<li>Fork the project on GitHub.</li>
+<li>Make your changes with tests.</li>
+<li>Commit the changes without making changes to the Rakefile, Gemfile, gemspec, or any other files that aren't related to your enhancement or fix</li>
+<li>Send a pull request.</li>
+</ol>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/bkeepers">bkeepers</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+  </body>
+</html>
