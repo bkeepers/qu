@@ -21,7 +21,11 @@ module Qu
 
     def perform
       if klass.include? Job
-        klass.new.perform_with_payload self, *args
+        @job = klass.new
+        @job._qu_payload = self
+        @job.resume save if save
+        @job.perform *args
+        @job = nil
       else
         klass.perform *args
       end
@@ -35,6 +39,10 @@ module Qu
       log_exception(e)
       Qu.failure.create(self, e) if Qu.failure
       Qu.backend.failed(self, e)
+    end
+
+    def abort!
+      @job.abort! if @job
     end
 
     def to_s
@@ -52,6 +60,5 @@ module Qu
       end
       constant
     end
-
   end
 end

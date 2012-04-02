@@ -40,12 +40,28 @@ module Qu
       end
       alias_method :database, :connection
 
+      def set payload, data
+        set, unset = {}, {}
+        (data.keys & [:save, :status, :progress]).each do |k|
+          if data[k]
+            set[k] = data[k]
+          else
+            unset[k] = 1
+          end
+        end
+        jobs(payload.queue).update({ :_id => payload.id }, '$set' => set, '$unset' => unset)
+      end
+
       def progress payload, value
-        jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :progress => value.to_i })
+        set payload, progress: value.to_i
+      end
+
+      def save payload, state
+        set payload, save: state
       end
 
       def status payload, value
-        jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :status => value })
+        set payload, status: value
       end
 
       def clear(queue = nil)
