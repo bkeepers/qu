@@ -148,7 +148,7 @@ module Qu
         for key in %w(state progress status added_at) do
           doc.delete key
         end
-        self['profiling'].insert(data.merge(:payload => doc))
+        self['profiling'].insert(data.merge(:payload => doc, :added_at => Time.now))
       end
 
       def requeue queue, id=nil
