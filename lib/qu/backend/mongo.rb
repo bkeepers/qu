@@ -96,16 +96,6 @@ module Qu
       def completed(payload)
       end
 
-      def requeue(id)
-        logger.debug "Requeuing job #{id}"
-        doc = jobs('failed').find_and_modify(:query => {:_id => id}, :remove => true) || raise(::Mongo::OperationFailure)
-        jobs(doc.delete('queue')).insert(doc)
-        doc['id'] = doc.delete('_id')
-        Payload.new(doc)
-      rescue ::Mongo::OperationFailure
-        false
-      end
-
       def register_worker(worker)
         logger.debug "Registering worker #{worker.id}"
         self[:workers].insert(worker.attributes.merge(:id => worker.id))
