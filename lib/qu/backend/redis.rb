@@ -71,17 +71,6 @@ module Qu
         redis.del("job:#{payload.id}")
       end
 
-      def requeue(id)
-        logger.debug "Requeuing job #{id}"
-        if payload = get(id)
-          redis.lrem('queue:failed', 1, id)
-          redis.rpush("queue:#{payload.queue}", id)
-          payload
-        else
-          false
-        end
-      end
-
       def register_worker(worker)
         logger.debug "Registering worker #{worker.id}"
         redis.set("worker:#{worker.id}", encode(worker.attributes))

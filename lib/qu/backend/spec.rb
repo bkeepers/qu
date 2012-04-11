@@ -200,44 +200,6 @@ shared_examples_for 'a backend' do
     end
   end
 
-  describe 'requeue' do
-    context 'with a failed job' do
-      before do
-        subject.enqueue(payload)
-        subject.reserve(worker).id.should == payload.id
-        subject.failed(payload, Exception.new)
-      end
-
-      it 'should add the job back on the queue' do
-        subject.length(payload.queue).should == 0
-        subject.requeue(payload.id)
-        subject.length(payload.queue).should == 1
-
-        p = subject.reserve(worker)
-        p.should be_instance_of(Qu::Payload)
-        p.id.should == payload.id
-        p.klass.should == payload.klass
-        p.args.should == payload.args
-      end
-
-      it 'should remove the job from the failed jobs' do
-        subject.length('failed').should == 1
-        subject.requeue(payload.id)
-        subject.length('failed').should == 0
-      end
-
-      it 'should return the job' do
-        subject.requeue(payload.id).id.should == payload.id
-      end
-    end
-
-    context 'without a failed job' do
-      it 'should return false' do
-        subject.requeue('1').should be_false
-      end
-    end
-  end
-
   describe 'register_worker' do
     it 'should add worker to array of workers' do
       subject.register_worker(worker)
