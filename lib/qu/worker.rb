@@ -31,6 +31,16 @@ module Qu
           raise Abort
         end
       end
+      logger.debug "Worker #{id} registering traps for USR2 for graceful quit"
+      trap("QUIT") do
+        logger.info "Worker #{id} received #{sig}, graceful shutting down"
+        Qu.backend.unregister_worker(self)
+        @shutdown = true
+      end
+    end
+
+    def shutdown?
+      !!@shutdown
     end
 
     def work_off
@@ -54,7 +64,10 @@ module Qu
       logger.warn "Worker #{id} starting"
       handle_signals
       Qu.backend.register_worker(self)
-      loop { work }
+      loop do
+        break if shutdown?
+        work
+      end
     rescue Abort => e
       # Ok, we'll shut down, but give us a sec
     ensure
