@@ -68,8 +68,8 @@ module Qu
         logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
           logger.debug "Clearing queue #{q}"
-          jobs(q).remove status: 'enq'
-          self[:queues].remove({:name => q}) if length(q).zero?
+          jobs(q).remove state: 'enq'
+          # self[:queues].remove({:name => q}) if length(q).zero?
         end
       end
 
