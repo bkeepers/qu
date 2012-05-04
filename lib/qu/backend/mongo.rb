@@ -134,7 +134,7 @@ module Qu
         doc = jobs(payload.queue).find_and_modify(
           :query => { :_id => payload.id },
           :update => { '$set' => { :state => 'die' }})
-        profile doc, :runtime => Time.now - doc['started_at'], :failed => true
+        profile doc, :runtime => Time.now - doc['started_at'], :failed => true, :error => { :message => error.message, :backtrace => error.backtrace}
       end
 
       def completed(payload)
