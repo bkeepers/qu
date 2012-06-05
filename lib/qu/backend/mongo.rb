@@ -21,7 +21,8 @@ module Qu
 
       def connection
         @connection ||= begin
-          uri = URI.parse(ENV['MONGOHQ_URL'].to_s)
+          host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI']).to_s
+          uri = URI.parse(host_uri)
           database = uri.path.empty? ? 'qu' : uri.path[1..-1]
           options = {}
           if uri.password
