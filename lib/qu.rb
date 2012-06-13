@@ -36,6 +36,8 @@ Qu.configure do |c|
 end
 
 if defined?(Rails)
+  warn "#{Kernel.caller[1]}: [DEPRECATION] v1.0 will require you use the 'qu-rails' gem for rails hooks to be autoloaded"
+
   if defined?(Rails::Railtie)
     require 'qu/railtie'
   else
