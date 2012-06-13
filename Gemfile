@@ -3,10 +3,7 @@ gemspec :name => 'qu'
 
 Dir['qu-*.gemspec'].each do |gemspec|
   plugin = gemspec.scan(/qu-(.*)\.gemspec/).flatten.first
-
-  group plugin do
-    gemspec(:name => "qu-#{plugin}", :development_group => plugin)
-  end
+  gemspec(:name => "qu-#{plugin}", :development_group => plugin)
 end
 
 group :test do
