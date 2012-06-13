@@ -1,3 +1,14 @@
+0.2.0 - unreleased
+
+  Enhancements
+
+    * Move implicit Rails dependency to it's own Gem, which you must declare now in your Gemfile.
+
+        gem 'qu-rails'
+
+  https://github.com/bkeepers/qu/compare/v0.1.4...v0.2.0
+
+
 0.1.4 - 2012-01-07
 
   Enhancements:

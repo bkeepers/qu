@@ -21,6 +21,7 @@ Qu was created to overcome some shortcomings in the existing queuing libraries t
 Decide which backend you want to use and add the gem to your `Gemfile`.
 
 ``` ruby
+gem 'qu-rails'
 gem 'qu-redis'
 ```
 
