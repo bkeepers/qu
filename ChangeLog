@@ -1,10 +1,20 @@
-0.2.0 - unreleased
+0.2.0 - 2012-06-13
 
-  Enhancements
+  Backwards-incompatible Changes:
 
+    * Remove #requeue from all backends. It was not used internally.
     * Move implicit Rails dependency to it's own Gem, which you must declare now in your Gemfile.
 
         gem 'qu-rails'
+
+  Enhancements
+
+    * qu-mongo: Add mongolab environment variable for automatic configuration on Heroku.
+
+  Bug Fixes:
+
+    * Fixing Immediate backend to satisfy the backend interface
+
 
   https://github.com/bkeepers/qu/compare/v0.1.4...v0.2.0
 
