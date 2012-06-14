@@ -1,5 +1,5 @@
 require 'bundler'
-Bundler.require :default, :test
+Bundler.require :test
 require 'qu'
 require 'qu/backend/spec'
 
