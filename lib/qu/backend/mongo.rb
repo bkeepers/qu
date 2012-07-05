@@ -108,7 +108,8 @@ module Qu
                   '$inc' => { :tries => 1 },
                   '$set' => {
                     :state => 'run',
-                    :started_at => Time.now }})
+                    :started_at => Time.now,
+                    :worker => worker.id }})
               if doc
                 doc['id'] = doc.delete('_id')
                 return Payload.new(doc)
@@ -130,10 +131,15 @@ module Qu
         jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :state => 'enq' })
       end
 
+      def clear_worker(payload)
+        jobs(payload.queue).update({ :_id => payload.id }, '$set' => { :worker => nil })
+      end
+
       def failed(payload, error)
         doc = jobs(payload.queue).find_and_modify(
           :query => { :_id => payload.id },
           :update => { '$set' => { :state => 'die' }})
+        clear_worker payload
         profile doc, :runtime => Time.now - doc['started_at'], :failed => true, :error => { :message => error.message, :backtrace => error.backtrace}
       end
 
