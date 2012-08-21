@@ -21,7 +21,6 @@ module Qu
 
     def perform
       klass.perform(*args)
-      Qu.backend.completed(self)
     rescue Qu::Worker::Abort
       logger.debug "Releasing job #{self}"
       Qu.backend.release(self)
@@ -31,6 +30,8 @@ module Qu
       log_exception(e)
       Qu.failure.create(self, e) if Qu.failure
       Qu.backend.failed(self, e)
+    ensure
+      Qu.backend.completed(self)
     end
 
     def to_s

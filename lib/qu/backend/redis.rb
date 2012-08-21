@@ -15,6 +15,10 @@ module Qu
       end
       alias_method :redis, :connection
 
+      def redis=(an_redis)
+        @connection = ::Redis::Namespace.new(namespace, :redis => an_redis)
+      end
+
       def enqueue(payload)
         payload.id = SimpleUUID::UUID.new.to_guid
         redis.set("job:#{payload.id}", encode('klass' => payload.klass.to_s, 'args' => payload.args))
