@@ -57,6 +57,7 @@ module Qu
     def start
       logger.warn "Worker #{id} starting"
       handle_signals
+      Qu.backend.reenqueue_zombie_jobs @queues if Qu.backend.respond_to?(:reenqueue_zombie_jobs)
       Qu.backend.register_worker(self)
       loop { work }
     rescue Abort => e
@@ -73,6 +74,10 @@ module Qu
 
     def pid
       @pid ||= Process.pid
+    end
+
+    def alive?
+      `ps  -p#{@pid}`.lines.count > 1
     end
 
     def hostname

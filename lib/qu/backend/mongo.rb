@@ -193,6 +193,26 @@ module Qu
         self[:workers].drop
       end
 
+      def remove_zombie_workers
+        self.workers.each do |w|
+          self.unregister_worker(w) unless w.alive?
+        end
+      end
+
+      def reenqueue_zombie_jobs queues
+        self.remove_zombie_workers
+        worker_ids = self.workers.map &:id
+        queues.each do |queue|
+          candidates = jobs(queue).find(:state => 'run').to_a
+          candidates.each do |c|
+            if c["worker"] && !worker_ids.include?(c["worker"])
+              puts "Reenqueuing zombie: #{c.inspect}"
+              self.requeue queue, c["_id"]
+            end
+          end
+        end
+      end
+
     private
 
       def jobs(queue)
