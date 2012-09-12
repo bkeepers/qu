@@ -104,6 +104,7 @@ module Qu
               doc = c.find_and_modify(
                 :new => true,
                 :query => { :state => 'enq' },
+                :sort => { :added_at => 1},
                 :update => {
                   '$inc' => { :tries => 1 },
                   '$set' => {
