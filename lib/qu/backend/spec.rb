@@ -36,9 +36,10 @@ shared_examples_for 'a backend' do
     end
 
     it 'should add a job to the queue' do
+      length = subject.length(payload.queue)
       subject.enqueue(payload)
       payload.queue.should == 'default'
-      subject.length(payload.queue).should == 1
+      subject.length(payload.queue).should == length + 1
     end
 
     it 'should add queue to list of queues' do
@@ -100,6 +101,9 @@ shared_examples_for 'a backend' do
     end
 
     it 'should return next job' do
+      subject.enqueue(payload.dup)
+      subject.enqueue(payload.dup)
+      subject.enqueue(payload.dup)
       subject.reserve(worker).id.should == payload.id
     end
 

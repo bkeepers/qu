@@ -64,7 +64,7 @@ module Qu
         set payload, status: value
       end
 
-      def clear(queue = nil)
+      def clear(queue = 'default')
         logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
           logger.debug "Clearing queue #{q}"
@@ -104,6 +104,7 @@ module Qu
               doc = c.find_and_modify(
                 :new => true,
                 :query => { :state => 'enq' },
+                :sort => { :added_at => 1},
                 :update => {
                   '$inc' => { :tries => 1 },
                   '$set' => {
