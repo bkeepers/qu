@@ -64,7 +64,7 @@ module Qu
         set payload, status: value
       end
 
-      def clear(queue = nil)
+      def clear(queue = 'default')
         logger.info { "Clearing queues: #{queue.inspect}" }
         Array(queue).each do |q|
           logger.debug "Clearing queue #{q}"
