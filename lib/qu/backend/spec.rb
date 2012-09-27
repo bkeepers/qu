@@ -15,9 +15,11 @@ end
 shared_examples_for 'a backend' do
   let(:worker) { Qu::Worker.new('default') }
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
+  let(:priorized_payload) { Qu::Payload.new(:klass => SimpleJob, :priority => 1) }
 
   before(:all) do
     Qu.backend = described_class.new
+    p Qu.backend
   end
 
   before do
@@ -98,6 +100,19 @@ shared_examples_for 'a backend' do
   describe 'reserve' do
     before do
       subject.enqueue(payload)
+    end
+
+    describe 'with jobs with priority' do
+      before do
+        subject.enqueue(priorized_payload)
+      end
+
+      it 'should return the priorized job' do
+        subject.enqueue(payload.dup)
+        subject.enqueue(payload.dup)
+        subject.enqueue(payload.dup)
+        subject.reserve(worker).id.should == priorized_payload.id
+      end
     end
 
     it 'should return next job' do

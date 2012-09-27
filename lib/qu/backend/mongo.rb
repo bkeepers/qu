@@ -83,11 +83,16 @@ module Qu
 
       def enqueue(payload)
         payload.id = BSON::ObjectId.new
-        jobs(payload.queue).insert(
+        doc = {
           :_id => payload.id,
           :klass => payload.klass.to_s, :args => payload.args,
           :added_at => Time.now,
-          :state => 'enq')
+          :state => 'enq'
+        }
+        doc.merge!(:priority => payload.priority) unless payload.priority.nil?
+
+        jobs(payload.queue).insert(doc)
+
         self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
         logger.debug { "Enqueued job #{payload}" }
         payload
@@ -104,7 +109,7 @@ module Qu
               doc = c.find_and_modify(
                 :new => true,
                 :query => { :state => 'enq' },
-                :sort => { :added_at => 1},
+                :sort => {:priority => -1, :added_at => 1},
                 :update => {
                   '$inc' => { :tries => 1 },
                   '$set' => {
