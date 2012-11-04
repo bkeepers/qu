@@ -56,8 +56,8 @@ module Qu
       end
 
       def enqueue(payload)
-        payload.id = BSON::ObjectId.new
-        jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
+        payload.id = id_for_payload(payload)
+        jobs(payload.queue).insert(payload_attributes(payload))
         self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
         logger.debug { "Enqueued job #{payload}" }
         payload
@@ -69,7 +69,7 @@ module Qu
             logger.debug { "Reserving job in queue #{queue}" }
 
             begin
-              if doc = jobs(queue).find_and_modify(:remove => true)
+              if doc = reserve_from_queue(queue)
                 doc['id'] = doc.delete('_id')
                 return Payload.new(doc)
               end
@@ -87,11 +87,11 @@ module Qu
       end
 
       def release(payload)
-        jobs(payload.queue).insert({:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args})
+        jobs(payload.queue).insert(payload_attributes(payload))
       end
 
       def failed(payload, error)
-        jobs('failed').insert(:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args, :queue => payload.queue)
+        jobs('failed').insert(payload_attributes(payload).merge(:queue => payload.queue))
       end
 
       def completed(payload)
@@ -116,6 +116,19 @@ module Qu
       def clear_workers
         logger.info "Clearing workers"
         self[:workers].drop
+      end
+
+    protected
+      def payload_attributes(payload)
+        {:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args}
+      end
+
+      def id_for_payload(payload)
+        BSON::ObjectId.new
+      end
+
+      def reserve_from_queue(queue)
+        jobs(queue).find_and_modify(:remove => true)
       end
 
     private
