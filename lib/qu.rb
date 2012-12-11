@@ -13,7 +13,7 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure, :logger
+  attr_accessor :backend, :failure, :logger, :graceful_shutdown
 
   def_delegators :backend, :length, :queues, :reserve, :clear, :connection=
 
