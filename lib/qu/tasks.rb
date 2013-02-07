@@ -5,8 +5,11 @@ namespace :qu do
     worker = Qu::Worker.new(*queues)
     begin
       worker.start
+    rescue Qu::Worker::Stop
+      Qu.logger.debug "Worker #{worker.id} stopped"
     rescue Qu::Worker::Abort
       Qu.logger.debug "Worker #{worker.id} aborted"
+      exit(1)
     end
   end
 end

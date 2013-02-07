@@ -6,6 +6,9 @@ module Qu
 
     class Abort < Exception
     end
+    
+    class Stop < Exception
+    end
 
     def initialize(*queues)
       @queues = queues.flatten
@@ -29,13 +32,8 @@ module Qu
       logger.debug "Worker #{id} registering traps for INT and TERM signals"
       %W(INT TERM).each do |sig|
         trap(sig) do
-          @running = false
           logger.info "Worker #{id} received #{sig}, shutting down"
-          if @performing && Qu.graceful_shutdown
-            stop
-          else
-            raise Abort
-          end
+          stop
         end
       end
     end
@@ -86,6 +84,12 @@ module Qu
     
     def stop
       @running = false
+      
+      # If the worker is blocked waiting for a new job, this will break them out.
+      raise Stop unless @performing
+      
+      # If the worker is still performing a job and this is not a graceful shutdown, abort immediately.
+      raise Abort unless Qu.graceful_shutdown
     end
 
     def id
