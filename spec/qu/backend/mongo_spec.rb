@@ -15,12 +15,18 @@ describe Qu::Backend::Mongo do
     end
 
     it 'should use MONGOHQ_URL from heroku' do
-      Mongo::Connection.any_instance.stub(:connect)
+      Mongo::MongoClient.any_instance.stub(:connect)
       ENV['MONGOHQ_URL'] = 'mongodb://user:pw@host:10060/quspec'
       subject.connection.name.should == 'quspec'
       # debugger
       subject.connection.connection.host_port.should == ['host', 10060]
-      subject.connection.connection.auths.should == [{:db_name => 'quspec', :username => 'user', :password => 'pw'}]
+      subject.connection.connection.auths.should satisfy { |v|
+        # Not happy about this, but the format of the auths attribute differs depending on your installed mongo version
+        # mongo >= 1.8.4 uses symbols for hash keys
+        # mongo < 1.8.4 uses strings for hash keys
+        v == [{:db_name => 'quspec', :username => 'user', :password => 'pw'}] or
+        v ==  [{'db_name' => 'quspec', 'username' => 'user', 'password' => 'pw'}]
+      }
     end
 
     context "Connection Failure" do
