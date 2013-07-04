@@ -27,9 +27,9 @@ module Qu
           options = {}
           if uri.password
             options[:auths] = [{
-              'db_name'  => database,
-              'username' => uri.user,
-              'password' => uri.password
+              :db_name  => database,
+              :username => uri.user,
+              :password => uri.password
             }]
           end
           ::Mongo::Connection.new(uri.host, uri.port, options).db(database)
