@@ -19,8 +19,8 @@ describe Qu::Backend::Mongo do
       ENV['MONGOHQ_URL'] = 'mongodb://user:pw@host:10060/quspec'
       subject.connection.name.should == 'quspec'
       # debugger
-      subject.connection.connection.host_to_try.should == ['host', 10060]
-      subject.connection.connection.auths.should == [{'db_name' => 'quspec', 'username' => 'user', 'password' => 'pw'}]
+      subject.connection.connection.host_port.should == ['host', 10060]
+      subject.connection.connection.auths.should == [{:db_name => 'quspec', :username => 'user', :password => 'pw'}]
     end
 
     context "Connection Failure" do
