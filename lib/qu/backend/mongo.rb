@@ -22,17 +22,13 @@ module Qu
       def connection
         @connection ||= begin
           host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI']).to_s
-          uri = URI.parse(host_uri)
-          database = uri.path.empty? ? 'qu' : uri.path[1..-1]
-          options = {}
-          if uri.password
-            options[:auths] = [{
-              'db_name'  => database,
-              'username' => uri.user,
-              'password' => uri.password
-            }]
+          if host_uri && !host_uri.empty?
+            uri = URI.parse(host_uri)
+            database = uri.path.empty? ? 'qu' : uri.path[1..-1]
+            ::Mongo::MongoClient.from_uri(host_uri).db(database)
+          else
+            ::Mongo::MongoClient.new.db('qu')
           end
-          ::Mongo::Connection.new(uri.host, uri.port, options).db(database)
         end
       end
       alias_method :database, :connection
