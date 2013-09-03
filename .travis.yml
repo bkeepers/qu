@@ -5,3 +5,5 @@ rvm:
 services:
   - mongodb
   - redis
+before_script:
+  - psql -c 'create database qu_test;' -U postgres

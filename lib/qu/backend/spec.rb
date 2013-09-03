@@ -171,6 +171,8 @@ shared_examples_for 'a backend' do
     let(:payload) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
 
     it 'should add to failure queue' do
+      subject.enqueue(payload)
+      subject.reserve(worker)
       subject.failed(payload, Exception.new)
       subject.length('failed').should == 1
     end
