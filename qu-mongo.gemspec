@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files -- lib | grep mongo`.split("\n")
   s.require_paths = ["lib"]
 
-  s.add_dependency 'mongo'
+  s.add_dependency 'mongo', '~> 1.9.0'
   s.add_dependency 'qu', Qu::VERSION
 
-  s.add_development_dependency 'bson_ext'
+  s.add_development_dependency 'bson_ext', '~> 1.9.0'
 end
