@@ -6,10 +6,6 @@ describe Qu::Backend::Redis do
 
   let(:worker) { Qu::Worker.new('default') }
 
-  before do
-    ENV.delete('REDISTOGO_URL')
-  end
-
   describe 'completed' do
     it 'should delete job' do
       subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
@@ -32,16 +28,19 @@ describe Qu::Backend::Redis do
 
   describe 'connection' do
     it 'should create default connection if one not provided' do
-      subject.connection.client.host.should == '127.0.0.1'
-      subject.connection.client.port.should == 6379
+      subject.connection.should be_instance_of(Redis::Namespace)
       subject.connection.namespace.should == :qu
     end
 
     it 'should use REDISTOGO_URL from heroku with namespace' do
-      ENV['REDISTOGO_URL'] = 'redis://0.0.0.0:9876'
-      subject.connection.client.host.should == '0.0.0.0'
-      subject.connection.client.port.should == 9876
-      subject.connection.namespace.should == :qu
+      begin
+        ENV['REDISTOGO_URL'] = 'redis://0.0.0.0:9876'
+        subject.connection.client.host.should == '0.0.0.0'
+        subject.connection.client.port.should == 9876
+        subject.connection.namespace.should == :qu
+      ensure
+        ENV.delete 'REDISTOGO_URL'
+      end
     end
 
     it 'should allow customizing the namespace' do
