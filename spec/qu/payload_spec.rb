@@ -33,6 +33,18 @@ describe Qu::Payload do
     end
   end
 
+  describe 'as_json' do
+    subject { Qu::Payload.new(:klass => SimpleJob, :args => ['test'], :id => 1) }
+
+    it 'returns hash of attributes' do
+      subject.as_json.should eq({
+        :klass => 'SimpleJob',
+        :args => ['test'],
+        :id => 1,
+      })
+    end
+  end
+
   describe 'perform' do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
@@ -81,6 +93,5 @@ describe Qu::Payload do
         subject.perform
       end
     end
-
   end
 end
