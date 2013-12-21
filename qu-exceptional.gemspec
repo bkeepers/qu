@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files -- lib | grep exceptional`.split("\n")
   s.require_paths = ["lib"]
 
-  s.add_dependency 'exceptional'
+  s.add_dependency 'exceptional', '~> 2.0.0'
   s.add_dependency 'qu', Qu::VERSION
 end
