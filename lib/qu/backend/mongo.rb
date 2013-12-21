@@ -24,7 +24,12 @@ module Qu
           host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI']).to_s
           if host_uri && !host_uri.empty?
             uri = URI.parse(host_uri)
-            database = uri.path.empty? ? 'qu' : uri.path[1..-1]
+
+            # path can come in as nil, "", "/", or "/something";
+            # this normalizes to empty string or "something"
+            path = uri.path.to_s[1..-1].to_s
+            database = path.empty? ? 'qu' : path
+            uri.path = "/#{database}"
             ::Mongo::MongoClient.from_uri(host_uri).db(database)
           else
             ::Mongo::MongoClient.new.db('qu')
