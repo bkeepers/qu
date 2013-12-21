@@ -21,7 +21,7 @@ module Qu
 
       def connection
         @connection ||= begin
-          host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI']).to_s
+          host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI'] || ENV['BOXEN_MONGODB_URL']).to_s
           if host_uri && !host_uri.empty?
             uri = URI.parse(host_uri)
 
