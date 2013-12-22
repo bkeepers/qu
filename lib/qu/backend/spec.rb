@@ -193,9 +193,10 @@ shared_examples_for 'a backend' do
     end
 
     it 'should add the job back on the queue' do
-      subject.reserve(worker).id.should == payload.id
+      reserved_payload = subject.reserve(worker)
+      reserved_payload.id.should == payload.id
       subject.length(payload.queue).should == 0
-      subject.release(payload)
+      subject.release(reserved_payload)
       subject.length(payload.queue).should == 1
     end
   end
