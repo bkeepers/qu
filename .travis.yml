@@ -6,3 +6,4 @@ services:
   - mongodb
   - redis
 script: bundle exec rake unattended_spec
+cache: bundler
