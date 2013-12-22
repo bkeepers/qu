@@ -88,7 +88,7 @@ describe Qu::Payload do
       end
 
       it 'should call create on failure backend' do
-        Qu.failure = mock('a failure backend')
+        Qu.failure = double('a failure backend')
         Qu.failure.should_receive(:create).with(subject, error)
         subject.perform
       end

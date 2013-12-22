@@ -248,7 +248,7 @@ shared_examples_for 'a backend' do |options|
 
     describe 'connection=' do
       it 'should allow setting the connection' do
-        connection = mock('a connection')
+        connection = double('a connection')
         subject.connection = connection
         subject.connection.should == connection
       end
