@@ -14,7 +14,7 @@ module ServiceHelpers
     when "mongo"
       uri = ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI'] || ENV['BOXEN_MONGODB_URL']
 
-      client = if uri.empty?
+      client = if uri.nil? || uri.empty?
         Mongo::MongoClient.new
       else
         Mongo::MongoClient.from_uri(uri)
@@ -27,7 +27,7 @@ module ServiceHelpers
     when "redis"
       url = ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']
 
-      client = if url.empty?
+      client = if uri.nil? || url.empty?
         Redis.new
       else
         Redis.connect(:url => url)
