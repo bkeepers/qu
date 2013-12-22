@@ -1,3 +1,10 @@
+# To run the tests for this you need to have fake_sqs and fake_dynamo running.
+# They are included in the gemfile through the aws gemspec as development
+# dependencies. You can fire them up like this:
+#
+#   bundle exec fake_sqs -p 5111
+#   bundle exec fake_dynamo -p 5112
+#
 require 'spec_helper'
 require 'net/http'
 require 'qu-aws'
@@ -21,21 +28,22 @@ describe Qu::Backend::AWS do
     Net::HTTP.new(host, port).request(Net::HTTP::Delete.new("/"))
   end
 
-  before(:each) do |ex|
+  before(:each) do
     [
       :sqs,
       :dynamo_db,
     ].each do |service|
-      reset_service(service)
+      reset_service(service) if service_running?(service)
     end
 
-    ENV["QU_DYNAMO_TABLE_NAME"] = "qu_test"
-
-    dynamo.tables.create(ENV["QU_DYNAMO_TABLE_NAME"], 10, 5, {
-      :hash_key => {:namespace => :string},
-      :range_key => {:id => :string},
-    })
+    if service_running?(:dynamo_db)
+      ENV["QU_DYNAMO_TABLE_NAME"] = "qu_test"
+      dynamo.tables.create(ENV["QU_DYNAMO_TABLE_NAME"], 10, 5, {
+        :hash_key => {:namespace => :string},
+        :range_key => {:id => :string},
+      })
+    end
   end
 
-  it_should_behave_like 'a backend'
+  it_should_behave_like 'a backend', :services => [:sqs, :dynamo_db]
 end
