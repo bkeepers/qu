@@ -20,8 +20,6 @@ module ServiceHelpers
         Mongo::MongoClient.from_uri(uri)
       end
 
-      p client
-
       client.ping
       true
     when "redis"
@@ -32,8 +30,6 @@ module ServiceHelpers
       else
         Redis.connect(:url => url)
       end
-
-      p client
 
       client.ping
       true
