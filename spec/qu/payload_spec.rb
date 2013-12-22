@@ -74,7 +74,7 @@ describe Qu::Payload do
       let(:error) { Exception.new("Some kind of error") }
 
       before do
-        SimpleJob.stub!(:perform).and_raise(error)
+        SimpleJob.stub(:perform).and_raise(error)
       end
 
       it 'should call failed on backend' do
