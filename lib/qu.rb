@@ -3,13 +3,12 @@ require 'qu/logger'
 require 'qu/failure'
 require 'qu/payload'
 require 'qu/backend/base'
+require 'qu/worker'
 
 require 'forwardable'
 require 'logger'
 
 module Qu
-  autoload :Worker, 'qu/worker'
-
   extend SingleForwardable
   extend self
 
@@ -34,4 +33,3 @@ Qu.configure do |c|
   c.logger = Logger.new(STDOUT)
   c.logger.level = Logger::INFO
 end
-
