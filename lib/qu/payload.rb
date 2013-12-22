@@ -37,7 +37,7 @@ module Qu
       "#{id}:#{klass}:#{args.inspect}"
     end
 
-    def as_json(*)
+    def attributes
       {
         :id => id,
         :klass => klass.to_s,

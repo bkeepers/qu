@@ -33,11 +33,11 @@ describe Qu::Payload do
     end
   end
 
-  describe 'as_json' do
+  describe 'attributes' do
     subject { Qu::Payload.new(:klass => SimpleJob, :args => ['test'], :id => 1) }
 
     it 'returns hash of attributes' do
-      subject.as_json.should eq({
+      subject.attributes.should eq({
         :klass => 'SimpleJob',
         :args => ['test'],
         :id => 1,
