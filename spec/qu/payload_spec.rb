@@ -33,6 +33,18 @@ describe Qu::Payload do
     end
   end
 
+  describe 'attributes' do
+    subject { Qu::Payload.new(:klass => SimpleJob, :args => ['test'], :id => 1) }
+
+    it 'returns hash of attributes' do
+      subject.attributes.should eq({
+        :klass => 'SimpleJob',
+        :args => ['test'],
+        :id => 1,
+      })
+    end
+  end
+
   describe 'perform' do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
@@ -62,7 +74,7 @@ describe Qu::Payload do
       let(:error) { Exception.new("Some kind of error") }
 
       before do
-        SimpleJob.stub!(:perform).and_raise(error)
+        SimpleJob.stub(:perform).and_raise(error)
       end
 
       it 'should call failed on backend' do
@@ -76,11 +88,10 @@ describe Qu::Payload do
       end
 
       it 'should call create on failure backend' do
-        Qu.failure = mock('a failure backend')
+        Qu.failure = double('a failure backend')
         Qu.failure.should_receive(:create).with(subject, error)
         subject.perform
       end
     end
-
   end
 end

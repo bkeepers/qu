@@ -13,7 +13,7 @@ describe Qu::Worker do
 
   describe 'work' do
     before do
-      Qu.stub!(:reserve).and_return(job)
+      Qu.stub(:reserve).and_return(job)
     end
 
     it 'should reserve a job' do

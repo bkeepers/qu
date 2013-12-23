@@ -37,6 +37,14 @@ module Qu
       "#{id}:#{klass}:#{args.inspect}"
     end
 
+    def attributes
+      {
+        :id => id,
+        :klass => klass.to_s,
+        :args => args,
+      }
+    end
+
   protected
 
     def constantize(class_name)
