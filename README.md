@@ -21,6 +21,7 @@ Qu was created to overcome some shortcomings in the existing queuing libraries t
 Decide which backend you want to use and add the gem to your `Gemfile`.
 
 ``` ruby
+gem 'qu-rails'
 gem 'qu-redis'
 ```
 
@@ -126,6 +127,14 @@ Qu.configure do |c|
   c.connection  = Redis::Namespace.new('myapp:qu', :redis => Redis.connect)
   c.logger      = Logger.new('log/qu.log')
 end
+```
+
+## Tests
+
+If you prefer to have jobs processed immediatly in your tests, there is an `Immediate` backend that will perform the job instead of enqueuing it. In your test helper, require qu-immediate:
+
+``` ruby
+require 'qu-immediate'
 ```
 
 ## Why another queuing library?

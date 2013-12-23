@@ -1,8 +1,39 @@
-unreleased
+0.3.0
+
+    * Remove qu-airbrake failure backend
+
+0.2.0 - 2012-06-13
+
+  Backwards-incompatible Changes:
+
+    * Remove #requeue from all backends. It was not used internally.
+    * Move implicit Rails dependency to it's own Gem, which you must declare now in your Gemfile.
+
+        gem 'qu-rails'
+
+  Enhancements
+
+    * qu-mongo: Add mongolab environment variable for automatic configuration on Heroku.
+
+  Bug Fixes:
+
+    * Fixing Immediate backend to satisfy the backend interface
+
+  https://github.com/bkeepers/qu/compare/v0.1.4...v0.2.0
+
+
+0.1.4 - 2012-01-07
 
   Enhancements:
 
-    * Added `poll_frequency` config for mongo backend
+    * Add `poll_frequency` config for mongo backend
+    * Add qu-airbrake failure backend
+    * Add immediate backend for performing jobs immediately
+
+        require 'qu-immediate'
+
+  https://github.com/bkeepers/qu/compare/v0.1.3...v0.1.4
+
 
 0.1.3 - 2011-10-10
 
@@ -20,11 +51,16 @@ unreleased
           c.backend.retry_frequency = 5   # default: 1
         end
 
+  https://github.com/bkeepers/qu/compare/v0.1.2..v0.1.3
+
+
 0.1.2 - 2011-10-05
 
   Bug Fixes:
 
     * Build gem with Ruby 1.8 to avoid YAML errors (http://blog.rubygems.org/2011/08/31/shaving-the-yaml-yacc.html)
+
+  https://github.com/bkeepers/qu/compare/v0.1.1...v0.1.2
 
 
 0.1.1 - 2011-10-02

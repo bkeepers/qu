@@ -2,7 +2,15 @@ namespace :qu do
   desc "Start a worker"
   task :work  => :environment do
     queues = (ENV['QUEUES'] || ENV['QUEUE'] || 'default').to_s.split(',')
-    Qu::Worker.new(*queues).start
+    worker = Qu::Worker.new(*queues)
+    begin
+      worker.start
+    rescue Qu::Worker::Stop
+      Qu.logger.debug "Worker #{worker.id} stopped"
+    rescue Qu::Worker::Abort
+      Qu.logger.debug "Worker #{worker.id} aborted"
+      exit(1)
+    end
   end
 end
 

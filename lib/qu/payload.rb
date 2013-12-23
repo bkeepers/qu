@@ -32,7 +32,7 @@ module Qu
         Qu.backend.release(self)
       end
       raise
-    rescue Exception => e
+    rescue => e
       job.run_hook(:failure, e) do
         logger.fatal "Job #{self} failed"
         log_exception(e)
@@ -43,6 +43,14 @@ module Qu
 
     def to_s
       "#{id}:#{klass}:#{args.inspect}"
+    end
+
+    def attributes
+      {
+        :id => id,
+        :klass => klass.to_s,
+        :args => args,
+      }
     end
 
   protected

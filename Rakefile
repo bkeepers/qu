@@ -48,3 +48,45 @@ def changelog
 end
 
 task :default => :spec
+
+desc "Start fake services, run tests, cleanup"
+task :unattended_spec do |t|
+  require 'tmpdir'
+  require 'socket'
+
+  dir = Dir.mktmpdir
+  data_file = File.join(dir, "data.fdb")
+
+  sqs_pid = Process.spawn 'fake_sqs', '-p', '5111', err: '/dev/null', out: '/dev/null'
+  dynamo_pid = Process.spawn 'fake_dynamo', '-d', data_file, '-p', '5112', err: '/dev/null', out: '/dev/null'
+
+  at_exit {
+    Process.kill('TERM', sqs_pid)
+    Process.kill('TERM', dynamo_pid)
+    FileUtils.rmtree(dir)
+  }
+
+  40.downto(0) do |count|
+    begin
+      s = TCPSocket.new 'localhost', 5112
+      s.close
+      break
+    rescue Errno::ECONNREFUSED
+      raise if count == 0
+      sleep 0.1
+    end
+  end
+
+  40.downto(0) do |count|
+    begin
+      s = TCPSocket.new 'localhost', 5111
+      s.close
+      break
+    rescue Errno::ECONNREFUSED
+      raise if count == 0
+      sleep 0.1
+    end
+  end
+
+  Rake::Task["spec"].invoke
+end
