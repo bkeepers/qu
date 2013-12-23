@@ -23,12 +23,12 @@ module ServiceHelpers
       client.ping
       true
     when "redis"
-      url = ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']
+      uri = ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']
 
-      client = if uri.nil? || url.empty?
+      client = if uri.nil? || uri.empty?
         Redis.new
       else
-        Redis.connect(:url => url)
+        Redis.connect(:url => uri)
       end
 
       client.ping
