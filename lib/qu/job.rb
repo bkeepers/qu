@@ -22,5 +22,14 @@ module Qu
         payload.job.run_hook(:enqueue) { Qu.backend.enqueue payload }
       end
     end
+
+    # Public: Feel free to override this in your class with specific arg names and all that.
+    def initialize(*args)
+      @args = args
+    end
+
+    # Public: Feel free to override this as well.
+    def perform
+    end
   end
 end

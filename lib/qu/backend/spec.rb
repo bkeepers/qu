@@ -4,11 +4,6 @@ unless defined?(SystemTimer)
 end
 
 class SimpleJob < Qu::Job
-  def initialize(arg = nil)
-  end
-
-  def perform
-  end
 end
 
 class CustomQueue < Qu::Job
