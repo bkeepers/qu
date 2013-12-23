@@ -96,7 +96,7 @@ shared_examples_for 'a backend' do |options|
 
       it 'should clear failed queue without any args' do
         subject.enqueue(payload)
-        subject.failed(payload, Exception.new)
+        subject.failed(payload, StandardError.new)
         subject.length('failed').should == 1
         subject.clear
         subject.length('failed').should == 0
@@ -104,7 +104,7 @@ shared_examples_for 'a backend' do |options|
 
       it 'should not clear failed queue with specified queues' do
         subject.enqueue(payload)
-        subject.failed(payload, Exception.new)
+        subject.failed(payload, StandardError.new)
         subject.length('failed').should == 1
         subject.clear('default')
         subject.length('failed').should == 1
@@ -180,12 +180,12 @@ shared_examples_for 'a backend' do |options|
       let(:payload) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
 
       it 'should add to failure queue' do
-        subject.failed(payload, Exception.new)
+        subject.failed(payload, StandardError.new)
         subject.length('failed').should == 1
       end
 
       it 'should not add failed queue to the list of queues' do
-        subject.failed(payload, Exception.new)
+        subject.failed(payload, StandardError.new)
         subject.queues.should_not include('failed')
       end
     end

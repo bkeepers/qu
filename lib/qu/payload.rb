@@ -26,7 +26,7 @@ module Qu
       logger.debug "Releasing job #{self}"
       Qu.backend.release(self)
       raise
-    rescue Exception => e
+    rescue => e
       logger.fatal "Job #{self} failed"
       log_exception(e)
       Qu.failure.create(self, e) if Qu.failure

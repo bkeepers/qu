@@ -4,7 +4,7 @@ module Qu
 
     attr_accessor :queues
 
-    class Abort < Exception
+    class Abort < StandardError
     end
 
     def initialize(*queues)

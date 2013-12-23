@@ -71,7 +71,7 @@ describe Qu::Payload do
     end
 
     context 'when the job raises an error' do
-      let(:error) { Exception.new("Some kind of error") }
+      let(:error) { StandardError.new("Some kind of error") }
 
       before do
         SimpleJob.stub(:perform).and_raise(error)
