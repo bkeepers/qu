@@ -6,7 +6,7 @@ module Qu
 
     class Abort < StandardError
     end
-    
+
     class Stop < Exception
     end
 
@@ -41,37 +41,24 @@ module Qu
     def work_off
       logger.debug "Worker #{id} working of all jobs"
       while job = Qu.reserve(self, :block => false)
-        logger.debug "Worker #{id} reserved job #{job}"
-        begin
-          @performing = true
-          job.perform
-        ensure
-          @performing = false
-        end
-        logger.debug "Worker #{id} completed job #{job}"
+        perform(job)
       end
     end
 
     def work
       logger.debug "Worker #{id} waiting for next job"
       job = Qu.reserve(self)
-      logger.debug "Worker #{id} reserved job #{job}"
-      begin
-        @performing = true
-        job.perform
-      ensure
-        @performing = false
-      end
-      logger.debug "Worker #{id} completed job #{job}"
+      perform(job)
     end
 
     def start
       return if @running
       @running = true
-      
+
       logger.warn "Worker #{id} starting"
       handle_signals
       Qu.backend.register_worker(self)
+
       loop do
         break unless @running
         work
@@ -81,13 +68,13 @@ module Qu
       logger.debug "Worker #{id} done"
       @running = false
     end
-    
+
     def stop
       @running = false
-      
+
       # If the worker is blocked waiting for a new job, this will break them out.
       raise Stop unless @performing
-      
+
       # If the worker is still performing a job and this is not a graceful shutdown, abort immediately.
       raise Abort unless Qu.graceful_shutdown
     end
@@ -102,6 +89,19 @@ module Qu
 
     def hostname
       @hostname ||= `hostname`.strip
+    end
+
+    private
+
+    def perform(job)
+      logger.debug "Worker #{id} reserved job #{job}"
+      begin
+        @performing = true
+        job.perform
+      ensure
+        @performing = false
+      end
+      logger.debug "Worker #{id} completed job #{job}"
     end
   end
 end
