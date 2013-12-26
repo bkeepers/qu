@@ -47,8 +47,8 @@ RSpec.configure do |config|
   config.extend ServiceHelpers
 
   config.before(:each) do
-    Qu.backend = double('a backend', :reserve => nil, :failed => nil, :completed => nil,
-      :register_worker => nil, :unregister_worker => nil)
+    Qu.backend = double('a backend', :reserve => nil, :failed => nil, :completed => nil, :release => nil,
+        :register_worker => nil, :unregister_worker => nil, :enqueue => nil)
     Qu.failure = nil
   end
 end

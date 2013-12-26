@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe Qu::Payload do
-  class MyJob
-    @queue = :custom
-  end
-
   it 'should default id to nil' do
     Qu::Payload.new.id.should == nil
   end
@@ -18,14 +14,14 @@ describe Qu::Payload do
       Qu::Payload.new.queue.should == 'default'
     end
 
-    it 'should get queue from instance variable' do
-      Qu::Payload.new(:klass => MyJob).queue.should == 'custom'
+    it 'should get queue from klass' do
+      Qu::Payload.new(:klass => CustomQueue).queue.should == 'custom'
     end
   end
 
   describe 'klass' do
     it 'should constantize string' do
-      Qu::Payload.new(:klass => 'MyJob').klass.should == MyJob
+      Qu::Payload.new(:klass => 'CustomQueue').klass.should == CustomQueue
     end
 
     it 'should find namespaced class' do
@@ -45,12 +41,30 @@ describe Qu::Payload do
     end
   end
 
+  describe 'job' do
+    subject { Qu::Payload.new(:klass => SimpleJob) }
+
+    it 'should load the job' do
+      SimpleJob.should_receive(:load).with(subject)
+      subject.job
+    end
+
+    it 'should return the job' do
+      subject.job.should be_instance_of(SimpleJob)
+    end
+  end
+
   describe 'perform' do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
-    it 'should call .perform on class with args' do
-      subject.args = ['a', 'b']
-      SimpleJob.should_receive(:perform).with('a', 'b')
+    it 'should call perform on job' do
+      subject.job.should_receive(:perform)
+      subject.perform
+    end
+
+    it 'should run perform hooks' do
+      subject.job.stub(:run_hook).and_yield
+      subject.job.should_receive(:run_hook).with(:perform)
       subject.perform
     end
 
@@ -59,13 +73,25 @@ describe Qu::Payload do
       subject.perform
     end
 
+    it 'should run complete hooks' do
+      subject.job.stub(:run_hook).and_yield
+      subject.job.should_receive(:run_hook).with(:complete)
+      subject.perform
+    end
+
     context 'when being aborted' do
       before do
-        SimpleJob.stub(:perform).and_raise(Qu::Worker::Abort)
+        SimpleJob.any_instance.stub(:perform).and_raise(Qu::Worker::Abort)
       end
 
       it 'should release the job and re-raise the error' do
         Qu.backend.should_receive(:release).with(subject)
+        lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
+      end
+
+      it 'should run release hook' do
+        subject.job.stub(:run_hook).and_yield
+        subject.job.should_receive(:run_hook).with(:release)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
     end
@@ -74,7 +100,7 @@ describe Qu::Payload do
       let(:error) { StandardError.new("Some kind of error") }
 
       before do
-        SimpleJob.stub(:perform).and_raise(error)
+        SimpleJob.any_instance.stub(:perform).and_raise(error)
       end
 
       it 'should call failed on backend' do
@@ -92,6 +118,13 @@ describe Qu::Payload do
         Qu.failure.should_receive(:create).with(subject, error)
         subject.perform
       end
+
+      it 'should run failure hook with exception' do
+        subject.job.stub(:run_hook).and_yield
+        subject.job.should_receive(:run_hook).with(:failure, error)
+        subject.perform
+      end
+
     end
   end
 end

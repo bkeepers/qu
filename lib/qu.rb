@@ -1,7 +1,9 @@
 require 'qu/version'
 require 'qu/logger'
+require 'qu/hooks'
 require 'qu/failure'
 require 'qu/payload'
+require 'qu/job'
 require 'qu/backend/base'
 require 'qu/worker'
 
@@ -25,7 +27,8 @@ module Qu
   end
 
   def enqueue(klass, *args)
-    backend.enqueue Payload.new(:klass => klass, :args => args)
+    warn "[DEPRECATION] `Qu.enqueue` is deprecated. Use `#{klass}.create(#{args.map {|a| a.inspect }.join(',')})` instead."
+    klass.create(*args)
   end
 end
 

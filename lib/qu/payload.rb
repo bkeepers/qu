@@ -15,22 +15,30 @@ module Qu
       constantize(super)
     end
 
+    def job
+      @job ||= klass.load(self)
+    end
+
     def queue
       (klass.instance_variable_get(:@queue) || 'default').to_s
     end
 
     def perform
-      klass.perform(*args)
-      Qu.backend.completed(self)
+      job.run_hook(:perform)  { job.perform }
+      job.run_hook(:complete) { Qu.backend.completed(self) }
     rescue Qu::Worker::Abort
-      logger.debug "Releasing job #{self}"
-      Qu.backend.release(self)
+      job.run_hook(:release) do
+        logger.debug "Releasing job #{self}"
+        Qu.backend.release(self)
+      end
       raise
     rescue => e
-      logger.fatal "Job #{self} failed"
-      log_exception(e)
-      Qu.failure.create(self, e) if Qu.failure
-      Qu.backend.failed(self, e)
+      job.run_hook(:failure, e) do
+        logger.fatal "Job #{self} failed"
+        log_exception(e)
+        Qu.failure.create(self, e) if Qu.failure
+        Qu.backend.failed(self, e)
+      end
     end
 
     def to_s

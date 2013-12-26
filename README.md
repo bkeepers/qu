@@ -43,25 +43,28 @@ require 'qu/tasks'
 
 ## Usage
 
-Jobs are any class that responds to the `.perform` method:
+Jobs are defined by extending the `Qu::Job` class:
 
 ``` ruby
-class ProcessPresentation
-  def self.perform(presentation_id)
-    presentation = Presentation.find(presentation_id)
-    presentation.process!
+class ProcessPresentation < Qu::Job
+  def initialize(presentation_id)
+    @presentation = Presentation.find(presentation_id)
+  end
+
+  def perform
+    @presentation.process!
   end
 end
 ```
 
-You can add a job to the queue by calling the `enqueue` method:
+You can add a job to the queue by calling `create` on your job:
 
 ``` ruby
-job = Qu.enqueue ProcessPresentation, @presentation.id
+job = ProcessPresentation.create(@presentation.id)
 puts "Enqueued job #{job.id}"
 ```
 
-Any additional parameters passed to the `enqueue` method will be passed on to the `perform` method of your job class. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. So don't try to pass in an ActiveRecord object.
+The job will be initialized with any parameters that are passed to it when it is performed. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. Don't try to pass in an ActiveRecord object.
 
 Processing the jobs on the queue can be done with a Rake task:
 
@@ -82,13 +85,17 @@ The `default` queue is used, um…by default. Jobs that don't specify a queue wi
 
 However, if you have some background jobs that are more or less important, or some that take longer than others, you may want to consider using multiple queues. You can have workers dedicated to specific queues, or simply tell all your workers to work on the most important queue first.
 
-Jobs can be placed in a specific queue by setting the queue variable:
+Jobs can be placed in a specific queue by setting the queue:
 
 ``` ruby
-class CallThePresident
-  @queue = :urgent
+class CallThePresident < Qu:Job
+  queue :urgent
 
-  def self.perform(message)
+  def initialize(message)
+    @message = message
+  end
+
+  def perform
     # …
   end
 end
