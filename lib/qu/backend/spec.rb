@@ -52,29 +52,6 @@ shared_examples_for 'a backend' do |options|
       end
     end
 
-    describe 'length' do
-      it 'should use the default queue by default' do
-        subject.length.should == 0
-        subject.push(payload)
-        subject.length.should == 1
-      end
-    end
-
-    describe 'clear' do
-      it 'should clear jobs for given queue' do
-        subject.push(payload)
-        subject.length(payload.queue).should == 1
-        subject.clear(payload.queue)
-        subject.length(payload.queue).should == 0
-      end
-
-      it 'should not clear jobs for a different queue' do
-        subject.push(payload)
-        subject.clear('other')
-        subject.length(payload.queue).should == 1
-      end
-    end
-
     describe 'pop' do
       it 'should return next job' do
         subject.push(payload)
@@ -158,6 +135,29 @@ shared_examples_for 'a backend' do |options|
         popped_payload.id.should == payload.id
         subject.length(payload.queue).should == 0
         subject.release(popped_payload)
+        subject.length(payload.queue).should == 1
+      end
+    end
+
+    describe 'length' do
+      it 'should use the default queue by default' do
+        subject.length.should == 0
+        subject.push(payload)
+        subject.length.should == 1
+      end
+    end
+
+    describe 'clear' do
+      it 'should clear jobs for given queue' do
+        subject.push(payload)
+        subject.length(payload.queue).should == 1
+        subject.clear(payload.queue)
+        subject.length(payload.queue).should == 0
+      end
+
+      it 'should not clear jobs for a different queue' do
+        subject.push(payload)
+        subject.clear('other')
         subject.length(payload.queue).should == 1
       end
     end
