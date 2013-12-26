@@ -10,16 +10,37 @@ module Qu
         self.namespace = :qu
       end
 
-      def connection
-        @connection ||= ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']))
-      end
-
       def push(payload)
         payload.id = SimpleUUID::UUID.new.to_guid
         connection.set("job:#{payload.id}", encode('klass' => payload.klass.to_s, 'args' => payload.args))
         connection.rpush("queue:#{payload.queue}", payload.id)
         connection.sadd('queues', payload.queue)
         payload
+      end
+
+      def pop(worker, options = {:block => true})
+        queues = worker.queues.map {|q| "queue:#{q}" }
+
+        if options[:block]
+          id = connection.blpop(*queues.push(0))[1]
+        else
+          queues.detect {|queue| id = connection.lpop(queue) }
+        end
+
+        if id
+          if data = connection.get("job:#{id}")
+            data = decode(data)
+            Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
+          end
+        end
+      end
+
+      def release(payload)
+        connection.rpush("queue:#{payload.queue}", payload.id)
+      end
+
+      def completed(payload)
+        connection.del("job:#{payload.id}")
       end
 
       def length(queue = 'default')
@@ -32,33 +53,8 @@ module Qu
         end
       end
 
-      def pop(worker, options = {:block => true})
-        queues = worker.queues.map {|q| "queue:#{q}" }
-
-        if options[:block]
-          id = connection.blpop(*queues.push(0))[1]
-        else
-          queues.detect {|queue| id = connection.lpop(queue) }
-        end
-
-        get(id) if id
-      end
-
-      def release(payload)
-        connection.rpush("queue:#{payload.queue}", payload.id)
-      end
-
-      def completed(payload)
-        connection.del("job:#{payload.id}")
-      end
-
-      private
-
-      def get(id)
-        if data = connection.get("job:#{id}")
-          data = decode(data)
-          Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
-        end
+      def connection
+        @connection ||= ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']))
       end
     end
   end

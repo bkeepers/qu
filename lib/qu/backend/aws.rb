@@ -21,15 +21,6 @@ module Qu
         payload
       end
 
-      def completed(payload)
-        payload.message.delete
-      end
-
-      def release(payload)
-        payload.message.delete
-        connection.enqueue(payload.queue, encode(payload.attributes))
-      end
-
       def pop(worker, options = {:block => true})
         loop do
           worker.queues.each do |queue_name|
@@ -49,6 +40,15 @@ module Qu
             break
           end
         end
+      end
+
+      def completed(payload)
+        payload.message.delete
+      end
+
+      def release(payload)
+        payload.message.delete
+        connection.enqueue(payload.queue, encode(payload.attributes))
       end
 
       def length(queue_name = 'default')

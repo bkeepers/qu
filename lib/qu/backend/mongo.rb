@@ -19,39 +19,9 @@ module Qu
         self.poll_frequency  = 5
       end
 
-      def connection
-        @connection ||= begin
-          host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI'] || ENV['BOXEN_MONGODB_URL']).to_s
-          if host_uri && !host_uri.empty?
-            uri = URI.parse(host_uri)
-
-            # path can come in as nil, "", "/", or "/something";
-            # this normalizes to empty string or "something"
-            path = uri.path.to_s[1..-1].to_s
-            database = path.empty? ? 'qu' : path
-            uri.path = "/#{database}"
-            ::Mongo::MongoClient.from_uri(host_uri).db(database)
-          else
-            ::Mongo::MongoClient.new.db('qu')
-          end
-        end
-      end
-
-      def clear(queue = 'default')
-        rescue_connection_failure do
-          jobs(queue).drop
-        end
-      end
-
-      def length(queue = 'default')
-        rescue_connection_failure do
-          jobs(queue).count
-        end
-      end
-
       def push(payload)
-        payload.id = id_for_payload(payload)
-        rescue_connection_failure do
+        payload.id = BSON::ObjectId.new
+        with_connection_retries do
           jobs(payload.queue).insert(payload_attributes(payload))
         end
         payload
@@ -61,7 +31,7 @@ module Qu
         loop do
           worker.queues.each do |queue|
             begin
-              doc = rescue_connection_failure do
+              doc = with_connection_retries do
                 jobs(queue).find_and_modify(:remove => true)
               end
 
@@ -83,7 +53,7 @@ module Qu
       end
 
       def release(payload)
-        rescue_connection_failure do
+        with_connection_retries do
           jobs(payload.queue).insert(payload_attributes(payload))
         end
       end
@@ -91,22 +61,47 @@ module Qu
       def completed(payload)
       end
 
-    protected
-      def payload_attributes(payload)
-        {:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args}
+      def length(queue = 'default')
+        with_connection_retries do
+          jobs(queue).count
+        end
       end
 
-      def id_for_payload(payload)
-        BSON::ObjectId.new
+      def clear(queue = 'default')
+        with_connection_retries do
+          jobs(queue).drop
+        end
+      end
+
+      def connection
+        @connection ||= begin
+          host_uri = (ENV['MONGOHQ_URL'] || ENV['MONGOLAB_URI'] || ENV['BOXEN_MONGODB_URL']).to_s
+          if host_uri && !host_uri.empty?
+            uri = URI.parse(host_uri)
+
+            # path can come in as nil, "", "/", or "/something";
+            # this normalizes to empty string or "something"
+            path = uri.path.to_s[1..-1].to_s
+            database = path.empty? ? 'qu' : path
+            uri.path = "/#{database}"
+            ::Mongo::MongoClient.from_uri(host_uri).db(database)
+          else
+            ::Mongo::MongoClient.new.db('qu')
+          end
+        end
       end
 
       private
+
+      def payload_attributes(payload)
+        {:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args}
+      end
 
       def jobs(queue)
         connection["qu:queue:#{queue}"]
       end
 
-      def rescue_connection_failure
+      def with_connection_retries
         retries = 0
         begin
           yield
