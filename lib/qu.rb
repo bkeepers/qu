@@ -16,7 +16,7 @@ module Qu
 
   attr_accessor :backend, :failure, :logger, :graceful_shutdown
 
-  def_delegators :backend, :size, :queues, :pop, :clear, :connection=
+  def_delegators :backend, :size, :clear
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
@@ -24,11 +24,6 @@ module Qu
 
   def configure(&block)
     block.call(self)
-  end
-
-  def enqueue(klass, *args)
-    warn "[DEPRECATION] `Qu.enqueue` is deprecated. Use `#{klass}.create(#{args.map {|a| a.inspect }.join(',')})` instead."
-    klass.create(*args)
   end
 end
 
