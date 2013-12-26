@@ -44,7 +44,7 @@ shared_examples_for 'a backend' do |options|
       it 'should add a job to the queue' do
         subject.push(payload)
         payload.queue.should == 'default'
-        subject.length(payload.queue).should == 1
+        subject.size(payload.queue).should == 1
       end
 
       it 'should assign a different job id for the same job pushed multiple times' do
@@ -133,32 +133,32 @@ shared_examples_for 'a backend' do |options|
       it 'should add the job back on the queue' do
         popped_payload = subject.pop(worker)
         popped_payload.id.should == payload.id
-        subject.length(payload.queue).should == 0
+        subject.size(payload.queue).should == 0
         subject.abort(popped_payload)
-        subject.length(payload.queue).should == 1
+        subject.size(payload.queue).should == 1
       end
     end
 
-    describe 'length' do
+    describe 'size' do
       it 'should use the default queue by default' do
-        subject.length.should == 0
+        subject.size.should == 0
         subject.push(payload)
-        subject.length.should == 1
+        subject.size.should == 1
       end
     end
 
     describe 'clear' do
       it 'should clear jobs for given queue' do
         subject.push(payload)
-        subject.length(payload.queue).should == 1
+        subject.size(payload.queue).should == 1
         subject.clear(payload.queue)
-        subject.length(payload.queue).should == 0
+        subject.size(payload.queue).should == 0
       end
 
       it 'should not clear jobs for a different queue' do
         subject.push(payload)
         subject.clear('other')
-        subject.length(payload.queue).should == 1
+        subject.size(payload.queue).should == 1
       end
     end
 

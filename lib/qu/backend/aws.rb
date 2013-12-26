@@ -51,7 +51,7 @@ module Qu
         connection.enqueue(payload.queue, encode(payload.attributes))
       end
 
-      def length(queue_name = 'default')
+      def size(queue_name = 'default')
         connection.depth(queue_name)
       end
 

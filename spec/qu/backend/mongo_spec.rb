@@ -43,12 +43,12 @@ describe Qu::Backend::Mongo do
         end
 
         it "raise error" do
-          expect { subject.length }.to raise_error(Mongo::ConnectionFailure)
+          expect { subject.size }.to raise_error(Mongo::ConnectionFailure)
         end
 
         it "trying to reconnect" do
           subject.connection.should_receive(:[]).exactly(4).times.and_raise(Mongo::ConnectionFailure)
-          expect { subject.length }.to raise_error
+          expect { subject.size }.to raise_error
         end
 
         it "sleep between tries" do
@@ -56,7 +56,7 @@ describe Qu::Backend::Mongo do
           subject.should_receive(:sleep).with(10).ordered
           subject.should_receive(:sleep).with(15).ordered
 
-          expect { subject.length }.to raise_error
+          expect { subject.size }.to raise_error
         end
 
       end

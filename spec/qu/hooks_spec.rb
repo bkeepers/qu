@@ -53,7 +53,7 @@ describe Qu::Hooks do
   describe 'define_hooks' do
     it 'should create an empty chain' do
       Captain.hooks(:pillage).should be_instance_of(Qu::Hooks::Chain)
-      Captain.hooks(:pillage).length.should == 0
+      Captain.hooks(:pillage).size.should == 0
     end
 
     it 'should define before, after and around methods' do

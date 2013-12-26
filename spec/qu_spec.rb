@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Qu do
-  %w(length queues pop clear connection=).each do |method|
+  %w(size queues pop clear connection=).each do |method|
     it "should delegate #{method} to backend" do
       Qu.backend.should_receive(method).with(:arg)
       Qu.send(method, :arg)

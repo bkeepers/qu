@@ -43,7 +43,7 @@ module Qu
         connection.del("job:#{payload.id}")
       end
 
-      def length(queue = 'default')
+      def size(queue = 'default')
         connection.llen("queue:#{queue}")
       end
 

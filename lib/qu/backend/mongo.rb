@@ -61,7 +61,7 @@ module Qu
       def complete(payload)
       end
 
-      def length(queue = 'default')
+      def size(queue = 'default')
         with_connection_retries do
           jobs(queue).count
         end

@@ -17,7 +17,7 @@ module Qu
       def clear(queue)
       end
 
-      def length(*)
+      def size(*)
         0
       end
 

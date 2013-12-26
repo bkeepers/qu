@@ -75,7 +75,7 @@ $ bundle exec rake qu:work
 You can easily inspect the queue or clear it:
 
 ``` ruby
-puts "Jobs on the queue:", Qu.length
+puts "Jobs on the queue:", Qu.size
 Qu.clear
 ```
 
@@ -109,10 +109,10 @@ $ bundle exec rake qu:work QUEUES=urgent,default
 
 Note that if you still want your worker to process the default queue, you must specify it. Queues will be process in the order they are specified.
 
-You can also get the length or clear a specific queue:
+You can also get the size or clear a specific queue:
 
 ``` ruby
-Qu.length(:urgent)
+Qu.size(:urgent)
 Qu.clear(:urgent)
 ```
 
