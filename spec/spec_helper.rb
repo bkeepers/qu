@@ -48,7 +48,7 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Qu.backend = double('a backend', {
-      :enqueue => nil,
+      :push => nil,
       :reserve => nil,
       :completed => nil,
       :release => nil,

@@ -14,7 +14,7 @@ module Qu
         @connection ||= ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']))
       end
 
-      def enqueue(payload)
+      def push(payload)
         payload.id = SimpleUUID::UUID.new.to_guid
         connection.set("job:#{payload.id}", encode('klass' => payload.klass.to_s, 'args' => payload.args))
         connection.rpush("queue:#{payload.queue}", payload.id)

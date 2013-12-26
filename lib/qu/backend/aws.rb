@@ -10,7 +10,7 @@ module Qu
         self.poll_frequency  = 5
       end
 
-      def enqueue(payload)
+      def push(payload)
         # id does not really matter for aws as they have ids already so i'm just
         # sending something relatively unique for errors and what not
         payload.id = Digest::SHA1.hexdigest(payload.to_s + Time.now.to_s)

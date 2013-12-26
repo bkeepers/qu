@@ -49,7 +49,7 @@ module Qu
         end
       end
 
-      def enqueue(payload)
+      def push(payload)
         payload.id = id_for_payload(payload)
         rescue_connection_failure do
           jobs(payload.queue).insert(payload_attributes(payload))

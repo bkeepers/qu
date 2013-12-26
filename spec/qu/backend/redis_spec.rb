@@ -9,7 +9,7 @@ describe Qu::Backend::Redis do
   if service_running?(:redis)
     describe 'completed' do
       it 'should delete job' do
-        subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
+        subject.push(Qu::Payload.new(:klass => SimpleJob))
         job = subject.reserve(worker)
         subject.connection.exists("job:#{job.id}").should be_true
         subject.completed(job)
@@ -43,7 +43,7 @@ describe Qu::Backend::Redis do
     describe 'clear' do
       it 'should delete jobs' do
         payload = Qu::Payload.new(:klass => SimpleJob)
-        job = subject.enqueue(payload)
+        job = subject.push(payload)
         subject.connection.exists("job:#{job.id}").should be_true
         subject.clear(payload.queue)
         subject.connection.exists("job:#{job.id}").should be_false

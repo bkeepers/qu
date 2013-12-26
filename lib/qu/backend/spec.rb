@@ -31,45 +31,45 @@ shared_examples_for 'a backend' do |options|
       subject.clear(payload.queue)
     end
 
-    describe 'enqueue' do
+    describe 'push' do
       it 'should return a payload' do
-        subject.enqueue(payload).should be_instance_of(Qu::Payload)
+        subject.push(payload).should be_instance_of(Qu::Payload)
       end
 
       it 'should set the payload id' do
-        subject.enqueue(payload)
+        subject.push(payload)
         payload.id.should_not be_nil
       end
 
       it 'should add a job to the queue' do
-        subject.enqueue(payload)
+        subject.push(payload)
         payload.queue.should == 'default'
         subject.length(payload.queue).should == 1
       end
 
-      it 'should assign a different job id for the same job enqueue multiple times' do
-        subject.enqueue(payload).id.should_not == subject.enqueue(payload).id
+      it 'should assign a different job id for the same job pushed multiple times' do
+        subject.push(payload).id.should_not == subject.push(payload).id
       end
     end
 
     describe 'length' do
       it 'should use the default queue by default' do
         subject.length.should == 0
-        subject.enqueue(payload)
+        subject.push(payload)
         subject.length.should == 1
       end
     end
 
     describe 'clear' do
       it 'should clear jobs for given queue' do
-        subject.enqueue payload
+        subject.push(payload)
         subject.length(payload.queue).should == 1
         subject.clear(payload.queue)
         subject.length(payload.queue).should == 0
       end
 
       it 'should not clear jobs for a different queue' do
-        subject.enqueue(payload)
+        subject.push(payload)
         subject.clear('other')
         subject.length(payload.queue).should == 1
       end
@@ -77,20 +77,20 @@ shared_examples_for 'a backend' do |options|
 
     describe 'reserve' do
       it 'should return next job' do
-        subject.enqueue(payload)
+        subject.push(payload)
         subject.reserve(worker).id.should == payload.id
       end
 
       it 'should not return an already reserved job' do
-        subject.enqueue(payload)
-        subject.enqueue(payload.dup)
+        subject.push(payload)
+        subject.push(payload.dup)
         subject.reserve(worker).id.should_not == subject.reserve(worker).id
       end
 
       it 'should return next job based on queue order for worker' do
-        subject.enqueue(payload)
-        custom = subject.enqueue(Qu::Payload.new(:klass => CustomQueue))
-        subject.enqueue(payload.dup)
+        subject.push(payload)
+        custom = subject.push(Qu::Payload.new(:klass => CustomQueue))
+        subject.push(payload.dup)
 
         worker = Qu::Worker.new('custom', 'default')
 
@@ -98,7 +98,7 @@ shared_examples_for 'a backend' do |options|
       end
 
       it 'should not return job from different queue' do
-        subject.enqueue(payload)
+        subject.push(payload)
         worker = Qu::Worker.new('video')
         timeout { subject.reserve(worker) }.should be_nil
       end
@@ -119,13 +119,13 @@ shared_examples_for 'a backend' do |options|
 
       it 'should properly persist args' do
         payload.args = ['a', 'b']
-        subject.enqueue(payload)
+        subject.push(payload)
         subject.reserve(worker).args.should == ['a', 'b']
       end
 
       it 'should properly persist a hash argument' do
         payload.args = [{:a => 1, :b => 2}]
-        subject.enqueue(payload)
+        subject.push(payload)
         subject.reserve(worker).args.should == [{'a' => 1, 'b' => 2}]
       end
 
@@ -144,7 +144,7 @@ shared_examples_for 'a backend' do |options|
 
     describe 'release' do
       before do
-        subject.enqueue(payload)
+        subject.push(payload)
       end
 
       it 'should add the job back on the queue' do

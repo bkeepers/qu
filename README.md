@@ -61,7 +61,7 @@ You can add a job to the queue by calling `create` on your job:
 
 ``` ruby
 job = ProcessPresentation.create(@presentation.id)
-puts "Enqueued job #{job.id}"
+puts "Created job #{job.id}"
 ```
 
 The job will be initialized with any parameters that are passed to it when it is performed. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. Don't try to pass in an ActiveRecord object.
