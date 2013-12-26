@@ -84,12 +84,6 @@ module Qu
         end
       end
 
-      def failed(payload, error)
-        rescue_connection_failure do
-          jobs('failed').insert(payload_attributes(payload).merge(:queue => payload.queue))
-        end
-      end
-
       def completed(payload)
       end
 

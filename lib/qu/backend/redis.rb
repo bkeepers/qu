@@ -48,10 +48,6 @@ module Qu
         connection.rpush("queue:#{payload.queue}", payload.id)
       end
 
-      def failed(payload, error)
-        connection.rpush("queue:failed", payload.id)
-      end
-
       def completed(payload)
         connection.del("job:#{payload.id}")
       end

@@ -37,7 +37,6 @@ module Qu
         logger.fatal "Job #{self} failed"
         log_exception(e)
         Qu.failure.create(self, e) if Qu.failure
-        Qu.backend.failed(self, e)
       end
     end
 

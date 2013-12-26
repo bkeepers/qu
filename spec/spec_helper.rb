@@ -52,7 +52,6 @@ RSpec.configure do |config|
       :reserve => nil,
       :completed => nil,
       :release => nil,
-      :failed => nil,
     })
     Qu.failure = nil
   end

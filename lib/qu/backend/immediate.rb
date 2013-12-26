@@ -11,9 +11,6 @@ module Qu
       def release(payload)
       end
 
-      def failed(payload, error)
-      end
-
       def clear(queue)
       end
 

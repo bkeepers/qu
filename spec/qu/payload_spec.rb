@@ -103,11 +103,6 @@ describe Qu::Payload do
         SimpleJob.any_instance.stub(:perform).and_raise(error)
       end
 
-      it 'should call failed on backend' do
-        Qu.backend.should_receive(:failed).with(subject, error)
-        subject.perform
-      end
-
       it 'should not call completed on backend' do
         Qu.backend.should_not_receive(:completed)
         subject.perform

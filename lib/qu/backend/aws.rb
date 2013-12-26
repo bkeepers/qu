@@ -30,11 +30,6 @@ module Qu
         connection.enqueue(payload.queue, encode(payload.attributes))
       end
 
-      def failed(payload, error)
-        attrs = payload.attributes.merge(:queue => payload.queue)
-        connection.enqueue('failed', encode(attrs))
-      end
-
       def reserve(worker, options = {:block => true})
         loop do
           worker.queues.each do |queue_name|
