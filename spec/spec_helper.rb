@@ -50,7 +50,7 @@ RSpec.configure do |config|
     Qu.backend = double('a backend', {
       :push => nil,
       :pop => nil,
-      :completed => nil,
+      :complete => nil,
       :abort => nil,
     })
     Qu.failure = nil

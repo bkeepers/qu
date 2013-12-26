@@ -42,7 +42,7 @@ module Qu
         end
       end
 
-      def completed(payload)
+      def complete(payload)
         payload.message.delete
       end
 

@@ -8,7 +8,7 @@ module Qu
       def pop(*)
       end
 
-      def completed(payload)
+      def complete(payload)
       end
 
       def abort(payload)

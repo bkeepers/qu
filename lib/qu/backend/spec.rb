@@ -119,9 +119,9 @@ shared_examples_for 'a backend' do |options|
       end
     end
 
-    describe 'completed' do
+    describe 'complete' do
       it 'should be defined' do
-        subject.respond_to?(:completed).should be_true
+        subject.respond_to?(:complete).should be_true
       end
     end
 

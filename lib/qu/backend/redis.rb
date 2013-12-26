@@ -39,7 +39,7 @@ module Qu
         connection.rpush("queue:#{payload.queue}", payload.id)
       end
 
-      def completed(payload)
+      def complete(payload)
         connection.del("job:#{payload.id}")
       end
 

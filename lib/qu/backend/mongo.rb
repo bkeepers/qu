@@ -58,7 +58,7 @@ module Qu
         end
       end
 
-      def completed(payload)
+      def complete(payload)
       end
 
       def length(queue = 'default')

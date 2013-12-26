@@ -7,12 +7,12 @@ describe Qu::Backend::Redis do
   let(:worker) { Qu::Worker.new('default') }
 
   if service_running?(:redis)
-    describe 'completed' do
+    describe 'complete' do
       it 'should delete job' do
         subject.push(Qu::Payload.new(:klass => SimpleJob))
         job = subject.pop(worker)
         subject.connection.exists("job:#{job.id}").should be_true
-        subject.completed(job)
+        subject.complete(job)
         subject.connection.exists("job:#{job.id}").should be_false
       end
     end

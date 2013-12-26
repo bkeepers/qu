@@ -68,8 +68,8 @@ describe Qu::Payload do
       subject.perform
     end
 
-    it 'should call completed on backend' do
-      Qu.backend.should_receive(:completed)
+    it 'should call complete on backend' do
+      Qu.backend.should_receive(:complete)
       subject.perform
     end
 
@@ -103,8 +103,8 @@ describe Qu::Payload do
         SimpleJob.any_instance.stub(:perform).and_raise(error)
       end
 
-      it 'should not call completed on backend' do
-        Qu.backend.should_not_receive(:completed)
+      it 'should not call complete on backend' do
+        Qu.backend.should_not_receive(:complete)
         subject.perform
       end
 

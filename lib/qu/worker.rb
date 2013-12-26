@@ -99,7 +99,7 @@ module Qu
       ensure
         @performing = false
       end
-      logger.debug "Worker #{id} completed job #{job}"
+      logger.debug "Worker #{id} complete job #{job}"
     end
   end
 end
