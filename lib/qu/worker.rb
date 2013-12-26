@@ -40,7 +40,12 @@ module Qu
 
     def work
       logger.debug "Worker #{id} waiting for next job"
-      job = Qu.pop(self)
+      job = nil
+      queues.each { |queue_name|
+        if job = Qu.pop(queue_name)
+          break
+        end
+      }
       perform(job)
     end
 

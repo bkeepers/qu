@@ -9,8 +9,9 @@ describe Qu::Backend::Redis do
   if service_running?(:redis)
     describe 'complete' do
       it 'should delete job' do
-        subject.push(Qu::Payload.new(:klass => SimpleJob))
-        job = subject.pop(worker)
+        payload = Qu::Payload.new(:klass => SimpleJob)
+        subject.push(payload)
+        job = subject.pop(payload.queue)
         subject.connection.exists("job:#{job.id}").should be_true
         subject.complete(job)
         subject.connection.exists("job:#{job.id}").should be_false

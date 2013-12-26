@@ -21,19 +21,13 @@ module Qu
         payload
       end
 
-      def pop(worker)
-        worker.queues.each do |queue_name|
-          logger.debug { "Reserving job in queue #{queue_name}" }
-
-          if message = connection.dequeue(queue_name)
-            doc = decode(message.body)
-            payload = Payload.new(doc)
-            payload.message = message
-            return payload
-          end
+      def pop(queue_name)
+        if message = connection.dequeue(queue_name)
+          doc = decode(message.body)
+          payload = Payload.new(doc)
+          payload.message = message
+          return payload
         end
-
-        nil
       end
 
       def complete(payload)

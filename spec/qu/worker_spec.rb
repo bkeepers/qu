@@ -17,7 +17,7 @@ describe Qu::Worker do
     end
 
     it 'should pop a job' do
-      Qu.should_receive(:pop).with(subject).and_return(job)
+      Qu.should_receive(:pop).with(subject.queues.first).and_return(job)
       subject.work
     end
 

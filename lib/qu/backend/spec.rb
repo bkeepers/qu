@@ -50,47 +50,30 @@ shared_examples_for 'a backend' do |options|
     describe 'pop' do
       it 'should return next job' do
         subject.push(payload)
-        subject.pop(worker).id.should == payload.id
+        subject.pop(payload.queue).id.should == payload.id
       end
 
       it 'should not return an already popped job' do
         subject.push(payload)
         subject.push(payload.dup)
-        subject.pop(worker).id.should_not == subject.pop(worker).id
-      end
-
-      it 'should return next job based on queue order for worker' do
-        begin
-          subject.clear('custom')
-
-          subject.push(payload)
-          custom = subject.push(Qu::Payload.new(:klass => CustomQueue))
-          subject.push(payload.dup)
-
-          worker = Qu::Worker.new('custom', 'default')
-
-          subject.pop(worker).id.should == custom.id
-        ensure
-          subject.clear('custom')
-        end
+        subject.pop(payload.queue).id.should_not == subject.pop(payload.queue).id
       end
 
       it 'should not return job from different queue' do
         subject.push(payload)
-        worker = Qu::Worker.new('video')
-        subject.pop(worker).should be_nil
+        subject.pop('video').should be_nil
       end
 
       it 'should properly persist args' do
         payload.args = ['a', 'b']
         subject.push(payload)
-        subject.pop(worker).args.should == ['a', 'b']
+        subject.pop(payload.queue).args.should == ['a', 'b']
       end
 
       it 'should properly persist a hash argument' do
         payload.args = [{:a => 1, :b => 2}]
         subject.push(payload)
-        subject.pop(worker).args.should == [{'a' => 1, 'b' => 2}]
+        subject.pop(payload.queue).args.should == [{'a' => 1, 'b' => 2}]
       end
     end
 
@@ -106,7 +89,7 @@ shared_examples_for 'a backend' do |options|
       end
 
       it 'should add the job back on the queue' do
-        popped_payload = subject.pop(worker)
+        popped_payload = subject.pop(payload.queue)
         popped_payload.id.should == payload.id
         subject.size(payload.queue).should == 0
         subject.abort(popped_payload)
