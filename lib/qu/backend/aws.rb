@@ -55,14 +55,8 @@ module Qu
         connection.depth(queue_name)
       end
 
-      def clear(queue_name = nil)
-        if queue_name.nil?
-          (queues + ['failed']).each do |name|
-            connection.drain(name)
-          end
-        else
-          connection.drain(queue_name)
-        end
+      def clear(queue_name = 'default')
+        connection.drain(queue_name)
       end
 
       def connection
