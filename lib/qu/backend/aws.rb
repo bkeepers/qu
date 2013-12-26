@@ -30,7 +30,7 @@ module Qu
         connection.enqueue(payload.queue, encode(payload.attributes))
       end
 
-      def reserve(worker, options = {:block => true})
+      def pop(worker, options = {:block => true})
         loop do
           worker.queues.each do |queue_name|
             logger.debug { "Reserving job in queue #{queue_name}" }

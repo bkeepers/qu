@@ -75,16 +75,16 @@ shared_examples_for 'a backend' do |options|
       end
     end
 
-    describe 'reserve' do
+    describe 'pop' do
       it 'should return next job' do
         subject.push(payload)
-        subject.reserve(worker).id.should == payload.id
+        subject.pop(worker).id.should == payload.id
       end
 
-      it 'should not return an already reserved job' do
+      it 'should not return an already popped job' do
         subject.push(payload)
         subject.push(payload.dup)
-        subject.reserve(worker).id.should_not == subject.reserve(worker).id
+        subject.pop(worker).id.should_not == subject.pop(worker).id
       end
 
       it 'should return next job based on queue order for worker' do
@@ -106,19 +106,19 @@ shared_examples_for 'a backend' do |options|
       it 'should not return job from different queue' do
         subject.push(payload)
         worker = Qu::Worker.new('video')
-        timeout { subject.reserve(worker) }.should be_nil
+        timeout { subject.pop(worker) }.should be_nil
       end
 
       it 'should block by default if no jobs available' do
         timeout(1) do
-          subject.reserve(worker)
-          fail("#reserve should block")
+          subject.pop(worker)
+          fail("#pop should block")
         end
       end
 
       it 'should not block if :block option is set to false' do
         timeout(1) do
-          subject.reserve(worker, :block => false)
+          subject.pop(worker, :block => false)
           true
         end.should be_true
       end
@@ -126,13 +126,13 @@ shared_examples_for 'a backend' do |options|
       it 'should properly persist args' do
         payload.args = ['a', 'b']
         subject.push(payload)
-        subject.reserve(worker).args.should == ['a', 'b']
+        subject.pop(worker).args.should == ['a', 'b']
       end
 
       it 'should properly persist a hash argument' do
         payload.args = [{:a => 1, :b => 2}]
         subject.push(payload)
-        subject.reserve(worker).args.should == [{'a' => 1, 'b' => 2}]
+        subject.pop(worker).args.should == [{'a' => 1, 'b' => 2}]
       end
 
       def timeout(count = 0.1, &block)
@@ -154,10 +154,10 @@ shared_examples_for 'a backend' do |options|
       end
 
       it 'should add the job back on the queue' do
-        reserved_payload = subject.reserve(worker)
-        reserved_payload.id.should == payload.id
+        popped_payload = subject.pop(worker)
+        popped_payload.id.should == payload.id
         subject.length(payload.queue).should == 0
-        subject.release(reserved_payload)
+        subject.release(popped_payload)
         subject.length(payload.queue).should == 1
       end
     end

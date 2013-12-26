@@ -32,7 +32,7 @@ module Qu
         end
       end
 
-      def reserve(worker, options = {:block => true})
+      def pop(worker, options = {:block => true})
         queues = worker.queues.map {|q| "queue:#{q}" }
 
         if options[:block]

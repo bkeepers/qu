@@ -13,11 +13,11 @@ describe Qu::Worker do
 
   describe 'work' do
     before do
-      Qu.stub(:reserve).and_return(job)
+      Qu.stub(:pop).and_return(job)
     end
 
-    it 'should reserve a job' do
-      Qu.should_receive(:reserve).with(subject).and_return(job)
+    it 'should pop a job' do
+      Qu.should_receive(:pop).with(subject).and_return(job)
       subject.work
     end
 
@@ -29,7 +29,7 @@ describe Qu::Worker do
 
   describe 'work_off' do
     it 'should work all jobs off the queue' do
-      Qu.should_receive(:reserve).exactly(4).times.with(subject, :block => false).and_return(job, job, job, nil)
+      Qu.should_receive(:pop).exactly(4).times.with(subject, :block => false).and_return(job, job, job, nil)
       subject.work_off
     end
   end
@@ -40,7 +40,7 @@ describe Qu::Worker do
         Process.kill('SIGTERM', $$)
         sleep(0.01)
       end
-      Qu.stub!(:reserve).and_return(job)
+      Qu.stub!(:pop).and_return(job)
     end
 
     context 'when stopping' do
@@ -50,7 +50,7 @@ describe Qu::Worker do
       end
 
       it 'should stop if the worker is blocked waiting for a new job' do
-        Qu.stub(:reserve) { sleep }
+        Qu.stub(:pop) { sleep }
 
         t = Thread.new do
           sleep(0.01)

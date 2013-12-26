@@ -57,11 +57,15 @@ module Qu
         payload
       end
 
-      def reserve(worker, options = {:block => true})
+      def pop(worker, options = {:block => true})
         loop do
           worker.queues.each do |queue|
             begin
-              if doc = reserve_from_queue(queue)
+              doc = rescue_connection_failure do
+                jobs(queue).find_and_modify(:remove => true)
+              end
+
+              if doc
                 doc['id'] = doc.delete('_id')
                 return Payload.new(doc)
               end
@@ -94,12 +98,6 @@ module Qu
 
       def id_for_payload(payload)
         BSON::ObjectId.new
-      end
-
-      def reserve_from_queue(queue)
-        rescue_connection_failure do
-          jobs(queue).find_and_modify(:remove => true)
-        end
       end
 
       private

@@ -5,6 +5,9 @@ module Qu
         payload.perform
       end
 
+      def pop(*)
+      end
+
       def completed(payload)
       end
 
@@ -12,9 +15,6 @@ module Qu
       end
 
       def clear(queue)
-      end
-
-      def reserve(*)
       end
 
       def length(*)

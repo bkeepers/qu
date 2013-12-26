@@ -40,14 +40,14 @@ module Qu
 
     def work_off
       logger.debug "Worker #{id} working of all jobs"
-      while job = Qu.reserve(self, :block => false)
+      while job = Qu.pop(self, :block => false)
         perform(job)
       end
     end
 
     def work
       logger.debug "Worker #{id} waiting for next job"
-      job = Qu.reserve(self)
+      job = Qu.pop(self)
       perform(job)
     end
 
@@ -92,7 +92,7 @@ module Qu
     private
 
     def perform(job)
-      logger.debug "Worker #{id} reserved job #{job}"
+      logger.debug "Worker #{id} popped job #{job}"
       begin
         @performing = true
         job.perform
