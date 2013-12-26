@@ -18,21 +18,17 @@ module Qu
         payload
       end
 
-      def pop(worker, options = {:block => true})
-        queues = worker.queues.map {|q| "queue:#{q}" }
-
-        if options[:block]
-          id = connection.blpop(*queues.push(0))[1]
-        else
-          queues.detect {|queue| id = connection.lpop(queue) }
-        end
-
-        if id
-          if data = connection.get("job:#{id}")
-            data = decode(data)
-            Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
+      def pop(worker)
+        worker.queues.each do |queue_name|
+          if id = connection.lpop("queue:#{queue_name}")
+            if data = connection.get("job:#{id}")
+              data = decode(data)
+              return Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
+            end
           end
         end
+
+        nil
       end
 
       def abort(payload)

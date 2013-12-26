@@ -69,7 +69,7 @@ describe Qu::Backend::Mongo do
         it 'should return nil when no jobs exist' do
           subject.clear
           Mongo::Collection.any_instance.should_receive(:find_and_modify).and_return(nil)
-          lambda { subject.pop(worker, :block => false).should be_nil }.should_not raise_error
+          lambda { subject.pop(worker).should be_nil }.should_not raise_error
         end
       end
 
@@ -77,7 +77,7 @@ describe Qu::Backend::Mongo do
         it 'should return nil when no jobs exist' do
           subject.clear
           Mongo::Collection.any_instance.should_receive(:find_and_modify).and_raise(Mongo::OperationFailure)
-          lambda { subject.pop(worker, :block => false).should be_nil }.should_not raise_error
+          lambda { subject.pop(worker).should be_nil }.should_not raise_error
         end
       end
     end

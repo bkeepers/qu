@@ -21,25 +21,19 @@ module Qu
         payload
       end
 
-      def pop(worker, options = {:block => true})
-        loop do
-          worker.queues.each do |queue_name|
-            logger.debug { "Reserving job in queue #{queue_name}" }
+      def pop(worker)
+        worker.queues.each do |queue_name|
+          logger.debug { "Reserving job in queue #{queue_name}" }
 
-            if message = connection.dequeue(queue_name)
-              doc = decode(message.body)
-              payload = Payload.new(doc)
-              payload.message = message
-              return payload
-            end
-          end
-
-          if options[:block]
-            sleep poll_frequency
-          else
-            break
+          if message = connection.dequeue(queue_name)
+            doc = decode(message.body)
+            payload = Payload.new(doc)
+            payload.message = message
+            return payload
           end
         end
+
+        nil
       end
 
       def complete(payload)

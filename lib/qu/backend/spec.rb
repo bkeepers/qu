@@ -1,8 +1,3 @@
-unless defined?(SystemTimer)
-  require 'timeout'
-  SystemTimer = Timeout
-end
-
 class SimpleJob < Qu::Job
 end
 
@@ -83,21 +78,7 @@ shared_examples_for 'a backend' do |options|
       it 'should not return job from different queue' do
         subject.push(payload)
         worker = Qu::Worker.new('video')
-        timeout { subject.pop(worker) }.should be_nil
-      end
-
-      it 'should block by default if no jobs available' do
-        timeout(1) do
-          subject.pop(worker)
-          fail("#pop should block")
-        end
-      end
-
-      it 'should not block if :block option is set to false' do
-        timeout(1) do
-          subject.pop(worker, :block => false)
-          true
-        end.should be_true
+        subject.pop(worker).should be_nil
       end
 
       it 'should properly persist args' do
@@ -110,12 +91,6 @@ shared_examples_for 'a backend' do |options|
         payload.args = [{:a => 1, :b => 2}]
         subject.push(payload)
         subject.pop(worker).args.should == [{'a' => 1, 'b' => 2}]
-      end
-
-      def timeout(count = 0.1, &block)
-        SystemTimer.timeout(count, &block)
-      rescue Timeout::Error
-        nil
       end
     end
 

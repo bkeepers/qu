@@ -27,29 +27,23 @@ module Qu
         payload
       end
 
-      def pop(worker, options = {:block => true})
-        loop do
-          worker.queues.each do |queue|
-            begin
-              doc = with_connection_retries do
-                jobs(queue).find_and_modify(:remove => true)
-              end
-
-              if doc
-                doc['id'] = doc.delete('_id')
-                return Payload.new(doc)
-              end
-            rescue ::Mongo::OperationFailure
-              # No jobs in the queue (MongoDB <2)
+      def pop(worker)
+        worker.queues.each do |queue|
+          begin
+            doc = with_connection_retries do
+              jobs(queue).find_and_modify(:remove => true)
             end
-          end
 
-          if options[:block]
-            sleep poll_frequency
-          else
-            break
+            if doc
+              doc['id'] = doc.delete('_id')
+              return Payload.new(doc)
+            end
+          rescue ::Mongo::OperationFailure
+            # No jobs in the queue (MongoDB <2)
           end
         end
+
+        nil
       end
 
       def abort(payload)
