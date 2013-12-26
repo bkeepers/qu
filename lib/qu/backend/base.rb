@@ -1,4 +1,4 @@
-require 'multi_json'
+require 'json'
 
 module Qu
   module Backend
@@ -6,14 +6,14 @@ module Qu
       include Logger
       attr_accessor :connection
 
-    private
+      private
 
       def encode(data)
-        MultiJson.encode(data) if data
+        JSON.dump(data) if data
       end
 
       def decode(data)
-        MultiJson.decode(data) if data
+        JSON.load(data) if data
       end
     end
   end
