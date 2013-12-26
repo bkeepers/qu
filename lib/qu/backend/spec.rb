@@ -88,13 +88,19 @@ shared_examples_for 'a backend' do |options|
       end
 
       it 'should return next job based on queue order for worker' do
-        subject.push(payload)
-        custom = subject.push(Qu::Payload.new(:klass => CustomQueue))
-        subject.push(payload.dup)
+        begin
+          subject.clear('custom')
 
-        worker = Qu::Worker.new('custom', 'default')
+          subject.push(payload)
+          custom = subject.push(Qu::Payload.new(:klass => CustomQueue))
+          subject.push(payload.dup)
 
-        subject.reserve(worker).id.should == custom.id
+          worker = Qu::Worker.new('custom', 'default')
+
+          subject.pop(worker).id.should == custom.id
+        ensure
+          subject.clear('custom')
+        end
       end
 
       it 'should not return job from different queue' do
