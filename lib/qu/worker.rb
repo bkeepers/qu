@@ -40,7 +40,8 @@ module Qu
 
     def work_off
       logger.debug "Worker #{id} working of all jobs"
-      while job = Qu.pop(self, :block => false)
+
+      while job = Qu.pop(self)
         perform(job)
       end
     end
@@ -70,10 +71,10 @@ module Qu
     def stop
       @running = false
 
-      # If the worker is blocked waiting for a new job, this will break them out.
+      # If the backend is blocked waiting for a new job, this will break them out.
       raise Stop unless @performing
 
-      # If the worker is still performing a job and this is not a graceful shutdown, abort immediately.
+      # If the backend is still performing a job and this is not a graceful shutdown, abort immediately.
       raise Abort unless Qu.graceful_shutdown
     end
 

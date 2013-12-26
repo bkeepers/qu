@@ -29,7 +29,7 @@ describe Qu::Worker do
 
   describe 'work_off' do
     it 'should work all jobs off the queue' do
-      Qu.should_receive(:pop).exactly(4).times.with(subject, :block => false).and_return(job, job, job, nil)
+      Qu.should_receive(:pop).exactly(4).times.with(subject).and_return(job, job, job, nil)
       subject.work_off
     end
   end
@@ -49,7 +49,7 @@ describe Qu::Worker do
         subject.start
       end
 
-      it 'should stop if the worker is blocked waiting for a new job' do
+      it 'should stop if the backend is blocked waiting for a new job' do
         Qu.stub(:pop) { sleep }
 
         t = Thread.new do
