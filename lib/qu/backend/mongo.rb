@@ -52,7 +52,7 @@ module Qu
         end
       end
 
-      def release(payload)
+      def abort(payload)
         with_connection_retries do
           jobs(payload.queue).insert(payload_attributes(payload))
         end

@@ -35,7 +35,7 @@ module Qu
         end
       end
 
-      def release(payload)
+      def abort(payload)
         connection.rpush("queue:#{payload.queue}", payload.id)
       end
 

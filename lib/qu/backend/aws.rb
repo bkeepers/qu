@@ -46,7 +46,7 @@ module Qu
         payload.message.delete
       end
 
-      def release(payload)
+      def abort(payload)
         payload.message.delete
         connection.enqueue(payload.queue, encode(payload.attributes))
       end

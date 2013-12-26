@@ -125,7 +125,7 @@ shared_examples_for 'a backend' do |options|
       end
     end
 
-    describe 'release' do
+    describe 'abort' do
       before do
         subject.push(payload)
       end
@@ -134,7 +134,7 @@ shared_examples_for 'a backend' do |options|
         popped_payload = subject.pop(worker)
         popped_payload.id.should == payload.id
         subject.length(payload.queue).should == 0
-        subject.release(popped_payload)
+        subject.abort(popped_payload)
         subject.length(payload.queue).should == 1
       end
     end

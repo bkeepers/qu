@@ -84,14 +84,14 @@ describe Qu::Payload do
         SimpleJob.any_instance.stub(:perform).and_raise(Qu::Worker::Abort)
       end
 
-      it 'should release the job and re-raise the error' do
-        Qu.backend.should_receive(:release).with(subject)
+      it 'should abort the job and re-raise the error' do
+        Qu.backend.should_receive(:abort).with(subject)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
 
-      it 'should run release hook' do
+      it 'should run abort hook' do
         subject.job.stub(:run_hook).and_yield
-        subject.job.should_receive(:run_hook).with(:release)
+        subject.job.should_receive(:run_hook).with(:abort)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
     end

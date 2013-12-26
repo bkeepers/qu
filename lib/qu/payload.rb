@@ -27,9 +27,9 @@ module Qu
       job.run_hook(:perform)  { job.perform }
       job.run_hook(:complete) { Qu.backend.completed(self) }
     rescue Qu::Worker::Abort
-      job.run_hook(:release) do
-        logger.debug "Releasing job #{self}"
-        Qu.backend.release(self)
+      job.run_hook(:abort) do
+        logger.debug "Aborting job #{self}"
+        Qu.backend.abort(self)
       end
       raise
     rescue => e

@@ -51,7 +51,7 @@ RSpec.configure do |config|
       :push => nil,
       :pop => nil,
       :completed => nil,
-      :release => nil,
+      :abort => nil,
     })
     Qu.failure = nil
   end
