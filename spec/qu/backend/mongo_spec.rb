@@ -38,17 +38,17 @@ describe Qu::Backend::Mongo do
           subject.max_retries = retries_number
           subject.retry_frequency = retries_frequency
 
-          Mongo::DB.any_instance.stub(:[]).and_raise(Mongo::ConnectionFailure)
+          Mongo::Collection.any_instance.stub(:count).and_raise(Mongo::ConnectionFailure)
           subject.stub(:sleep)
         end
 
         it "raise error" do
-          expect { subject.queues }.to raise_error(Mongo::ConnectionFailure)
+          expect { subject.length }.to raise_error(Mongo::ConnectionFailure)
         end
 
-        it "trying to reconect" do
-          subject.database.should_receive(:[]).exactly(4).times.and_raise(Mongo::ConnectionFailure)
-          expect { subject.queues }.to raise_error
+        it "trying to reconnect" do
+          subject.connection.should_receive(:[]).exactly(4).times.and_raise(Mongo::ConnectionFailure)
+          expect { subject.length }.to raise_error
         end
 
         it "sleep between tries" do
@@ -56,7 +56,7 @@ describe Qu::Backend::Mongo do
           subject.should_receive(:sleep).with(10).ordered
           subject.should_receive(:sleep).with(15).ordered
 
-          expect { subject.queues }.to raise_error
+          expect { subject.length }.to raise_error
         end
 
       end

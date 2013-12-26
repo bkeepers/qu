@@ -11,19 +11,9 @@ describe Qu::Backend::Redis do
       it 'should delete job' do
         subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
         job = subject.reserve(worker)
-        subject.redis.exists("job:#{job.id}").should be_true
+        subject.connection.exists("job:#{job.id}").should be_true
         subject.completed(job)
-        subject.redis.exists("job:#{job.id}").should be_false
-      end
-    end
-
-    describe 'clear_workers' do
-      before { subject.register_worker worker }
-
-      it 'should delete worker key' do
-        subject.redis.get("worker:#{worker.id}").should_not be_nil
-        subject.clear_workers
-        subject.redis.get("worker:#{worker.id}").should be_nil
+        subject.connection.exists("job:#{job.id}").should be_false
       end
     end
 
@@ -52,10 +42,11 @@ describe Qu::Backend::Redis do
 
     describe 'clear' do
       it 'should delete jobs' do
-        job = subject.enqueue(Qu::Payload.new(:klass => SimpleJob))
-        subject.redis.exists("job:#{job.id}").should be_true
-        subject.clear
-        subject.redis.exists("job:#{job.id}").should be_false
+        payload = Qu::Payload.new(:klass => SimpleJob)
+        job = subject.enqueue(payload)
+        subject.connection.exists("job:#{job.id}").should be_true
+        subject.clear(payload.queue)
+        subject.connection.exists("job:#{job.id}").should be_false
       end
     end
   end

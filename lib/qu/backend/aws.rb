@@ -16,7 +16,6 @@ module Qu
         payload.id = Digest::SHA1.hexdigest(payload.to_s + Time.now.to_s)
 
         connection.enqueue(payload.queue, encode(payload.attributes))
-        connection.register_queue(payload.queue)
 
         logger.debug { "Enqueued job #{payload}" }
         payload
@@ -65,32 +64,10 @@ module Qu
         if queue_name.nil?
           (queues + ['failed']).each do |name|
             connection.drain(name)
-            connection.unregister_queue(name)
           end
         else
           connection.drain(queue_name)
-          connection.unregister_queue(queue_name)
         end
-      end
-
-      def queues
-        connection.queues
-      end
-
-      def register_worker(worker)
-        connection.register_worker(worker)
-      end
-
-      def unregister_worker(worker)
-        connection.unregister_worker(worker)
-      end
-
-      def workers
-        connection.workers
-      end
-
-      def clear_workers
-        connection.clear_workers(workers)
       end
 
       def connection

@@ -36,39 +36,30 @@ module Qu
           end
         end
       end
-      alias_method :database, :connection
 
-      def clear(queue = nil)
-        queue ||= queues + ['failed']
-        logger.info { "Clearing queues: #{queue.inspect}" }
-        Array(queue).each do |q|
-          logger.debug "Clearing queue #{q}"
-          jobs(q).drop
-          self[:queues].remove({:name => q})
+      def clear(queue = 'default')
+        rescue_connection_failure do
+          jobs(queue).drop
         end
       end
 
-      def queues
-        self[:queues].find.map {|doc| doc['name'] }
-      end
-
       def length(queue = 'default')
-        jobs(queue).count
+        rescue_connection_failure do
+          jobs(queue).count
+        end
       end
 
       def enqueue(payload)
         payload.id = id_for_payload(payload)
-        jobs(payload.queue).insert(payload_attributes(payload))
-        self[:queues].update({:name => payload.queue}, {:name => payload.queue}, :upsert => true)
-        logger.debug { "Enqueued job #{payload}" }
+        rescue_connection_failure do
+          jobs(payload.queue).insert(payload_attributes(payload))
+        end
         payload
       end
 
       def reserve(worker, options = {:block => true})
         loop do
           worker.queues.each do |queue|
-            logger.debug { "Reserving job in queue #{queue}" }
-
             begin
               if doc = reserve_from_queue(queue)
                 doc['id'] = doc.delete('_id')
@@ -88,35 +79,18 @@ module Qu
       end
 
       def release(payload)
-        jobs(payload.queue).insert(payload_attributes(payload))
-      end
-
-      def failed(payload, error)
-        jobs('failed').insert(payload_attributes(payload).merge(:queue => payload.queue))
-      end
-
-      def completed(payload)
-      end
-
-      def register_worker(worker)
-        logger.debug "Registering worker #{worker.id}"
-        self[:workers].insert(worker.attributes.merge(:id => worker.id))
-      end
-
-      def unregister_worker(worker)
-        logger.debug "Unregistering worker #{worker.id}"
-        self[:workers].remove(:id => worker.id)
-      end
-
-      def workers
-        self[:workers].find.map do |doc|
-          Qu::Worker.new(doc)
+        rescue_connection_failure do
+          jobs(payload.queue).insert(payload_attributes(payload))
         end
       end
 
-      def clear_workers
-        logger.info "Clearing workers"
-        self[:workers].drop
+      def failed(payload, error)
+        rescue_connection_failure do
+          jobs('failed').insert(payload_attributes(payload).merge(:queue => payload.queue))
+        end
+      end
+
+      def completed(payload)
       end
 
     protected
@@ -129,19 +103,15 @@ module Qu
       end
 
       def reserve_from_queue(queue)
-        jobs(queue).find_and_modify(:remove => true)
+        rescue_connection_failure do
+          jobs(queue).find_and_modify(:remove => true)
+        end
       end
 
-    private
+      private
 
       def jobs(queue)
-        self["queue:#{queue}"]
-      end
-
-      def [](name)
-        rescue_connection_failure do
-          database["qu:#{name}"]
-        end
+        connection["qu:queue:#{queue}"]
       end
 
       def rescue_connection_failure
@@ -155,7 +125,6 @@ module Qu
           retry
         end
       end
-
     end
   end
 end

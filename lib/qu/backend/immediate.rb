@@ -14,13 +14,7 @@ module Qu
       def failed(payload, error)
       end
 
-      def register_worker(*)
-      end
-
-      def unregister_worker(*)
-      end
-
-      def clear(*)
+      def clear(queue)
       end
 
       def connection=(*)

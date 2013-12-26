@@ -57,14 +57,12 @@ module Qu
 
       logger.warn "Worker #{id} starting"
       handle_signals
-      Qu.backend.register_worker(self)
 
       loop do
         break unless @running
         work
       end
     ensure
-      Qu.backend.unregister_worker(self)
       logger.debug "Worker #{id} done"
       @running = false
     end

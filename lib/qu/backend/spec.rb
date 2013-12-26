@@ -28,7 +28,7 @@ shared_examples_for 'a backend' do |options|
     end
 
     before do
-      subject.clear
+      subject.clear(payload.queue)
     end
 
     describe 'enqueue' do
@@ -72,16 +72,6 @@ shared_examples_for 'a backend' do |options|
         subject.enqueue(payload)
         subject.clear('other')
         subject.length(payload.queue).should == 1
-      end
-
-      it 'should clear all queues without any args' do
-        subject.enqueue(payload).queue.should == 'default'
-        subject.enqueue(Qu::Payload.new(:klass => CustomQueue)).queue.should == 'custom'
-        subject.length('default').should == 1
-        subject.length('custom').should == 1
-        subject.clear
-        subject.length('default').should == 0
-        subject.length('custom').should == 0
       end
     end
 
