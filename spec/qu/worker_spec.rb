@@ -27,13 +27,6 @@ describe Qu::Worker do
     end
   end
 
-  describe 'work_off' do
-    it 'should work all jobs off the queue' do
-      Qu.should_receive(:pop).exactly(4).times.with(subject).and_return(job, job, job, nil)
-      subject.work_off
-    end
-  end
-
   describe 'stop' do
     before do
       job.stub(:perform) do

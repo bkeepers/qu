@@ -38,14 +38,6 @@ module Qu
       end
     end
 
-    def work_off
-      logger.debug "Worker #{id} working of all jobs"
-
-      while job = Qu.pop(self)
-        perform(job)
-      end
-    end
-
     def work
       logger.debug "Worker #{id} waiting for next job"
       job = Qu.pop(self)
