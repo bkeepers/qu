@@ -29,7 +29,6 @@ shared_examples_for 'a backend' do |options|
 
     before do
       subject.clear
-      subject.clear_workers
     end
 
     describe 'enqueue' do
@@ -46,12 +45,6 @@ shared_examples_for 'a backend' do |options|
         subject.enqueue(payload)
         payload.queue.should == 'default'
         subject.length(payload.queue).should == 1
-      end
-
-      it 'should add queue to list of queues' do
-        subject.queues.should == []
-        subject.enqueue(payload)
-        subject.queues.should == [payload.queue]
       end
 
       it 'should assign a different job id for the same job enqueue multiple times' do
@@ -73,7 +66,6 @@ shared_examples_for 'a backend' do |options|
         subject.length(payload.queue).should == 1
         subject.clear(payload.queue)
         subject.length(payload.queue).should == 0
-        subject.queues.should_not include(payload.queue)
       end
 
       it 'should not clear jobs for a different queue' do
@@ -91,40 +83,22 @@ shared_examples_for 'a backend' do |options|
         subject.length('default').should == 0
         subject.length('custom').should == 0
       end
-
-      it 'should clear failed queue without any args' do
-        subject.enqueue(payload)
-        subject.failed(payload, StandardError.new)
-        subject.length('failed').should == 1
-        subject.clear
-        subject.length('failed').should == 0
-      end
-
-      it 'should not clear failed queue with specified queues' do
-        subject.enqueue(payload)
-        subject.failed(payload, StandardError.new)
-        subject.length('failed').should == 1
-        subject.clear('default')
-        subject.length('failed').should == 1
-      end
     end
 
     describe 'reserve' do
-      before do
-        subject.enqueue(payload)
-      end
-
       it 'should return next job' do
+        subject.enqueue(payload)
         subject.reserve(worker).id.should == payload.id
       end
 
       it 'should not return an already reserved job' do
+        subject.enqueue(payload)
         subject.enqueue(payload.dup)
         subject.reserve(worker).id.should_not == subject.reserve(worker).id
       end
 
-      it 'should return next job in given queues' do
-        subject.enqueue(payload.dup)
+      it 'should return next job based on queue order for worker' do
+        subject.enqueue(payload)
         custom = subject.enqueue(Qu::Payload.new(:klass => CustomQueue))
         subject.enqueue(payload.dup)
 
@@ -134,12 +108,12 @@ shared_examples_for 'a backend' do |options|
       end
 
       it 'should not return job from different queue' do
+        subject.enqueue(payload)
         worker = Qu::Worker.new('video')
         timeout { subject.reserve(worker) }.should be_nil
       end
 
       it 'should block by default if no jobs available' do
-        subject.clear
         timeout(1) do
           subject.reserve(worker)
           fail("#reserve should block")
@@ -154,14 +128,12 @@ shared_examples_for 'a backend' do |options|
       end
 
       it 'should properly persist args' do
-        subject.clear
         payload.args = ['a', 'b']
         subject.enqueue(payload)
         subject.reserve(worker).args.should == ['a', 'b']
       end
 
       it 'should properly persist a hash argument' do
-        subject.clear
         payload.args = [{:a => 1, :b => 2}]
         subject.enqueue(payload)
         subject.reserve(worker).args.should == [{'a' => 1, 'b' => 2}]
@@ -171,20 +143,6 @@ shared_examples_for 'a backend' do |options|
         SystemTimer.timeout(count, &block)
       rescue Timeout::Error
         nil
-      end
-    end
-
-    describe 'failed' do
-      let(:payload) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
-
-      it 'should add to failure queue' do
-        subject.failed(payload, StandardError.new)
-        subject.length('failed').should == 1
-      end
-
-      it 'should not add failed queue to the list of queues' do
-        subject.failed(payload, StandardError.new)
-        subject.queues.should_not include('failed')
       end
     end
 
@@ -205,42 +163,6 @@ shared_examples_for 'a backend' do |options|
         subject.length(payload.queue).should == 0
         subject.release(reserved_payload)
         subject.length(payload.queue).should == 1
-      end
-    end
-
-    describe 'register_worker' do
-      it 'should add worker to array of workers' do
-        subject.register_worker(worker)
-        subject.workers.size.should == 1
-        subject.workers.first.attributes.should == worker.attributes
-      end
-    end
-
-    describe 'clear_workers' do
-      before { subject.register_worker Qu::Worker.new('default') }
-
-      it 'should remove workers' do
-        subject.workers.size.should == 1
-        subject.clear_workers
-        subject.workers.size.should == 0
-      end
-    end
-
-    describe 'unregister_worker' do
-      before { subject.register_worker(worker) }
-
-      it 'should remove worker' do
-        subject.unregister_worker(worker)
-        subject.workers.size.should == 0
-      end
-
-      it 'should not remove other workers' do
-        other_worker = Qu::Worker.new('other')
-        subject.register_worker(other_worker)
-        subject.workers.size.should == 2
-        subject.unregister_worker(other_worker)
-        subject.workers.size.should == 1
-        subject.workers.first.id.should == worker.id
       end
     end
 
