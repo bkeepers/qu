@@ -14,9 +14,6 @@ module Qu
       def clear(queue)
       end
 
-      def connection=(*)
-      end
-
       def reserve(*)
       end
 

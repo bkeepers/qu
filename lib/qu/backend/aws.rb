@@ -68,10 +68,6 @@ module Qu
       def connection
         @connection ||= AWS::Connection.new
       end
-
-      def connection=(new_connection)
-        @connection = new_connection
-      end
     end
   end
 end
