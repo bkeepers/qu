@@ -30,7 +30,7 @@ module Qu
         end
 
         def abort(payload)
-          if AWS.fake_sqs?
+          if fake_sqs?
             # should only get here in localhost; it is ok to remove this when
             # fake_sqs supports changing a messages visibility timeout
             payload.message.delete
@@ -46,6 +46,10 @@ module Qu
 
         def clear(queue_name = 'default')
           subscriber.clear(queue_name)
+        end
+
+        def fake_sqs?
+          ::AWS.config.sqs_endpoint == "localhost"
         end
       end
     end

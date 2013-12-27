@@ -3,10 +3,6 @@ require 'digest/sha1'
 module Qu
   module Backend
     class AWS < Base
-      def self.fake_sqs?
-        ::AWS.config.sqs_endpoint == "localhost"
-      end
-
       def push(queue_name, payload)
         # id does not really matter for aws as they have ids already so i'm just
         # sending something relatively unique for errors and what not
