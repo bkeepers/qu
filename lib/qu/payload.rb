@@ -12,7 +12,7 @@ module Qu
     end
 
     def klass
-      constantize(super)
+      @klass ||= constantize(super)
     end
 
     def job
