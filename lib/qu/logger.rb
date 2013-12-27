@@ -15,6 +15,5 @@ module Qu
         Rails.backtrace_cleaner.clean(exception.backtrace) :
         exception.backtrace
     end
-
   end
 end

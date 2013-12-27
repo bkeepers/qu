@@ -52,7 +52,7 @@ module Qu
       }
     end
 
-  protected
+    protected
 
     def constantize(class_name)
       return unless class_name
@@ -63,6 +63,5 @@ module Qu
       end
       constant
     end
-
   end
 end
