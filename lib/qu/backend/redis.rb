@@ -12,9 +12,9 @@ module Qu
 
       def push(payload)
         payload.id = SimpleUUID::UUID.new.to_guid
-        connection.set("job:#{payload.id}", encode('klass' => payload.klass.to_s, 'args' => payload.args))
+        body = encode('klass' => payload.klass.to_s, 'args' => payload.args)
+        connection.set("job:#{payload.id}", body)
         connection.rpush("queue:#{payload.queue}", payload.id)
-        connection.sadd('queues', payload.queue)
         payload
       end
 
