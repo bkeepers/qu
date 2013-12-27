@@ -28,13 +28,11 @@ module Qu
       job.run_hook(:complete) { Qu.backend.complete(self) }
     rescue Qu::Worker::Abort
       job.run_hook(:abort) do
-        logger.debug "Aborting job #{self}"
         Qu.backend.abort(self)
       end
       raise
     rescue => e
       job.run_hook(:failure, e) do
-        logger.fatal "Job #{self} failed"
         log_exception(e)
         Qu.failure.create(self, e) if Qu.failure
       end
