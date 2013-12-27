@@ -7,16 +7,13 @@ module Qu
       # Number of times to retry connection on connection failure (default: 5)
       attr_accessor :max_retries
 
-      # Seconds to wait before try to reconnect after connection failure (default: 1)
+      # Seconds to wait before try to reconnect after connection
+      # failure (default: 1)
       attr_accessor :retry_frequency
-
-      # Seconds to wait before looking for more jobs when the queue is empty (default: 5)
-      attr_accessor :poll_frequency
 
       def initialize
         self.max_retries     = 5
         self.retry_frequency = 1
-        self.poll_frequency  = 5
       end
 
       def push(payload)
