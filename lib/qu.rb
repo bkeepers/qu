@@ -25,6 +25,14 @@ module Qu
   def configure(&block)
     block.call(self)
   end
+
+  def dump_json(data)
+    JSON.dump(data) if data
+  end
+
+  def load_json(data)
+    JSON.load(data) if data
+  end
 end
 
 Qu.configure do |c|

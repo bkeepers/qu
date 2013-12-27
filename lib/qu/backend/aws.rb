@@ -28,12 +28,11 @@ module Qu
       end
 
       def complete(payload)
-        payload.message.delete
+        connection.complete(payload)
       end
 
       def abort(payload)
-        payload.message.delete
-        connection.push(payload.queue, encode(payload.attributes))
+        connection.abort(payload)
       end
 
       def size(queue_name = 'default')

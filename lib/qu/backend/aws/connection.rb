@@ -25,6 +25,15 @@ module Qu
           subscriber.receive(queue_name)
         end
 
+        def complete(payload)
+          payload.message.delete
+        end
+
+        def abort(payload)
+          payload.message.delete
+          push(payload.queue, AWS.encode(payload.attributes))
+        end
+
         def size(queue_name)
           subscriber.size(queue_name)
         end
