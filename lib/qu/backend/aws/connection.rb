@@ -17,20 +17,20 @@ module Qu
           @subscriber = options.fetch(:subscriber) { AWS::SQS::Subscriber.new }
         end
 
-        def enqueue(queue_name, body)
+        def push(queue_name, body)
           publisher.publish(queue_name, body)
         end
 
-        def dequeue(queue_name)
+        def pop(queue_name)
           subscriber.receive(queue_name)
         end
 
-        def depth(queue_name)
-          subscriber.depth(queue_name)
+        def size(queue_name)
+          subscriber.size(queue_name)
         end
 
-        def drain(queue_name)
-          subscriber.drain(queue_name)
+        def clear(queue_name)
+          subscriber.clear(queue_name)
         end
       end
     end

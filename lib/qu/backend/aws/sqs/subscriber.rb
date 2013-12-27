@@ -13,7 +13,7 @@ module Qu
             end
           end
 
-          def depth(queue_name)
+          def size(queue_name = 'default')
             begin
               sqs.queues.named(queue_name).visible_messages
             rescue ::AWS::SQS::Errors::NonExistentQueue
@@ -21,7 +21,7 @@ module Qu
             end
           end
 
-          def drain(queue_name)
+          def clear(queue_name = 'default')
             begin
               queue = sqs.queues.named(queue_name)
               messages = []
