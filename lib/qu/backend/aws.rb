@@ -7,13 +7,6 @@ module Qu
         ::AWS.config.sqs_endpoint == "localhost"
       end
 
-      # Seconds to wait before looking for more jobs when the queue is empty (default: 5)
-      attr_accessor :poll_frequency
-
-      def initialize
-        self.poll_frequency  = 5
-      end
-
       def push(queue_name, payload)
         # id does not really matter for aws as they have ids already so i'm just
         # sending something relatively unique for errors and what not
