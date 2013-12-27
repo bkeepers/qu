@@ -16,7 +16,7 @@ module Qu
 
   attr_accessor :backend, :failure, :logger, :graceful_shutdown
 
-  def_delegators :backend, :length, :queues, :reserve, :clear, :connection=
+  def_delegators :backend, :size, :clear
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
@@ -26,9 +26,12 @@ module Qu
     block.call(self)
   end
 
-  def enqueue(klass, *args)
-    warn "[DEPRECATION] `Qu.enqueue` is deprecated. Use `#{klass}.create(#{args.map {|a| a.inspect }.join(',')})` instead."
-    klass.create(*args)
+  def dump_json(data)
+    JSON.dump(data) if data
+  end
+
+  def load_json(data)
+    JSON.load(data) if data
   end
 end
 
@@ -36,3 +39,5 @@ Qu.configure do |c|
   c.logger = Logger.new(STDOUT)
   c.logger.level = Logger::INFO
 end
+
+require "qu/failure/logger"

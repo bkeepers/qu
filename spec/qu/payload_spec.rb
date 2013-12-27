@@ -68,8 +68,8 @@ describe Qu::Payload do
       subject.perform
     end
 
-    it 'should call completed on backend' do
-      Qu.backend.should_receive(:completed)
+    it 'should call complete on backend' do
+      Qu.backend.should_receive(:complete)
       subject.perform
     end
 
@@ -84,14 +84,14 @@ describe Qu::Payload do
         SimpleJob.any_instance.stub(:perform).and_raise(Qu::Worker::Abort)
       end
 
-      it 'should release the job and re-raise the error' do
-        Qu.backend.should_receive(:release).with(subject)
+      it 'should abort the job and re-raise the error' do
+        Qu.backend.should_receive(:abort).with(subject)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
 
-      it 'should run release hook' do
+      it 'should run abort hook' do
         subject.job.stub(:run_hook).and_yield
-        subject.job.should_receive(:run_hook).with(:release)
+        subject.job.should_receive(:run_hook).with(:abort)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
     end
@@ -103,13 +103,8 @@ describe Qu::Payload do
         SimpleJob.any_instance.stub(:perform).and_raise(error)
       end
 
-      it 'should call failed on backend' do
-        Qu.backend.should_receive(:failed).with(subject, error)
-        subject.perform
-      end
-
-      it 'should not call completed on backend' do
-        Qu.backend.should_not_receive(:completed)
+      it 'should not call complete on backend' do
+        Qu.backend.should_not_receive(:complete)
         subject.perform
       end
 
@@ -124,7 +119,6 @@ describe Qu::Payload do
         subject.job.should_receive(:run_hook).with(:failure, error)
         subject.perform
       end
-
     end
   end
 end

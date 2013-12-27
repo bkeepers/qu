@@ -1,7 +1,7 @@
 module Qu
   class Job
     include Qu::Hooks
-    define_hooks :enqueue, :perform, :complete, :release, :failure
+    define_hooks :push, :perform, :complete, :abort, :failure
 
     attr_accessor :payload
 
@@ -19,13 +19,13 @@ module Qu
 
     def self.create(*args)
       Payload.new(:klass => self, :args => args).tap do |payload|
-        payload.job.run_hook(:enqueue) { Qu.backend.enqueue payload }
+        payload.job.run_hook(:push) { Qu.backend.push payload.queue, payload }
       end
     end
 
-    # Public: Feel free to override this in your class with specific arg names and all that.
+    # Public: Feel free to override this in your class with specific arg names
+    # and all that.
     def initialize(*args)
-      @args = args
     end
 
     # Public: Feel free to override this as well.

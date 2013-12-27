@@ -38,16 +38,14 @@ module Qu
       end
     end
 
-    def work_off
-      logger.debug "Worker #{id} working of all jobs"
-      while job = Qu.reserve(self, :block => false)
-        perform(job)
-      end
-    end
-
     def work
       logger.debug "Worker #{id} waiting for next job"
-      job = Qu.reserve(self)
+      job = nil
+      queues.each { |queue_name|
+        if job = Qu.pop(queue_name)
+          break
+        end
+      }
       perform(job)
     end
 
@@ -57,14 +55,12 @@ module Qu
 
       logger.warn "Worker #{id} starting"
       handle_signals
-      Qu.backend.register_worker(self)
 
       loop do
         break unless @running
         work
       end
     ensure
-      Qu.backend.unregister_worker(self)
       logger.debug "Worker #{id} done"
       @running = false
     end
@@ -72,10 +68,12 @@ module Qu
     def stop
       @running = false
 
-      # If the worker is blocked waiting for a new job, this will break them out.
+      # If the backend is blocked waiting for a new job, this will
+      # break them out.
       raise Stop unless @performing
 
-      # If the worker is still performing a job and this is not a graceful shutdown, abort immediately.
+      # If the backend is still performing a job and this is not a graceful
+      # shutdown, abort immediately.
       raise Abort unless Qu.graceful_shutdown
     end
 
@@ -94,14 +92,14 @@ module Qu
     private
 
     def perform(job)
-      logger.debug "Worker #{id} reserved job #{job}"
+      logger.debug "Worker #{id} popped job #{job}"
       begin
         @performing = true
         job.perform
       ensure
         @performing = false
       end
-      logger.debug "Worker #{id} completed job #{job}"
+      logger.debug "Worker #{id} complete job #{job}"
     end
   end
 end

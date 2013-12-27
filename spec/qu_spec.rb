@@ -1,17 +1,10 @@
 require 'spec_helper'
 
 describe Qu do
-  %w(length queues reserve clear connection=).each do |method|
+  %w(size clear).each do |method|
     it "should delegate #{method} to backend" do
       Qu.backend.should_receive(method).with(:arg)
       Qu.send(method, :arg)
-    end
-  end
-
-  describe 'enqueue' do
-    it 'should call create on backend the class' do
-      SimpleJob.should_receive(:create).with(9, 8)
-      Qu.enqueue SimpleJob, 9, 8
     end
   end
 

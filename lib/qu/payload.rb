@@ -12,7 +12,7 @@ module Qu
     end
 
     def klass
-      constantize(super)
+      @klass ||= constantize(super)
     end
 
     def job
@@ -20,24 +20,20 @@ module Qu
     end
 
     def queue
-      (klass.instance_variable_get(:@queue) || 'default').to_s
+      @queue ||= (klass.instance_variable_get(:@queue) || 'default').to_s
     end
 
     def perform
       job.run_hook(:perform)  { job.perform }
-      job.run_hook(:complete) { Qu.backend.completed(self) }
+      job.run_hook(:complete) { Qu.backend.complete(self) }
     rescue Qu::Worker::Abort
-      job.run_hook(:release) do
-        logger.debug "Releasing job #{self}"
-        Qu.backend.release(self)
+      job.run_hook(:abort) do
+        Qu.backend.abort(self)
       end
       raise
     rescue => e
       job.run_hook(:failure, e) do
-        logger.fatal "Job #{self} failed"
-        log_exception(e)
-        Qu.failure.create(self, e) if Qu.failure
-        Qu.backend.failed(self, e)
+        Qu.failure.create(self, e)
       end
     end
 
@@ -53,7 +49,7 @@ module Qu
       }
     end
 
-  protected
+    protected
 
     def constantize(class_name)
       return unless class_name
@@ -64,6 +60,5 @@ module Qu
       end
       constant
     end
-
   end
 end

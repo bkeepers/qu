@@ -13,11 +13,11 @@ describe Qu::Worker do
 
   describe 'work' do
     before do
-      Qu.stub(:reserve).and_return(job)
+      Qu.stub(:pop).and_return(job)
     end
 
-    it 'should reserve a job' do
-      Qu.should_receive(:reserve).with(subject).and_return(job)
+    it 'should pop a job' do
+      Qu.should_receive(:pop).with(subject.queues.first).and_return(job)
       subject.work
     end
 
@@ -27,63 +27,29 @@ describe Qu::Worker do
     end
   end
 
-  describe 'work_off' do
-    it 'should work all jobs off the queue' do
-      Qu.should_receive(:reserve).exactly(4).times.with(subject, :block => false).and_return(job, job, job, nil)
-      subject.work_off
-    end
-  end
-
-  describe 'start' do
-    before do
-      subject.stub(:loop)
-    end
-
-    it 'should register worker' do
-      Qu.backend.should_receive(:register_worker).with(subject)
-      subject.start
-    end
-  end
-  
   describe 'stop' do
     before do
       job.stub(:perform) do
         Process.kill('SIGTERM', $$)
         sleep(0.01)
       end
-      Qu.stub!(:reserve).and_return(job)
+      Qu.stub(:pop).and_return(job)
     end
-    
-    context 'when aborting' do
-      before do
-        Qu.graceful_shutdown = false
-      end
 
-      it 'should unregister worker' do
-        Qu.backend.should_receive(:unregister_worker).with(subject)
-        
-        expect { subject.start }.to raise_exception(Qu::Worker::Abort)
-      end
-    end
-    
     context 'when stopping' do
-      it 'should wait for the job to finish, shut down gracefully, and unregister worker' do
+      it 'should wait for the job to finish and shut down gracefully' do
         Qu.graceful_shutdown = true
-        
-        Qu.backend.should_receive(:unregister_worker).with(subject)
-        
         subject.start
       end
-      
-      it 'should stop if the worker is blocked waiting for a new job' do
-        Qu.backend.should_receive(:unregister_worker).with(subject)
-        Qu.stub(:reserve) { sleep }
-        
+
+      it 'should stop if the backend is blocked waiting for a new job' do
+        Qu.stub(:pop) { sleep }
+
         t = Thread.new do
           sleep(0.01)
           Process.kill('SIGTERM', $$)
         end
-        
+
         expect { subject.start }.to raise_exception(Qu::Worker::Stop)
       end
     end

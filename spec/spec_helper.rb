@@ -6,7 +6,7 @@ require 'qu/backend/spec'
 module ServiceHelpers
   def service_running?(service)
     case service.to_s
-    when "dynamo_db", "sqs"
+    when "sqs"
       host = AWS.config.send("#{service}_endpoint")
       port = AWS.config.send("#{service}_port")
       Net::HTTP.new(host, port).request(Net::HTTP::Get.new("/"))
@@ -47,9 +47,16 @@ RSpec.configure do |config|
   config.extend ServiceHelpers
 
   config.before(:each) do
-    Qu.backend = double('a backend', :reserve => nil, :failed => nil, :completed => nil, :release => nil,
-        :register_worker => nil, :unregister_worker => nil, :enqueue => nil)
-    Qu.failure = nil
+    Qu.backend = double('a backend', {
+      :push => nil,
+      :pop => nil,
+      :complete => nil,
+      :abort => nil,
+    })
+
+    Qu.failure = double('a failure handler', {
+      :create => nil,
+    })
   end
 end
 

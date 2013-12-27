@@ -61,7 +61,7 @@ You can add a job to the queue by calling `create` on your job:
 
 ``` ruby
 job = ProcessPresentation.create(@presentation.id)
-puts "Enqueued job #{job.id}"
+puts "Created job #{job.id}"
 ```
 
 The job will be initialized with any parameters that are passed to it when it is performed. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. Don't try to pass in an ActiveRecord object.
@@ -75,7 +75,7 @@ $ bundle exec rake qu:work
 You can easily inspect the queue or clear it:
 
 ``` ruby
-puts "Jobs on the queue:", Qu.length
+puts "Jobs on the queue:", Qu.size
 Qu.clear
 ```
 
@@ -109,10 +109,10 @@ $ bundle exec rake qu:work QUEUES=urgent,default
 
 Note that if you still want your worker to process the default queue, you must specify it. Queues will be process in the order they are specified.
 
-You can also get the length or clear a specific queue:
+You can also get the size or clear a specific queue:
 
 ``` ruby
-Qu.length(:urgent)
+Qu.size(:urgent)
 Qu.clear(:urgent)
 ```
 
@@ -124,8 +124,7 @@ However, if you do need to customize it, you can by calling the `Qu.configure`:
 
 ``` ruby
 Qu.configure do |c|
-  c.connection  = Redis::Namespace.new('myapp:qu', :redis => Redis.connect)
-  c.logger      = Logger.new('log/qu.log')
+  c.logger = Logger.new('log/qu.log')
 end
 ```
 

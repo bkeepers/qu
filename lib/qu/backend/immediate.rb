@@ -1,35 +1,23 @@
 module Qu
   module Backend
     class Immediate < Base
-      def enqueue(payload)
+      def push(queue_name, payload)
         payload.perform
       end
 
-      def completed(payload)
+      def pop(*)
       end
 
-      def release(payload)
+      def complete(payload)
       end
 
-      def failed(payload, error)
+      def abort(payload)
       end
 
-      def register_worker(*)
+      def clear(queue)
       end
 
-      def unregister_worker(*)
-      end
-
-      def clear(*)
-      end
-
-      def connection=(*)
-      end
-
-      def reserve(*)
-      end
-
-      def length(*)
+      def size(*)
         0
       end
 
