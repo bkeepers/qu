@@ -1,7 +1,7 @@
 module Qu
   module Backend
     class Immediate < Base
-      def push(payload)
+      def push(queue_name, payload)
         payload.perform
       end
 

@@ -16,10 +16,10 @@ module Qu
         self.retry_frequency = 1
       end
 
-      def push(payload)
+      def push(queue_name, payload)
         payload.id = BSON::ObjectId.new
         with_connection_retries do
-          jobs(payload.queue).insert(payload_attributes(payload))
+          jobs(queue_name).insert(payload_attributes(payload))
         end
         payload
       end

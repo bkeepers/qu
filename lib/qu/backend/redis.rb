@@ -10,12 +10,12 @@ module Qu
         self.namespace = :qu
       end
 
-      def push(payload)
+      def push(queue_name, payload)
         payload.id = SimpleUUID::UUID.new.to_guid
         body = encode('klass' => payload.klass.to_s, 'args' => payload.args)
         connection.multi do |multi|
           multi.set("job:#{payload.id}", body)
-          multi.rpush("queue:#{payload.queue}", payload.id)
+          multi.rpush("queue:#{queue_name}", payload.id)
         end
         payload
       end

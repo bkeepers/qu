@@ -52,7 +52,8 @@ describe Qu::Job do
 
   describe 'create' do
     it 'should call push on backend with a payload' do
-      Qu.backend.should_receive(:push) do |payload|
+      Qu.backend.should_receive(:push) do |queue_name, payload|
+        queue_name.should eq('default')
         payload.should be_instance_of(Qu::Payload)
         payload.klass.should == SimpleJob
         payload.args.should == [9]
