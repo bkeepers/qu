@@ -7,6 +7,7 @@ end
 
 shared_examples_for 'a backend' do |options|
   options ||= {}
+
   services = Array(options[:services]).inject({}) { |hash, service|
     hash[service] = service_running?(service)
     hash
