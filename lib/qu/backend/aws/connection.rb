@@ -31,7 +31,7 @@ module Qu
 
         def abort(payload)
           payload.message.delete
-          push(payload.queue, AWS.encode(payload.attributes))
+          push(payload.queue, AWS.dump(payload.attributes))
         end
 
         def size(queue_name)

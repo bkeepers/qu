@@ -6,22 +6,22 @@ module Qu
       include Logger
       attr_accessor :connection
 
-      def self.encode(data)
+      def self.dump(data)
         Qu.dump_json(data)
       end
 
-      def self.decode(data)
+      def self.load(data)
         Qu.load_json(data)
       end
 
       private
 
-      def encode(data)
-        self.class.encode(data)
+      def dump(data)
+        self.class.dump(data)
       end
 
-      def decode(data)
-        self.class.decode(data)
+      def load(data)
+        self.class.load(data)
       end
     end
   end

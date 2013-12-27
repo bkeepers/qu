@@ -12,7 +12,7 @@ module Qu
 
       def push(queue_name, payload)
         payload.id = SimpleUUID::UUID.new.to_guid
-        body = encode('klass' => payload.klass.to_s, 'args' => payload.args)
+        body = dump('klass' => payload.klass.to_s, 'args' => payload.args)
         connection.multi do |multi|
           multi.set("job:#{payload.id}", body)
           multi.rpush("queue:#{queue_name}", payload.id)
@@ -23,7 +23,7 @@ module Qu
       def pop(queue_name)
         if id = connection.lpop("queue:#{queue_name}")
           if data = connection.get("job:#{id}")
-            data = decode(data)
+            data = load(data)
             return Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
           end
         end
