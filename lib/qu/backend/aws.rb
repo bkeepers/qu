@@ -3,6 +3,10 @@ require 'digest/sha1'
 module Qu
   module Backend
     class AWS < Base
+      def self.fake_sqs?
+        ::AWS.config.sqs_endpoint == "localhost"
+      end
+
       # Seconds to wait before looking for more jobs when the queue is empty (default: 5)
       attr_accessor :poll_frequency
 

@@ -30,8 +30,12 @@ module Qu
         end
 
         def abort(payload)
-          payload.message.delete
-          push(payload.queue, AWS.dump(payload.attributes))
+          if AWS.fake_sqs?
+            payload.message.delete
+            push(payload.queue, AWS.dump(payload.attributes))
+          else
+            payload.message.visibility_timeout = 0
+          end
         end
 
         def size(queue_name)
