@@ -33,8 +33,7 @@ module Qu
       raise
     rescue => e
       job.run_hook(:failure, e) do
-        log_exception(e)
-        Qu.failure.create(self, e) if Qu.failure
+        Qu.failure.create(self, e)
       end
     end
 

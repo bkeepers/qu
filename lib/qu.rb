@@ -31,3 +31,5 @@ Qu.configure do |c|
   c.logger = Logger.new(STDOUT)
   c.logger.level = Logger::INFO
 end
+
+require "qu/failure/logger"

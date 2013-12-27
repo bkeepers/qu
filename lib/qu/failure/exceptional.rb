@@ -3,7 +3,7 @@ require 'exceptional'
 module Qu
   module Failure
     class Exceptional
-      extend Logger
+      extend ::Qu::Logger
 
       def self.create(job, exception)
         if ::Exceptional::Config.should_send_to_api?
