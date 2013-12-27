@@ -23,9 +23,9 @@ module Qu
       end
     end
 
-    # Public: Feel free to override this in your class with specific arg names and all that.
+    # Public: Feel free to override this in your class with specific arg names
+    # and all that.
     def initialize(*args)
-      @args = args
     end
 
     # Public: Feel free to override this as well.
