@@ -17,8 +17,8 @@ module Qu
           @subscriber = options.fetch(:subscriber) { AWS::SQS::Subscriber.new }
         end
 
-        def push(queue_name, body)
-          publisher.publish(queue_name, body)
+        def push(queue_name, payload)
+          publisher.publish(queue_name, AWS.dump(payload.attributes))
         end
 
         def pop(queue_name)
@@ -31,18 +31,20 @@ module Qu
 
         def abort(payload)
           if AWS.fake_sqs?
+            # should only get here in localhost; it is ok to remove this when
+            # fake_sqs supports changing a messages visibility timeout
             payload.message.delete
-            push(payload.queue, AWS.dump(payload.attributes))
+            push(payload.queue, payload)
           else
             payload.message.visibility_timeout = 0
           end
         end
 
-        def size(queue_name)
+        def size(queue_name = 'default')
           subscriber.size(queue_name)
         end
 
-        def clear(queue_name)
+        def clear(queue_name = 'default')
           subscriber.clear(queue_name)
         end
       end
