@@ -20,7 +20,7 @@ module Qu
     end
 
     def queue
-      (klass.instance_variable_get(:@queue) || 'default').to_s
+      @queue ||= (klass.instance_variable_get(:@queue) || 'default').to_s
     end
 
     def perform
