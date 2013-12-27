@@ -33,7 +33,7 @@ describe Qu::Worker do
         Process.kill('SIGTERM', $$)
         sleep(0.01)
       end
-      Qu.stub!(:pop).and_return(job)
+      Qu.stub(:pop).and_return(job)
     end
 
     context 'when stopping' do
