@@ -5,7 +5,7 @@
 #
 require 'spec_helper'
 require 'net/http'
-require 'qu-aws'
+require 'qu-sqs'
 
 AWS.config(
   use_ssl:            false,
@@ -15,7 +15,7 @@ AWS.config(
   secret_access_key:  'asdf',
 )
 
-describe Qu::Backend::AWS do
+describe Qu::Backend::SQS do
   def reset_service(service)
     host = AWS.config.send("#{service}_endpoint")
     port = AWS.config.send("#{service}_port")
