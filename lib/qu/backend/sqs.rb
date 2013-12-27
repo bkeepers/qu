@@ -4,15 +4,15 @@ require 'aws/sqs'
 module Qu
   module Backend
     class SQS < Base
-      def push(queue_name, payload)
+      def push(payload)
         # id does not really matter for sqs as they have ids already so i'm just
         # sending something relatively unique for errors and what not
         payload.id = Digest::SHA1.hexdigest(payload.to_s + Time.now.to_s)
 
         queue = begin
-          connection.queues.named(queue_name)
+          connection.queues.named(payload.queue)
         rescue ::AWS::SQS::Errors::NonExistentQueue
-          connection.queues.create(queue_name)
+          connection.queues.create(payload.queue)
         end
 
         queue.send_message(dump(payload.attributes))
@@ -42,7 +42,7 @@ module Qu
           # should only get here in localhost; it is ok to remove this when
           # fake_sqs supports changing a messages visibility timeout
           payload.message.delete
-          push(payload.queue, payload)
+          push(payload)
         else
           payload.message.visibility_timeout = 0
         end

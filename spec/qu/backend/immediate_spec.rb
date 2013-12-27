@@ -10,6 +10,6 @@ describe Qu::Backend::Immediate do
 
   it 'performs immediately' do
     payload.should_receive(:perform)
-    subject.push(payload.queue, payload)
+    subject.push(payload)
   end
 end
