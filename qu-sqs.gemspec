@@ -3,15 +3,15 @@ $:.push File.expand_path("../lib", __FILE__)
 require "qu/version"
 
 Gem::Specification.new do |s|
-  s.name        = "qu-aws"
+  s.name        = "qu-sqs"
   s.version     = Qu::VERSION
   s.authors     = ["John Nunemaker"]
   s.email       = ["nunemaker@gmail.com"]
   s.homepage    = "http://github.com/bkeepers/qu"
-  s.summary     = "AWS backend for qu"
-  s.description = "AWS backend for qu"
+  s.summary     = "SQS backend for qu"
+  s.description = "SQS backend for qu"
 
-  s.files         = `git ls-files -- lib | grep aws`.split("\n")
+  s.files         = `git ls-files -- lib | grep sqs`.split("\n")
   s.require_paths = ["lib"]
 
   s.add_dependency 'aws-sdk', '~> 1.0'
