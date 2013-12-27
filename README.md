@@ -124,8 +124,7 @@ However, if you do need to customize it, you can by calling the `Qu.configure`:
 
 ``` ruby
 Qu.configure do |c|
-  c.connection  = Redis::Namespace.new('myapp:qu', :redis => Redis.connect)
-  c.logger      = Logger.new('log/qu.log')
+  c.logger = Logger.new('log/qu.log')
 end
 ```
 
