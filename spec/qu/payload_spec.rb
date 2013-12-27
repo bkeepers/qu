@@ -119,7 +119,6 @@ describe Qu::Payload do
         subject.job.should_receive(:run_hook).with(:failure, error)
         subject.perform
       end
-
     end
   end
 end

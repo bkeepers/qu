@@ -68,10 +68,12 @@ module Qu
     def stop
       @running = false
 
-      # If the backend is blocked waiting for a new job, this will break them out.
+      # If the backend is blocked waiting for a new job, this will
+      # break them out.
       raise Stop unless @performing
 
-      # If the backend is still performing a job and this is not a graceful shutdown, abort immediately.
+      # If the backend is still performing a job and this is not a graceful
+      # shutdown, abort immediately.
       raise Abort unless Qu.graceful_shutdown
     end
 
