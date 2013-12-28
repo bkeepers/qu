@@ -46,7 +46,7 @@ module Qu
           break
         end
       }
-      perform(job)
+      perform(job) if job
     end
 
     def start
