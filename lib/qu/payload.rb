@@ -61,6 +61,14 @@ module Qu
       }
     end
 
+    # Internal: Pushes payload to backend.
+    def push
+      instrument("push.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:push) { Qu.backend.push(self) }
+      end
+    end
+
     private
 
     def constantize(class_name)
