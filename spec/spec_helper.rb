@@ -57,8 +57,6 @@ RSpec.configure do |config|
     Qu.failure = double('a failure handler', {
       :create => nil,
     })
-
-    Qu.instrumenter = Qu::Instrumenters::Noop
   end
 end
 
