@@ -29,12 +29,14 @@ module Qu
     block.call(self)
   end
 
-  def dump_json(data)
-    JSON.dump(data) if data
+  # Internal: Convert an object to json.
+  def dump_json(object)
+    JSON.dump(object) if object
   end
 
-  def load_json(data)
-    JSON.load(data) if data
+  # Internal: Convert json to an object.
+  def load_json(object)
+    JSON.load(object) if object
   end
 end
 
