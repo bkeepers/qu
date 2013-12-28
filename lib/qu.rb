@@ -11,12 +11,15 @@ require 'forwardable'
 require 'logger'
 
 module Qu
+  InstrumentationNamespace = :qu
+
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure, :logger, :graceful_shutdown
+  attr_accessor :backend, :failure, :logger, :graceful_shutdown, :instrumenter
 
-  def_delegators :backend, :size, :clear
+  def_delegators :backend, :push, :pop, :size, :clear
+  def_delegators :instrumenter, :instrument
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
@@ -35,9 +38,12 @@ module Qu
   end
 end
 
+require 'qu/instrumenters/noop'
+
 Qu.configure do |c|
   c.logger = Logger.new(STDOUT)
   c.logger.level = Logger::INFO
+  c.instrumenter = Qu::Instrumenters::Noop
 end
 
 require "qu/failure/logger"
