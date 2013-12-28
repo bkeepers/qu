@@ -6,6 +6,8 @@ describe Qu::Instrumentation::StatsdSubscriber do
   let(:socket) { FakeUDPSocket.new }
 
   before do
+    Qu.backend = Qu::Backend::Redis.new
+    Qu.clear
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications
     described_class.client = statsd_client
