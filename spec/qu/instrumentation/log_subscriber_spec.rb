@@ -7,6 +7,7 @@ describe Qu::Instrumentation::LogSubscriber do
 
   before(:each) do
     Qu.backend = Qu::Backend::Redis.new
+    Qu.clear
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications
     described_class.logger = Logger.new(io).tap { |logger|
