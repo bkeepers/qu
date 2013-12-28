@@ -29,6 +29,13 @@ describe Qu::Instrumentation::StatsdSubscriber do
     socket.buffer.detect { |op| op.first == "#{metric}:1|c" }.should_not be_nil
   end
 
+  it "instruments pop" do
+    worker = Qu::Worker.new
+    worker.work
+    assert_timer "qu.pop"
+    assert_timer "qu.pop.default"
+  end
+
   it "instruments push" do
     payload = SimpleJob.create
     assert_timer "qu.push"
