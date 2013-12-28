@@ -5,20 +5,20 @@ module Qu
         payload.perform
       end
 
-      def pop(*)
-      end
-
       def complete(payload)
       end
 
       def abort(payload)
       end
 
-      def clear(queue)
+      def pop(queue)
       end
 
-      def size(*)
+      def size(queue)
         0
+      end
+
+      def clear(queue)
       end
     end
   end
