@@ -37,6 +37,9 @@ describe Qu::Instrumentation::LogSubscriber do
     payload.perform
     line = find_line('Qu complete')
     line.should include(payload.to_s)
+
+    # should not get to abort
+    expect { find_line('Qu abort') }.to raise_error
   end
 
   it "logs abort" do
