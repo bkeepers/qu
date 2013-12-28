@@ -24,16 +24,26 @@ module Qu
     end
 
     def perform
-      job.run_hook(:perform)  { job.perform }
-      job.run_hook(:complete) { Qu.backend.complete(self) }
+      Qu.instrument("perform.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:perform) { job.perform }
+      end
+
+      Qu.instrument("complete.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:complete) { Qu.backend.complete(self) }
+      end
     rescue Qu::Worker::Abort
-      job.run_hook(:abort) do
-        Qu.backend.abort(self)
+      Qu.instrument("abort.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:abort) { Qu.backend.abort(self) }
       end
       raise
-    rescue => e
-      job.run_hook(:failure, e) do
-        Qu.failure.create(self, e)
+    rescue => exception
+      Qu.instrument("failure.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        payload[:exception] = exception
+        job.run_hook(:failure, exception) { Qu.failure.create(self, exception) }
       end
     end
 

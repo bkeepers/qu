@@ -18,8 +18,11 @@ module Qu
     end
 
     def self.create(*args)
-      Payload.new(:klass => self, :args => args).tap do |payload|
-        payload.job.run_hook(:push) { Qu.backend.push payload }
+      Qu.instrument("push.#{InstrumentationNamespace}") do |ipayload|
+        Payload.new(:klass => self, :args => args).tap do |payload|
+          ipayload[:payload] = payload
+          payload.job.run_hook(:push) { Qu.backend.push(payload) }
+        end
       end
     end
 
