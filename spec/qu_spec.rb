@@ -22,4 +22,14 @@ describe Qu do
       lambda { Qu.backend }.should raise_error
     end
   end
+
+  [
+    :instrument,
+    :instrumenter,
+    :instrumenter=,
+  ].each do |method_name|
+    it "responds to #{method_name}" do
+      Qu.should respond_to(method_name)
+    end
+  end
 end
