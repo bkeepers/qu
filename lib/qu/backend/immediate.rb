@@ -20,10 +20,6 @@ module Qu
       def size(*)
         0
       end
-
-      def queues(*)
-        ["default"]
-      end
     end
   end
 end
