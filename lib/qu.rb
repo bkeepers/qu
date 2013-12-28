@@ -6,6 +6,7 @@ require 'qu/payload'
 require 'qu/job'
 require 'qu/backend/base'
 require 'qu/failure/logger'
+require 'qu/instrumenters/noop'
 require 'qu/worker'
 
 require 'forwardable'
@@ -40,8 +41,6 @@ module Qu
     JSON.load(object) if object
   end
 end
-
-require 'qu/instrumenters/noop'
 
 Qu.configure do |config|
   config.logger = Logger.new(STDOUT)
