@@ -1,7 +1,9 @@
 require 'ostruct'
+require 'forwardable'
 
 module Qu
   class Payload < OpenStruct
+    extend Forwardable
     include Logger
 
     undef_method(:id) if method_defined?(:id)
@@ -24,23 +26,23 @@ module Qu
     end
 
     def perform
-      Qu.instrument("perform.#{InstrumentationNamespace}") do |payload|
+      instrument("perform.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
         job.run_hook(:perform) { job.perform }
       end
 
-      Qu.instrument("complete.#{InstrumentationNamespace}") do |payload|
+      instrument("complete.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
         job.run_hook(:complete) { Qu.backend.complete(self) }
       end
     rescue Qu::Worker::Abort
-      Qu.instrument("abort.#{InstrumentationNamespace}") do |payload|
+      instrument("abort.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
         job.run_hook(:abort) { Qu.backend.abort(self) }
       end
       raise
     rescue => exception
-      Qu.instrument("failure.#{InstrumentationNamespace}") do |payload|
+      instrument("failure.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
         payload[:exception] = exception
         job.run_hook(:failure, exception) { Qu.failure.create(self, exception) }
@@ -59,7 +61,7 @@ module Qu
       }
     end
 
-    protected
+    private
 
     def constantize(class_name)
       return unless class_name
@@ -70,5 +72,11 @@ module Qu
       end
       constant
     end
+
+    def instrumenter
+      Qu.instrumenter
+    end
+
+    def_delegators :instrumenter, :instrument
   end
 end
