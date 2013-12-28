@@ -29,9 +29,10 @@ module Qu
       # Private
       def update
         op = @name.split('.', 2).first
-        payload = @payload[:payload]
-        update_timer "qu.#{op}"
-        update_timer "qu.#{op}.#{payload.klass}"
+        if payload = @payload[:payload]
+          update_timer "qu.#{op}"
+          update_timer "qu.#{op}.#{payload.klass}"
+        end
       end
     end
   end
