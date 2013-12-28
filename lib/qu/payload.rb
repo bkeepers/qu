@@ -51,8 +51,12 @@ module Qu
       end
     end
 
-    def to_s
-      "#{id}:#{klass}:#{args.inspect}"
+    # Internal: Pushes payload to backend.
+    def push
+      instrument("push.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:push) { Qu.backend.push(self) }
+      end
     end
 
     def attributes
@@ -63,12 +67,8 @@ module Qu
       }
     end
 
-    # Internal: Pushes payload to backend.
-    def push
-      instrument("push.#{InstrumentationNamespace}") do |payload|
-        payload[:payload] = self
-        job.run_hook(:push) { Qu.backend.push(self) }
-      end
+    def to_s
+      "#{id}:#{klass}:#{args.inspect}"
     end
 
     private
