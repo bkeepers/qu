@@ -19,7 +19,7 @@ module Qu
 
     def self.create(*args)
       Payload.new(:klass => self, :args => args).tap do |payload|
-        payload.job.run_hook(:push) { Qu.backend.push payload.queue, payload }
+        payload.job.run_hook(:push) { Qu.backend.push payload }
       end
     end
 
