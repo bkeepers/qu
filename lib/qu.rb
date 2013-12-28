@@ -19,7 +19,7 @@ module Qu
   attr_accessor :backend, :failure, :logger, :graceful_shutdown, :instrumenter
 
   def_delegators :backend, :push, :pop, :size, :clear
-  def_delegators :instrumenter, :instrument
+  def_delegator :instrumenter, :instrument
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
