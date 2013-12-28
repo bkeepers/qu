@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'socket'
 
 module Qu
   class Worker
@@ -96,7 +97,7 @@ module Qu
     end
 
     def hostname
-      @hostname ||= `hostname`.strip
+      @hostname ||= Socket.gethostname
     end
 
     private
