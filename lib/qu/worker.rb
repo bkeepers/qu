@@ -45,7 +45,6 @@ module Qu
     end
 
     def work
-      logger.debug "Worker #{id} waiting for next job"
       job = nil
       queues.each { |queue_name|
         job = instrument("pop.#{InstrumentationNamespace}") do |payload|
@@ -72,7 +71,7 @@ module Qu
         work
       end
     ensure
-      logger.debug "Worker #{id} done"
+      logger.debug "Worker #{id} stopping"
       @running = false
     end
 
@@ -103,14 +102,12 @@ module Qu
     private
 
     def perform(job)
-      logger.debug "Worker #{id} popped job #{job}"
       begin
         @performing = true
         job.perform
       ensure
         @performing = false
       end
-      logger.debug "Worker #{id} complete job #{job}"
     end
   end
 end
