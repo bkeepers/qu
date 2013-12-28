@@ -20,6 +20,13 @@ describe Qu::Instrumentation::LogSubscriber do
     described_class.logger = nil
   end
 
+  it "logs pop" do
+    worker = Qu::Worker.new
+    worker.work
+    line = find_line('Qu pop')
+    line.should include("queue_name=default empty=true")
+  end
+
   it "logs push" do
     payload = SimpleJob.create
     line = find_line('Qu push')

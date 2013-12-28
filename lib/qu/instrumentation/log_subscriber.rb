@@ -5,6 +5,21 @@ require 'active_support/log_subscriber'
 module Qu
   module Instrumentation
     class LogSubscriber < ::ActiveSupport::LogSubscriber
+      def pop(event)
+        return unless logger.debug?
+
+        queue_name = event.payload[:queue_name]
+        empty = event.payload[:empty]
+
+        description = "Qu pop"
+        details = "queue_name=#{queue_name} empty=#{empty}"
+
+        name = '%s (%.1fms)' % [description, event.duration]
+        name_color = odd? ? CYAN : MAGENTA
+
+        debug "  #{color(name, name_color, true)}  [ #{details} ]"
+      end
+
       def push(event)
         log_event(:push, event)
       end
