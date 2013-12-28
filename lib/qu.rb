@@ -48,5 +48,3 @@ Qu.configure do |config|
   config.instrumenter = Qu::Instrumenters::Noop
   config.failure = Qu::Failure::Logger
 end
-
-require "qu/failure/logger"
