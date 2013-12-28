@@ -1,8 +1,12 @@
 require 'ostruct'
+require 'forwardable'
 
 module Qu
   class Payload < OpenStruct
+    extend Forwardable
     include Logger
+
+    def_delegators :"Qu.instrumenter", :instrument
 
     undef_method(:id) if method_defined?(:id)
 
@@ -24,21 +28,35 @@ module Qu
     end
 
     def perform
-      job.run_hook(:perform)  { job.perform }
-      job.run_hook(:complete) { Qu.backend.complete(self) }
+      instrument("perform.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:perform) { job.perform }
+      end
+
+      instrument("complete.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:complete) { Qu.backend.complete(self) }
+      end
     rescue Qu::Worker::Abort
-      job.run_hook(:abort) do
-        Qu.backend.abort(self)
+      instrument("abort.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:abort) { Qu.backend.abort(self) }
       end
       raise
-    rescue => e
-      job.run_hook(:failure, e) do
-        Qu.failure.create(self, e)
+    rescue => exception
+      instrument("failure.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        payload[:exception] = exception
+        job.run_hook(:failure, exception) { Qu.failure.create(self, exception) }
       end
     end
 
-    def to_s
-      "#{id}:#{klass}:#{args.inspect}"
+    # Internal: Pushes payload to backend.
+    def push
+      instrument("push.#{InstrumentationNamespace}") do |payload|
+        payload[:payload] = self
+        job.run_hook(:push) { Qu.backend.push(self) }
+      end
     end
 
     def attributes
@@ -49,7 +67,11 @@ module Qu
       }
     end
 
-    protected
+    def to_s
+      "#{id}:#{klass}:#{args.inspect}"
+    end
+
+    private
 
     def constantize(class_name)
       return unless class_name

@@ -3,6 +3,9 @@ Bundler.require :test
 require 'qu'
 require 'qu/backend/spec'
 
+root_path = Pathname(__FILE__).dirname.join('..').expand_path
+Dir[root_path.join("spec/support/**/*.rb")].each { |f| require f }
+
 module ServiceHelpers
   def service_running?(service)
     case service.to_s

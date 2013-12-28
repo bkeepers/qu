@@ -18,9 +18,7 @@ module Qu
     end
 
     def self.create(*args)
-      Payload.new(:klass => self, :args => args).tap do |payload|
-        payload.job.run_hook(:push) { Qu.backend.push payload.queue, payload }
-      end
+      Payload.new(:klass => self, :args => args).tap { |payload| payload.push }
     end
 
     # Public: Feel free to override this in your class with specific arg names

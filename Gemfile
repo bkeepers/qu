@@ -7,6 +7,8 @@ Dir['qu-*.gemspec'].each do |gemspec|
 end
 
 group :test do
+  gem 'activesupport', :require => false
+  gem 'statsd-ruby', :require => false
   gem 'SystemTimer',  :platform => :mri_18
   gem 'rake'
   gem 'rspec', '~> 2.0'

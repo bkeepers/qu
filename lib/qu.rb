@@ -5,18 +5,23 @@ require 'qu/failure'
 require 'qu/payload'
 require 'qu/job'
 require 'qu/backend/base'
+require 'qu/failure/logger'
+require 'qu/instrumenters/noop'
 require 'qu/worker'
 
 require 'forwardable'
 require 'logger'
 
 module Qu
+  InstrumentationNamespace = :qu
+
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure, :logger, :graceful_shutdown
+  attr_accessor :backend, :failure, :logger, :graceful_shutdown, :instrumenter
 
-  def_delegators :backend, :size, :clear
+  def_delegators :backend, :push, :pop, :size, :clear
+  def_delegator :instrumenter, :instrument
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
@@ -26,18 +31,20 @@ module Qu
     block.call(self)
   end
 
-  def dump_json(data)
-    JSON.dump(data) if data
+  # Internal: Convert an object to json.
+  def dump_json(object)
+    JSON.dump(object) if object
   end
 
-  def load_json(data)
-    JSON.load(data) if data
+  # Internal: Convert json to an object.
+  def load_json(object)
+    JSON.load(object) if object
   end
 end
 
-Qu.configure do |c|
-  c.logger = Logger.new(STDOUT)
-  c.logger.level = Logger::INFO
+Qu.configure do |config|
+  config.logger = Logger.new(STDOUT)
+  config.logger.level = Logger::INFO
+  config.instrumenter = Qu::Instrumenters::Noop
+  config.failure = Qu::Failure::Logger
 end
-
-require "qu/failure/logger"

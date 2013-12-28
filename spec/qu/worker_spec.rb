@@ -12,18 +12,30 @@ describe Qu::Worker do
   end
 
   describe 'work' do
-    before do
-      Qu.stub(:pop).and_return(job)
+    context "with job" do
+      before do
+        Qu.stub(:pop).and_return(job)
+      end
+
+      it 'should pop a job' do
+        Qu.should_receive(:pop).with(subject.queues.first).and_return(job)
+        subject.work
+      end
+
+      it 'should perform the job' do
+        job.should_receive(:perform)
+        subject.work
+      end
     end
 
-    it 'should pop a job' do
-      Qu.should_receive(:pop).with(subject.queues.first).and_return(job)
-      subject.work
-    end
+    context "with no job" do
+      before do
+        Qu.stub(:pop).and_return(nil)
+      end
 
-    it 'should perform the job' do
-      job.should_receive(:perform)
-      subject.work
+      it 'not error' do
+        expect { subject.work }.to_not raise_error
+      end
     end
   end
 

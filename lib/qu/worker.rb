@@ -1,6 +1,12 @@
+require 'forwardable'
+require 'socket'
+
 module Qu
   class Worker
+    extend Forwardable
     include Logger
+
+    def_delegators :"Qu.instrumenter", :instrument
 
     attr_accessor :queues
 
@@ -39,14 +45,18 @@ module Qu
     end
 
     def work
-      logger.debug "Worker #{id} waiting for next job"
       job = nil
       queues.each { |queue_name|
-        if job = Qu.pop(queue_name)
-          break
+        job = instrument("pop.#{InstrumentationNamespace}") do |payload|
+          payload[:queue_name] = queue_name
+          result = Qu.pop(queue_name)
+          payload[:empty] = result.nil?
+          result
         end
+
+        break if job
       }
-      perform(job)
+      perform(job) if job
     end
 
     def start
@@ -61,7 +71,7 @@ module Qu
         work
       end
     ensure
-      logger.debug "Worker #{id} done"
+      logger.debug "Worker #{id} stopping"
       @running = false
     end
 
@@ -86,20 +96,18 @@ module Qu
     end
 
     def hostname
-      @hostname ||= `hostname`.strip
+      @hostname ||= Socket.gethostname
     end
 
     private
 
     def perform(job)
-      logger.debug "Worker #{id} popped job #{job}"
       begin
         @performing = true
         job.perform
       ensure
         @performing = false
       end
-      logger.debug "Worker #{id} complete job #{job}"
     end
   end
 end
