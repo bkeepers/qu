@@ -69,7 +69,7 @@ describe Qu::Payload do
     end
 
     it 'should call complete on backend' do
-      Qu.backend.should_receive(:complete)
+      Qu.should_receive(:complete)
       subject.perform
     end
 
@@ -85,7 +85,7 @@ describe Qu::Payload do
       end
 
       it 'should abort the job and re-raise the error' do
-        Qu.backend.should_receive(:abort).with(subject)
+        Qu.should_receive(:abort).with(subject)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
 
@@ -103,8 +103,8 @@ describe Qu::Payload do
         SimpleJob.any_instance.stub(:perform).and_raise(error)
       end
 
-      it 'should not call complete on backend' do
-        Qu.backend.should_not_receive(:complete)
+      it 'should not call complete' do
+        Qu.should_not_receive(:complete)
         subject.perform
       end
 

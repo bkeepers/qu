@@ -20,7 +20,7 @@ module Qu
 
   attr_accessor :backend, :failure, :logger, :graceful_shutdown, :instrumenter
 
-  def_delegators :backend, :push, :pop, :size, :clear
+  def_delegators :backend, :push, :pop, :complete, :abort, :size, :clear
   def_delegator :instrumenter, :instrument
 
   def backend

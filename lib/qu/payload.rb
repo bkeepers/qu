@@ -35,12 +35,12 @@ module Qu
 
       instrument("complete.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
-        job.run_hook(:complete) { Qu.backend.complete(self) }
+        job.run_hook(:complete) { Qu.complete(self) }
       end
     rescue Qu::Worker::Abort
       instrument("abort.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
-        job.run_hook(:abort) { Qu.backend.abort(self) }
+        job.run_hook(:abort) { Qu.abort(self) }
       end
       raise
     rescue => exception
@@ -55,7 +55,7 @@ module Qu
     def push
       instrument("push.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
-        job.run_hook(:push) { Qu.backend.push(self) }
+        job.run_hook(:push) { Qu.push(self) }
       end
     end
 
