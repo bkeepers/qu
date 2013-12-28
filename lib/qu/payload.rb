@@ -6,6 +6,8 @@ module Qu
     extend Forwardable
     include Logger
 
+    def_delegators :"Qu.instrumenter", :instrument
+
     undef_method(:id) if method_defined?(:id)
 
     def initialize(options = {})
@@ -80,11 +82,5 @@ module Qu
       end
       constant
     end
-
-    def instrumenter
-      Qu.instrumenter
-    end
-
-    def_delegators :instrumenter, :instrument
   end
 end
