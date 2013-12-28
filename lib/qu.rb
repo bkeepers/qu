@@ -5,6 +5,7 @@ require 'qu/failure'
 require 'qu/payload'
 require 'qu/job'
 require 'qu/backend/base'
+require 'qu/failure/logger'
 require 'qu/worker'
 
 require 'forwardable'
@@ -42,10 +43,11 @@ end
 
 require 'qu/instrumenters/noop'
 
-Qu.configure do |c|
-  c.logger = Logger.new(STDOUT)
-  c.logger.level = Logger::INFO
-  c.instrumenter = Qu::Instrumenters::Noop
+Qu.configure do |config|
+  config.logger = Logger.new(STDOUT)
+  config.logger.level = Logger::INFO
+  config.instrumenter = Qu::Instrumenters::Noop
+  config.failure = Qu::Failure::Logger
 end
 
 require "qu/failure/logger"
