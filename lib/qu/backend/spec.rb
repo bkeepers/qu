@@ -48,6 +48,11 @@ shared_examples_for 'a backend' do |options|
         second = subject.push(payload).id
         first.should_not eq(second)
       end
+
+      it 'should enqueue the attributes for push' do
+        payload.should_receive(:attributes_for_push).and_return({})
+        subject.push(payload)
+      end
     end
 
     describe 'pop' do
