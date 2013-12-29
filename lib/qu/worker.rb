@@ -36,12 +36,8 @@ module Qu
 
     def handle_signals
       logger.debug "Worker #{id} registering traps for INT and TERM signals"
-      %W(INT TERM).each do |sig|
-        trap(sig) do
-          logger.info "Worker #{id} received #{sig}, shutting down"
-          stop
-        end
-      end
+      trap(:INT)  { stop }
+      trap(:TERM) { stop }
     end
 
     def work
@@ -56,7 +52,15 @@ module Qu
 
         break if job
       }
-      perform(job) if job
+
+      if job
+        begin
+          @performing = true
+          job.perform
+        ensure
+          @performing = false
+        end
+      end
     end
 
     def start
@@ -80,7 +84,7 @@ module Qu
 
       # If the backend is blocked waiting for a new job, this will
       # break them out.
-      raise Stop unless @performing
+      raise Stop unless performing?
 
       # If the backend is still performing a job and this is not a graceful
       # shutdown, abort immediately.
@@ -99,15 +103,12 @@ module Qu
       @hostname ||= Socket.gethostname
     end
 
-    private
+    def performing?
+      !!@performing
+    end
 
-    def perform(job)
-      begin
-        @performing = true
-        job.perform
-      ensure
-        @performing = false
-      end
+    def running?
+      !!@running
     end
   end
 end

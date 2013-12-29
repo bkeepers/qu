@@ -39,36 +39,79 @@ describe Qu::Worker do
     end
   end
 
-  describe 'stop' do
+  describe "stopping when signal received" do
+    shared_context "graceful shutdown" do
+      before do
+        @original_shutdown = Qu.graceful_shutdown
+        Qu.graceful_shutdown = true
+      end
+
+      after do
+        Qu.graceful_shutdown = @original_shutdown
+      end
+    end
+
+    shared_context "no graceful shutdown" do
+      before do
+        @original_shutdown = Qu.graceful_shutdown
+        Qu.graceful_shutdown = false
+      end
+
+      after do
+        Qu.graceful_shutdown = @original_shutdown
+      end
+    end
+
     before do
       job.stub(:perform) do
         Process.kill('SIGTERM', $$)
         sleep(0.01)
       end
-      Qu.stub(:pop).and_return(job)
-
-      @original_shutdown = Qu.graceful_shutdown
-      Qu.graceful_shutdown = true
     end
 
-    after do
-      Qu.graceful_shutdown = @original_shutdown
-    end
-
-    context 'when stopping' do
-      it 'should wait for the job to finish and shut down gracefully' do
-        subject.start
+    def send_terminate_signal
+      Thread.new do
+        sleep(0.01)
+        Process.kill('SIGTERM', $$)
       end
+    end
 
-      it 'should stop if the backend is blocked waiting for a new job' do
+    context "with graceful shutdown and backend stuck popping" do
+      include_context "graceful shutdown"
+
+      it "raises stop" do
         Qu.stub(:pop) { sleep }
-
-        t = Thread.new do
-          sleep(0.01)
-          Process.kill('SIGTERM', $$)
-        end
-
+        send_terminate_signal
         expect { subject.start }.to raise_exception(Qu::Worker::Stop)
+      end
+    end
+
+    context "with graceful shutdown and job performing" do
+      include_context "graceful shutdown"
+
+      it 'waits for the job to finish and shuts down' do
+        Qu.stub(:pop).and_return(job)
+        subject.stub(:performing?).and_return(true)
+        expect { subject.start }.to_not raise_exception
+      end
+    end
+
+    context "with no graceful shutdown and no job performing" do
+      include_context "no graceful shutdown"
+
+      it "raises stop" do
+        send_terminate_signal
+        expect { subject.start }.to raise_exception(Qu::Worker::Stop)
+      end
+    end
+
+    context "with no graceful shutdown and job performing" do
+      include_context "no graceful shutdown"
+
+      it "raises abort" do
+        subject.stub(:performing?).and_return(true)
+        send_terminate_signal
+        expect { subject.start }.to raise_exception(Qu::Worker::Abort)
       end
     end
   end
