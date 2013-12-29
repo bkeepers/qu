@@ -45,30 +45,63 @@ describe Qu::Worker do
         Process.kill('SIGTERM', $$)
         sleep(0.01)
       end
-      Qu.stub(:pop).and_return(job)
-
-      @original_shutdown = Qu.graceful_shutdown
-      Qu.graceful_shutdown = true
     end
 
-    after do
-      Qu.graceful_shutdown = @original_shutdown
-    end
+    context "with graceful shutdown and backend stuck popping" do
+      include_context "graceful shutdown"
 
-    context 'when stopping' do
-      it 'should wait for the job to finish and shut down gracefully' do
-        subject.start
-      end
-
-      it 'should stop if the backend is blocked waiting for a new job' do
+      before do
         Qu.stub(:pop) { sleep }
-
-        t = Thread.new do
+        Thread.new do
           sleep(0.01)
           Process.kill('SIGTERM', $$)
         end
+      end
 
+      it "raises stop" do
         expect { subject.start }.to raise_exception(Qu::Worker::Stop)
+      end
+    end
+
+    context "with graceful shutdown and job performing" do
+      include_context "graceful shutdown"
+
+      before do
+        Qu.stub(:pop).and_return(job)
+        subject.instance_variable_set("@performing", true)
+      end
+
+      it 'waits for the job to finish and shuts down' do
+        expect { subject.start }.to_not raise_exception
+      end
+    end
+
+    context "with no graceful shutdown and no job performing" do
+      include_context "no graceful shutdown"
+
+      before do
+        Qu.stub(:pop) { sleep }
+        Thread.new do
+          sleep(0.01)
+          Process.kill('SIGTERM', $$)
+        end
+      end
+
+      it "raises stop" do
+        expect { subject.start }.to raise_exception(Qu::Worker::Stop)
+      end
+    end
+
+    context "with no graceful shutdown and job performing" do
+      include_context "no graceful shutdown"
+
+      before do
+        Qu.stub(:pop).and_return(job)
+        subject.instance_variable_set("@performing", true)
+      end
+
+      it "raises abort" do
+        expect { subject.start }.to raise_exception(Qu::Worker::Abort)
       end
     end
   end

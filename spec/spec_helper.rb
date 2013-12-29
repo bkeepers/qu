@@ -64,3 +64,25 @@ RSpec.configure do |config|
 end
 
 Qu.logger = Logger.new('/dev/null')
+
+shared_context "graceful shutdown" do
+  before do
+    @original_shutdown = Qu.graceful_shutdown
+    Qu.graceful_shutdown = true
+  end
+
+  after do
+    Qu.graceful_shutdown = @original_shutdown
+  end
+end
+
+shared_context "no graceful shutdown" do
+  before do
+    @original_shutdown = Qu.graceful_shutdown
+    Qu.graceful_shutdown = false
+  end
+
+  after do
+    Qu.graceful_shutdown = @original_shutdown
+  end
+end
