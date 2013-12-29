@@ -36,12 +36,8 @@ module Qu
 
     def handle_signals
       logger.debug "Worker #{id} registering traps for INT and TERM signals"
-      %W(INT TERM).each do |sig|
-        trap(sig) do
-          logger.info "Worker #{id} received #{sig}, shutting down"
-          stop
-        end
-      end
+      trap(:INT)  { stop }
+      trap(:TERM) { stop }
     end
 
     def work
