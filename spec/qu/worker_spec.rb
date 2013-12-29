@@ -46,11 +46,17 @@ describe Qu::Worker do
         sleep(0.01)
       end
       Qu.stub(:pop).and_return(job)
+
+      @original_shutdown = Qu.graceful_shutdown
+      Qu.graceful_shutdown = true
+    end
+
+    after do
+      Qu.graceful_shutdown = @original_shutdown
     end
 
     context 'when stopping' do
       it 'should wait for the job to finish and shut down gracefully' do
-        Qu.graceful_shutdown = true
         subject.start
       end
 
