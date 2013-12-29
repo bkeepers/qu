@@ -56,7 +56,15 @@ module Qu
 
         break if job
       }
-      perform(job) if job
+
+      if job
+        begin
+          @performing = true
+          job.perform
+        ensure
+          @performing = false
+        end
+      end
     end
 
     def start
@@ -103,15 +111,8 @@ module Qu
       !!@performing
     end
 
-    private
-
-    def perform(job)
-      begin
-        @performing = true
-        job.perform
-      ensure
-        @performing = false
-      end
+    def running?
+      !!@running
     end
   end
 end
