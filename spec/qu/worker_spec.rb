@@ -40,6 +40,28 @@ describe Qu::Worker do
   end
 
   describe 'stop' do
+    shared_context "graceful shutdown" do
+      before do
+        @original_shutdown = Qu.graceful_shutdown
+        Qu.graceful_shutdown = true
+      end
+
+      after do
+        Qu.graceful_shutdown = @original_shutdown
+      end
+    end
+
+    shared_context "no graceful shutdown" do
+      before do
+        @original_shutdown = Qu.graceful_shutdown
+        Qu.graceful_shutdown = false
+      end
+
+      after do
+        Qu.graceful_shutdown = @original_shutdown
+      end
+    end
+
     before do
       job.stub(:perform) do
         Process.kill('SIGTERM', $$)
