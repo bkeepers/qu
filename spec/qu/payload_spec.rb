@@ -121,4 +121,13 @@ describe Qu::Payload do
       end
     end
   end
+
+  describe "push" do
+    subject { Qu::Payload.new(:klass => SimpleJob) }
+
+    it "pushes payload to backend" do
+      Qu.should_receive(:push).with(subject)
+      subject.push
+    end
+  end
 end
