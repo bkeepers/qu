@@ -80,7 +80,7 @@ module Qu
 
       # If the backend is blocked waiting for a new job, this will
       # break them out.
-      raise Stop unless @performing
+      raise Stop unless performing?
 
       # If the backend is still performing a job and this is not a graceful
       # shutdown, abort immediately.
@@ -97,6 +97,10 @@ module Qu
 
     def hostname
       @hostname ||= Socket.gethostname
+    end
+
+    def performing?
+      !!@performing
     end
 
     private

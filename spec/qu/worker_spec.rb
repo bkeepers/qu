@@ -39,7 +39,7 @@ describe Qu::Worker do
     end
   end
 
-  describe 'stop' do
+  describe "stopping when signal received" do
     shared_context "graceful shutdown" do
       before do
         @original_shutdown = Qu.graceful_shutdown
@@ -69,18 +69,19 @@ describe Qu::Worker do
       end
     end
 
+    def send_terminate_signal
+      Thread.new do
+        sleep(0.01)
+        Process.kill('SIGTERM', $$)
+      end
+    end
+
     context "with graceful shutdown and backend stuck popping" do
       include_context "graceful shutdown"
 
-      before do
-        Qu.stub(:pop) { sleep }
-        Thread.new do
-          sleep(0.01)
-          Process.kill('SIGTERM', $$)
-        end
-      end
-
       it "raises stop" do
+        Qu.stub(:pop) { sleep }
+        send_terminate_signal
         expect { subject.start }.to raise_exception(Qu::Worker::Stop)
       end
     end
@@ -88,12 +89,9 @@ describe Qu::Worker do
     context "with graceful shutdown and job performing" do
       include_context "graceful shutdown"
 
-      before do
-        Qu.stub(:pop).and_return(job)
-        subject.instance_variable_set("@performing", true)
-      end
-
       it 'waits for the job to finish and shuts down' do
+        Qu.stub(:pop).and_return(job)
+        subject.stub(:performing?).and_return(true)
         expect { subject.start }.to_not raise_exception
       end
     end
@@ -101,15 +99,8 @@ describe Qu::Worker do
     context "with no graceful shutdown and no job performing" do
       include_context "no graceful shutdown"
 
-      before do
-        Qu.stub(:pop) { sleep }
-        Thread.new do
-          sleep(0.01)
-          Process.kill('SIGTERM', $$)
-        end
-      end
-
       it "raises stop" do
+        send_terminate_signal
         expect { subject.start }.to raise_exception(Qu::Worker::Stop)
       end
     end
@@ -117,12 +108,9 @@ describe Qu::Worker do
     context "with no graceful shutdown and job performing" do
       include_context "no graceful shutdown"
 
-      before do
-        Qu.stub(:pop).and_return(job)
-        subject.instance_variable_set("@performing", true)
-      end
-
       it "raises abort" do
+        subject.stub(:performing?).and_return(true)
+        send_terminate_signal
         expect { subject.start }.to raise_exception(Qu::Worker::Abort)
       end
     end
