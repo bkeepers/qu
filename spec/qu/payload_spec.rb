@@ -129,5 +129,11 @@ describe Qu::Payload do
       Qu.should_receive(:push).with(subject)
       subject.push
     end
+
+    it "sets pushed_at" do
+      subject.pushed_at.should be_nil
+      subject.push
+      subject.pushed_at.should be_instance_of(Time)
+    end
   end
 end

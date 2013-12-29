@@ -55,6 +55,7 @@ module Qu
     def push
       instrument("push.#{InstrumentationNamespace}") do |payload|
         payload[:payload] = self
+        self.pushed_at = Time.now.utc
         job.run_hook(:push) { Qu.push(self) }
       end
     end
