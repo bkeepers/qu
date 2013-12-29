@@ -68,6 +68,10 @@ module Qu
       }
     end
 
+    def attributes_for_push
+      attributes
+    end
+
     def to_s
       "#{id}:#{klass}:#{args.inspect}"
     end

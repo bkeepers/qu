@@ -81,7 +81,9 @@ module Qu
       private
 
       def payload_attributes(payload)
-        {:_id => payload.id, :klass => payload.klass.to_s, :args => payload.args}
+        attrs = payload.attributes_for_push
+        attrs[:_id] = attrs.delete(:id)
+        attrs
       end
 
       def jobs(queue)

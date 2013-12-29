@@ -12,7 +12,7 @@ module Qu
 
       def push(payload)
         payload.id = SimpleUUID::UUID.new.to_guid
-        body = dump('klass' => payload.klass.to_s, 'args' => payload.args)
+        body = dump(payload.attributes_for_push)
         connection.multi do |multi|
           multi.set("job:#{payload.id}", body)
           multi.rpush("queue:#{payload.queue}", payload.id)

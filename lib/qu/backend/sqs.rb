@@ -15,7 +15,7 @@ module Qu
           connection.queues.create(payload.queue)
         end
 
-        queue.send_message(dump(payload.attributes))
+        queue.send_message(dump(payload.attributes_for_push))
         payload
       end
 
