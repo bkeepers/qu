@@ -1,12 +1,8 @@
-require 'forwardable'
 require 'socket'
 
 module Qu
   class Worker
-    extend Forwardable
     include Logger
-
-    def_delegators :"Qu.instrumenter", :instrument
 
     attr_accessor :queues
 
