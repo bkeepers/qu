@@ -5,6 +5,7 @@ require 'qu/failure'
 require 'qu/payload'
 require 'qu/job'
 require 'qu/backend/base'
+require 'qu/backend/instrumented'
 require 'qu/failure/logger'
 require 'qu/instrumenters/noop'
 require 'qu/worker'
@@ -27,7 +28,7 @@ module Qu
   end
 
   def backend=(backend)
-    @backend = backend
+    @backend = backend.nil? ? backend : Backend::Instrumented.new(backend)
   end
 
   def configure(&block)
