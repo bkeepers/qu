@@ -6,6 +6,14 @@ module Qu
     class Instrumented < Base
       extend Forwardable
 
+      def self.wrap(backend)
+        if backend.nil?
+          backend
+        else
+          new(backend)
+        end
+      end
+
       def_delegators :"Qu.instrumenter", :instrument
       def_delegators :@backend, :connection, :connection=
 

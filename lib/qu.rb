@@ -28,7 +28,7 @@ module Qu
   end
 
   def backend=(backend)
-    @backend = backend.nil? ? backend : Backend::Instrumented.new(backend)
+    @backend = Backend::Instrumented.wrap(backend)
   end
 
   def configure(&block)
