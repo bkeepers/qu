@@ -19,10 +19,6 @@ shared_examples_for 'a backend' do |options|
     let(:worker) { Qu::Worker.new('default') }
     let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
-    before(:all) do
-      Qu.backend = described_class.new
-    end
-
     before do
       subject.clear(payload.queue)
     end
