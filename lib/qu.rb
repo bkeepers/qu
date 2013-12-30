@@ -18,12 +18,16 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure, :logger, :graceful_shutdown, :instrumenter
+  attr_accessor :failure, :logger, :graceful_shutdown, :instrumenter
 
   def_delegators :backend, :push, :pop, :complete, :abort, :size, :clear
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
+  end
+
+  def backend=(backend)
+    @backend = backend
   end
 
   def configure(&block)
