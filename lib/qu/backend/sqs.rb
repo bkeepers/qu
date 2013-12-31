@@ -19,20 +19,6 @@ module Qu
         payload
       end
 
-      def pop(queue_name = 'default')
-        begin
-          queue = connection.queues.named(queue_name)
-
-          if message = queue.receive_message
-            doc = load(message.body)
-            payload = Payload.new(doc)
-            payload.message = message
-            return payload
-          end
-        rescue ::AWS::SQS::Errors::NonExistentQueue
-        end
-      end
-
       def complete(payload)
         payload.message.delete if payload.message
       end
@@ -45,6 +31,20 @@ module Qu
           push(payload)
         else
           payload.message.visibility_timeout = 0
+        end
+      end
+
+      def pop(queue_name = 'default')
+        begin
+          queue = connection.queues.named(queue_name)
+
+          if message = queue.receive_message
+            doc = load(message.body)
+            payload = Payload.new(doc)
+            payload.message = message
+            return payload
+          end
+        rescue ::AWS::SQS::Errors::NonExistentQueue
         end
       end
 

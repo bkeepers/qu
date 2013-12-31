@@ -24,6 +24,15 @@ module Qu
         payload
       end
 
+      def abort(payload)
+        with_connection_retries do
+          jobs(payload.queue).insert(payload_attributes(payload))
+        end
+      end
+
+      def complete(payload)
+      end
+
       def pop(queue = 'default')
         begin
           doc = with_connection_retries do
@@ -37,15 +46,6 @@ module Qu
         rescue ::Mongo::OperationFailure
           # No jobs in the queue (MongoDB <2)
         end
-      end
-
-      def abort(payload)
-        with_connection_retries do
-          jobs(payload.queue).insert(payload_attributes(payload))
-        end
-      end
-
-      def complete(payload)
       end
 
       def size(queue = 'default')

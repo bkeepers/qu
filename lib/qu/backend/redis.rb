@@ -20,6 +20,14 @@ module Qu
         payload
       end
 
+      def abort(payload)
+        connection.rpush("queue:#{payload.queue}", payload.id)
+      end
+
+      def complete(payload)
+        connection.del("job:#{payload.id}")
+      end
+
       def pop(queue = 'default')
         if id = connection.lpop("queue:#{queue}")
           if data = connection.get("job:#{id}")
@@ -27,14 +35,6 @@ module Qu
             return Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
           end
         end
-      end
-
-      def abort(payload)
-        connection.rpush("queue:#{payload.queue}", payload.id)
-      end
-
-      def complete(payload)
-        connection.del("job:#{payload.id}")
       end
 
       def size(queue = 'default')
