@@ -108,15 +108,9 @@ describe Qu::Payload do
         subject.perform
       end
 
-      it 'should call create on failure backend' do
-        Qu.failure = double('a failure backend')
-        Qu.failure.should_receive(:create).with(subject, error)
-        subject.perform
-      end
-
-      it 'should run failure hook with exception' do
+      it 'should run abort hook with exception' do
         subject.job.stub(:run_hook).and_yield
-        subject.job.should_receive(:run_hook).with(:failure, error)
+        subject.job.should_receive(:run_hook).with(:abort)
         subject.perform
       end
     end

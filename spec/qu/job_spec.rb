@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Qu::Job do
-  %w(push perform complete abort failure).each do |hook|
+  %w(push perform complete abort).each do |hook|
     it "should define hooks for #{hooks}" do
       Qu::Job.should respond_to("before_#{hook}")
       Qu::Job.should respond_to("around_#{hook}")

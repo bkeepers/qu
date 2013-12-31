@@ -65,16 +65,15 @@ describe Qu::Instrumentation::LogSubscriber do
     end
   end
 
-  it "logs failure" do
+  it "logs abort when exception happens" do
     payload = SimpleJob.create
     payload.job.stub(:perform).and_raise(StandardError.new)
     begin
       payload.perform
       flunk # should not get here
     rescue => exception
-      line = find_line('Qu failure')
+      line = find_line('Qu abort')
       line.should include(payload.to_s)
-      line.should include("StandardError")
 
       # should not get to complete
       expect { find_line('Qu complete') }.to raise_error

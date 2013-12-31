@@ -1,12 +1,10 @@
 require 'qu/version'
 require 'qu/logger'
 require 'qu/hooks'
-require 'qu/failure'
 require 'qu/payload'
 require 'qu/job'
 require 'qu/backend/base'
 require 'qu/backend/instrumented'
-require 'qu/failure/logger'
 require 'qu/instrumenters/noop'
 require 'qu/worker'
 
@@ -19,7 +17,7 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :failure, :logger, :graceful_shutdown, :instrumenter
+  attr_accessor :logger, :graceful_shutdown, :instrumenter
 
   def_delegators :backend, :push, :pop, :complete, :abort, :size, :clear
 
@@ -50,5 +48,4 @@ Qu.configure do |config|
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::INFO
   config.instrumenter = Qu::Instrumenters::Noop
-  config.failure = Qu::Failure::Logger
 end

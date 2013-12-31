@@ -44,12 +44,8 @@ module Qu
       end
       raise
     rescue => exception
-      job.run_hook(:failure, exception) do
-        instrument("failure.#{InstrumentationNamespace}") do |ipayload|
-          ipayload[:payload] = self
-          ipayload[:exception] = exception
-          Qu.failure.create(self, exception)
-        end
+      job.run_hook(:abort) do
+        Qu.abort(self)
       end
     end
 

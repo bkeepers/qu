@@ -56,10 +56,6 @@ RSpec.configure do |config|
       :complete => nil,
       :abort => nil,
     })
-
-    Qu.failure = double('a failure handler', {
-      :create => nil,
-    })
   end
 end
 
