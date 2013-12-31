@@ -28,27 +28,38 @@ module Qu
     end
 
     def perform
-      instrument("perform.#{InstrumentationNamespace}") do |payload|
-        payload[:payload] = self
-        job.run_hook(:perform) { job.perform }
+      job.run_hook(:perform) do
+        instrument("perform.#{InstrumentationNamespace}") do |ipayload|
+          ipayload[:payload] = self
+          job.perform
+        end
       end
 
-      job.run_hook(:complete) { Qu.complete(self) }
+      job.run_hook(:complete) do
+        Qu.complete(self)
+      end
     rescue Qu::Worker::Abort
-      job.run_hook(:abort) { Qu.abort(self) }
+      job.run_hook(:abort) do
+        Qu.abort(self)
+      end
       raise
     rescue => exception
-      instrument("failure.#{InstrumentationNamespace}") do |payload|
-        payload[:payload] = self
-        payload[:exception] = exception
-        job.run_hook(:failure, exception) { Qu.failure.create(self, exception) }
+      job.run_hook(:failure, exception) do
+        instrument("failure.#{InstrumentationNamespace}") do |ipayload|
+          ipayload[:payload] = self
+          ipayload[:exception] = exception
+          Qu.failure.create(self, exception)
+        end
       end
     end
 
     # Internal: Pushes payload to backend.
     def push
       self.pushed_at = Time.now.utc
-      job.run_hook(:push) { Qu.push(self) }
+
+      job.run_hook(:push) do
+        Qu.push(self)
+      end
     end
 
     def attributes
