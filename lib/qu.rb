@@ -5,6 +5,7 @@ require 'qu/failure'
 require 'qu/payload'
 require 'qu/job'
 require 'qu/backend/base'
+require 'qu/backend/instrumented'
 require 'qu/failure/logger'
 require 'qu/instrumenters/noop'
 require 'qu/worker'
@@ -18,13 +19,16 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :backend, :failure, :logger, :graceful_shutdown, :instrumenter
+  attr_accessor :failure, :logger, :graceful_shutdown, :instrumenter
 
   def_delegators :backend, :push, :pop, :complete, :abort, :size, :clear
-  def_delegator :instrumenter, :instrument
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
+  end
+
+  def backend=(backend)
+    @backend = Backend::Instrumented.wrap(backend)
   end
 
   def configure(&block)

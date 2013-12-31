@@ -24,7 +24,6 @@ describe Qu do
   end
 
   [
-    :instrument,
     :instrumenter,
     :instrumenter=,
   ].each do |method_name|

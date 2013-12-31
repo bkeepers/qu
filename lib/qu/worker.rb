@@ -1,12 +1,8 @@
-require 'forwardable'
 require 'socket'
 
 module Qu
   class Worker
-    extend Forwardable
     include Logger
-
-    def_delegators :"Qu.instrumenter", :instrument
 
     attr_accessor :queues
 
@@ -43,12 +39,7 @@ module Qu
     def work
       job = nil
       queues.each { |queue_name|
-        job = instrument("pop.#{InstrumentationNamespace}") do |payload|
-          payload[:queue_name] = queue_name
-          result = Qu.pop(queue_name)
-          payload[:empty] = result.nil?
-          result
-        end
+        job = Qu.pop(queue_name)
 
         break if job
       }
