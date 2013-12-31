@@ -24,10 +24,10 @@ module Qu
         payload
       end
 
-      def pop(queue_name)
+      def pop(queue = 'default')
         begin
           doc = with_connection_retries do
-            jobs(queue_name).find_and_modify(:remove => true)
+            jobs(queue).find_and_modify(:remove => true)
           end
 
           if doc

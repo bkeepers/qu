@@ -16,14 +16,14 @@ module Qu
       def abort(payload)
       end
 
-      def pop(queue)
+      def pop(queue = 'default')
       end
 
-      def size(queue)
+      def size(queue = 'default')
         0
       end
 
-      def clear(queue)
+      def clear(queue = 'default')
       end
     end
   end

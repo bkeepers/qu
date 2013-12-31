@@ -3,6 +3,7 @@ require 'qu-mongo'
 
 describe Qu::Backend::Mongo do
   it_should_behave_like 'a backend', :services => :mongo
+  it_should_behave_like 'a backend interface'
 
   if service_running?(:mongo)
     describe 'connection' do

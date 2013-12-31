@@ -34,14 +34,14 @@ module Qu
       end
 
       def complete(payload)
-        payload.message.delete
+        payload.message.delete if payload.message
       end
 
       def abort(payload)
         if fake_sqs?
           # should only get here in localhost; it is ok to remove this when
           # fake_sqs supports changing a messages visibility timeout
-          payload.message.delete
+          payload.message.delete if payload.message
           push(payload)
         else
           payload.message.visibility_timeout = 0

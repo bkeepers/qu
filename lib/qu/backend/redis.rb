@@ -20,8 +20,8 @@ module Qu
         payload
       end
 
-      def pop(queue_name)
-        if id = connection.lpop("queue:#{queue_name}")
+      def pop(queue = 'default')
+        if id = connection.lpop("queue:#{queue}")
           if data = connection.get("job:#{id}")
             data = load(data)
             return Payload.new(:id => id, :klass => data['klass'], :args => data['args'])

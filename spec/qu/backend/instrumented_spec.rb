@@ -13,4 +13,5 @@ describe Qu::Backend::Instrumented do
   }
 
   it_should_behave_like 'a backend', :services => :redis
+  it_should_behave_like 'a backend interface'
 end

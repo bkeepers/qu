@@ -5,6 +5,44 @@ class CustomQueue < Qu::Job
   queue :custom
 end
 
+shared_examples_for 'a backend interface' do
+  it "can push a payload" do
+    subject.push Qu::Payload.new(:klass => SimpleJob)
+  end
+
+  it "can complete a payload" do
+    subject.complete Qu::Payload.new(:klass => SimpleJob)
+  end
+
+  it "can abort a payload" do
+    subject.abort Qu::Payload.new(:klass => SimpleJob)
+  end
+
+  it "can pop" do
+    subject.pop
+  end
+
+  it "can pop from specific queue" do
+    subject.pop('foo')
+  end
+
+  it "can get size of default queue" do
+    subject.size
+  end
+
+  it "can get size of specific queue" do
+    subject.size('foo')
+  end
+
+  it "can clear default queue" do
+    subject.clear
+  end
+
+  it "can clear specific queue" do
+    subject.clear('foo')
+  end
+end
+
 shared_examples_for 'a backend' do |options|
   options ||= {}
 

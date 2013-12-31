@@ -12,4 +12,6 @@ describe Qu::Backend::Immediate do
     payload.should_receive(:perform)
     subject.push(payload)
   end
+
+  it_should_behave_like 'a backend interface'
 end
