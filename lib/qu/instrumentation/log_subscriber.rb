@@ -36,10 +36,6 @@ module Qu
         log_event(:abort, event)
       end
 
-      def failure(event)
-        log_event(:failure, event)
-      end
-
       private
 
       def log_event(type, event)
@@ -49,7 +45,6 @@ module Qu
 
         description = "Qu #{type}"
         details = "payload=#{payload}"
-        details += " exception=#{event.payload[:exception]}" if type == :failure
 
         name = '%s (%.1fms)' % [description, event.duration]
         name_color = odd? ? CYAN : MAGENTA
