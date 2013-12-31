@@ -1,12 +1,9 @@
 require 'ostruct'
-require 'forwardable'
 
 module Qu
   class Payload < OpenStruct
-    extend Forwardable
+    include Qu::Instrumenter
     include Logger
-
-    def_delegators :"Qu.instrumenter", :instrument
 
     undef_method(:id) if method_defined?(:id)
 
@@ -35,27 +32,20 @@ module Qu
         end
       end
 
-      job.run_hook(:complete) do
-        Qu.complete(self)
-      end
+      complete
     rescue Qu::Worker::Abort
-      job.run_hook(:abort) do
-        Qu.abort(self)
-      end
+      abort
       raise
     rescue => exception
-      job.run_hook(:abort) do
-        Qu.abort(self)
-      end
+      abort
+      job.run_hook(:failure, exception) { Qu::Failure.create(self, exception) }
     end
 
     # Internal: Pushes payload to backend.
     def push
       self.pushed_at = Time.now.utc
 
-      job.run_hook(:push) do
-        Qu.push(self)
-      end
+      job.run_hook(:push) { Qu.push(self) }
     end
 
     def attributes
@@ -75,6 +65,14 @@ module Qu
     end
 
     private
+
+    def complete
+      job.run_hook(:complete) { Qu.complete(self) }
+    end
+
+    def abort
+      job.run_hook(:abort) { Qu.abort(self) }
+    end
 
     def constantize(class_name)
       return unless class_name

@@ -100,7 +100,7 @@ describe Qu::Payload do
       let(:error) { StandardError.new("Some kind of error") }
 
       before do
-        SimpleJob.any_instance.stub(:perform).and_raise(error)
+        subject.job.stub(:perform).and_raise(error)
       end
 
       it 'should not call complete' do
@@ -108,9 +108,15 @@ describe Qu::Payload do
         subject.perform
       end
 
-      it 'should run abort hook with exception' do
+      it 'should run abort hook' do
         subject.job.stub(:run_hook).and_yield
         subject.job.should_receive(:run_hook).with(:abort)
+        subject.perform
+      end
+
+      it 'should run failure hook' do
+        subject.job.stub(:run_hook).and_yield
+        subject.job.should_receive(:run_hook).with(:failure, error)
         subject.perform
       end
     end

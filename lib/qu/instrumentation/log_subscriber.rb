@@ -36,6 +36,10 @@ module Qu
         log_event(:abort, event)
       end
 
+      def failure(event)
+        log_event(:failure, event)
+      end
+
       private
 
       def log_event(type, event)

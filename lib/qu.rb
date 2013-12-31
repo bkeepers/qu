@@ -1,5 +1,6 @@
 require 'qu/version'
 require 'qu/logger'
+require 'qu/failure'
 require 'qu/hooks'
 require 'qu/payload'
 require 'qu/job'

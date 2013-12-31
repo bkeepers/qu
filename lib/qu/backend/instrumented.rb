@@ -5,6 +5,7 @@ module Qu
     # Internal: Backend that wraps all backends with instrumentation.
     class Instrumented < Base
       extend Forwardable
+      include Qu::Instrumenter
 
       def self.wrap(backend)
         if backend.nil?
@@ -14,7 +15,6 @@ module Qu
         end
       end
 
-      def_delegators :"Qu.instrumenter", :instrument
       def_delegators :@backend, :connection, :connection=
 
       def initialize(backend)
