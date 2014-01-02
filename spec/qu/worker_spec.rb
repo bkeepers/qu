@@ -11,6 +11,32 @@ describe Qu::Worker do
     end
   end
 
+  describe 'id' do
+    it 'should return hostname, pid, and queues' do
+      worker = Qu::Worker.new('a', 'b', :hostname => 'quspec', :pid => 123)
+      worker.id.should == 'quspec:123:a,b'
+    end
+
+    it "should default hostname and pid" do
+      worker = Qu::Worker.new('a', 'b')
+      worker.id.should eq("#{Socket.gethostname}:#{Process.pid}:a,b")
+    end
+
+    it 'should not expand star in queue names' do
+      Qu::Worker.new('a', '*').id.should =~ /a,*/
+    end
+  end
+
+  describe 'attributes' do
+    let(:attrs) do
+      {'hostname' => 'omgbbq', 'pid' => 987, 'queues' => ['a', '*']}
+    end
+
+    it 'should return hash of attributes' do
+      Qu::Worker.new(attrs).attributes.should == attrs
+    end
+  end
+
   describe 'work' do
     context 'with job in first queue' do
       before do
@@ -77,7 +103,7 @@ describe Qu::Worker do
     end
   end
 
-  describe "stopping when signal received" do
+  context "stopping when signal received" do
     shared_context "graceful shutdown" do
       before do
         @original_shutdown = Qu.graceful_shutdown
@@ -151,32 +177,6 @@ describe Qu::Worker do
         send_terminate_signal
         expect { subject.start }.to raise_exception(Qu::Worker::Abort)
       end
-    end
-  end
-
-  describe 'id' do
-    it 'should return hostname, pid, and queues' do
-      worker = Qu::Worker.new('a', 'b', :hostname => 'quspec', :pid => 123)
-      worker.id.should == 'quspec:123:a,b'
-    end
-
-    it "should default hostname and pid" do
-      worker = Qu::Worker.new('a', 'b')
-      worker.id.should eq("#{Socket.gethostname}:#{Process.pid}:a,b")
-    end
-
-    it 'should not expand star in queue names' do
-      Qu::Worker.new('a', '*').id.should =~ /a,*/
-    end
-  end
-
-  describe 'attributes' do
-    let(:attrs) do
-      {'hostname' => 'omgbbq', 'pid' => 987, 'queues' => ['a', '*']}
-    end
-
-    it 'should return hash of attributes' do
-      Qu::Worker.new(attrs).attributes.should == attrs
     end
   end
 end
