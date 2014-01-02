@@ -4,9 +4,6 @@ module Qu
   class Worker
     include Logger
 
-    # Private: The states that the worker can be in.
-    States = [:initialized, :running, :performing, :stopped]
-
     attr_accessor :queues
 
     class Abort < StandardError
@@ -19,7 +16,8 @@ module Qu
       @queues = queues.flatten
       self.attributes = @queues.pop if @queues.last.is_a?(Hash)
       @queues << 'default' if @queues.empty?
-      transition_to :initialized
+      @running = false
+      @performing = false
     end
 
     def id
@@ -42,11 +40,11 @@ module Qu
       queues.each { |queue_name|
         if payload = Qu.pop(queue_name)
           begin
-            transition_to :performing
+            @performing = true
             payload.perform
           ensure
             did_work = true
-            transition_to :running
+            @performing = false
             break
           end
         end
@@ -57,21 +55,26 @@ module Qu
 
     def start
       return if running?
-      transition_to :running
+      @running = true
 
       logger.warn "Worker #{id} starting"
       register_signal_handlers
 
       loop do
-        break unless running?
-        sleep(Qu.interval) unless work
+        unless running?
+          break
+        end
+
+        unless work
+          sleep Qu.interval
+        end
       end
     ensure
       stop
     end
 
     def stop
-      transition_to :stopped
+      @running = false
 
       # If the backend is blocked waiting for a new job, this will
       # break them out.
@@ -83,11 +86,11 @@ module Qu
     end
 
     def performing?
-      @state == :performing
+      @performing
     end
 
     def running?
-      @state == :running || performing?
+      @running
     end
 
     private
@@ -100,18 +103,10 @@ module Qu
       @hostname ||= Socket.gethostname
     end
 
-    def transition_to(state)
-      if States.include?(state)
-        @state = state
-      else
-        raise "Invalid transition: #{state} not one of #{States.join(', ')}"
-      end
-    end
-
     def register_signal_handlers
       logger.debug "Worker #{id} registering traps for INT and TERM signals"
-      trap(:INT)  { stop }
-      trap(:TERM) { stop }
+      trap(:INT)  { puts "Worker #{id} received INT, stopping"; stop }
+      trap(:TERM) { puts "Worker #{id} received TERM, stopping"; stop }
     end
   end
 end
