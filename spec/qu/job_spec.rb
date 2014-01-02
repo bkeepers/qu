@@ -74,4 +74,8 @@ describe Qu::Job do
       SimpleJob.create(9)
     end
   end
+
+  it 'delegates logger to Qu.logger' do
+    SimpleJob.new.logger.should be(Qu.logger)
+  end
 end

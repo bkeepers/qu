@@ -29,5 +29,10 @@ module Qu
     # Public: Feel free to override this as well.
     def perform
     end
+
+    # Public: Gives you access to Qu's logger in your job.
+    def logger
+      Qu.logger
+    end
   end
 end
