@@ -64,7 +64,7 @@ module Qu
 
       loop do
         break unless running?
-        work
+        sleep(Qu.interval) unless work
       end
     ensure
       stop

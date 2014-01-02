@@ -18,7 +18,9 @@ module Qu
   extend SingleForwardable
   extend self
 
-  attr_accessor :logger, :graceful_shutdown, :instrumenter
+  @interval = 5
+
+  attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval
 
   def_delegators :backend, :push, :pop, :complete, :abort, :size, :clear
 

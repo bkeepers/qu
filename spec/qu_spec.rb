@@ -23,6 +23,27 @@ describe Qu do
     end
   end
 
+  describe 'interval' do
+    it 'defaults to 5' do
+      Qu.interval.should be(5)
+    end
+  end
+
+  describe 'interval=' do
+    before do
+      @original_interval = Qu.interval
+    end
+
+    after do
+      Qu.interval = @original_interval
+    end
+
+    it 'updates interval' do
+      Qu.interval = 1
+      Qu.interval.should be(1)
+    end
+  end
+
   [
     :instrumenter,
     :instrumenter=,

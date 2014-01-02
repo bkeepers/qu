@@ -37,6 +37,24 @@ describe Qu::Worker do
     end
   end
 
+  describe 'start' do
+    it 'sleeps for interval if no work performed' do
+      begin
+        original_interval = Qu.interval
+        Qu.stub(:pop).and_return(nil)
+
+        Timeout.timeout(0.1) do
+          Qu::Worker.new('a', 'b', 'c').start
+        end
+        flunk # should never get here as it should timeout
+      rescue Timeout::Error, Qu::Worker::Stop
+        # all good
+      ensure
+        Qu.interval = original_interval
+      end
+    end
+  end
+
   describe 'work' do
     context 'with job in first queue' do
       before do
