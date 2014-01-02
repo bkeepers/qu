@@ -60,7 +60,7 @@ module Qu
       transition_to :running
 
       logger.warn "Worker #{id} starting"
-      handle_signals
+      register_signal_handlers
 
       loop do
         break unless running?
@@ -108,7 +108,7 @@ module Qu
       end
     end
 
-    def handle_signals
+    def register_signal_handlers
       logger.debug "Worker #{id} registering traps for INT and TERM signals"
       trap(:INT)  { stop }
       trap(:TERM) { stop }
