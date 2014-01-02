@@ -2,12 +2,10 @@ require 'spec_helper'
 require 'qu-redis'
 
 describe Qu::Backend::Redis do
-  it_should_behave_like 'a backend', :services => :redis
-  it_should_behave_like 'a backend interface'
+  if Qu::Specs.perform?(described_class, :redis)
+    it_should_behave_like 'a backend'
+    it_should_behave_like 'a backend interface'
 
-  let(:worker) { Qu::Worker.new('default') }
-
-  if service_running?(:redis)
     describe 'complete' do
       it 'should delete job' do
         payload = Qu::Payload.new(:klass => SimpleJob)

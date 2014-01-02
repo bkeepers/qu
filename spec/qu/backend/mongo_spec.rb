@@ -2,10 +2,10 @@ require 'spec_helper'
 require 'qu-mongo'
 
 describe Qu::Backend::Mongo do
-  it_should_behave_like 'a backend', :services => :mongo
-  it_should_behave_like 'a backend interface'
+  if Qu::Specs.perform?(described_class, :mongo)
+    it_should_behave_like 'a backend'
+    it_should_behave_like 'a backend interface'
 
-  if service_running?(:mongo)
     describe 'connection' do
       it 'should default the qu database' do
         subject.connection.should be_instance_of(Mongo::DB)

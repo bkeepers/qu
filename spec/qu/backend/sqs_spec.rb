@@ -22,14 +22,12 @@ describe Qu::Backend::SQS do
     Net::HTTP.new(host, port).request(Net::HTTP::Delete.new("/"))
   end
 
-  before(:each) do
-    [
-      :sqs,
-    ].each do |service|
-      reset_service(service) if service_running?(service)
+  if Qu::Specs.perform?(described_class, :sqs)
+    before(:each) do
+      reset_service(:sqs)
     end
-  end
 
-  it_should_behave_like 'a backend', :services => :sqs
-  it_should_behave_like 'a backend interface'
+    it_should_behave_like 'a backend'
+    it_should_behave_like 'a backend interface'
+  end
 end
