@@ -37,21 +37,22 @@ module Qu
     end
 
     def work
-      job = nil
-      queues.each { |queue_name|
-        job = Qu.pop(queue_name)
+      did_work = false
 
-        break if job
+      queues.each { |queue_name|
+        if payload = Qu.pop(queue_name)
+          begin
+            transition_to :performing
+            payload.perform
+          ensure
+            did_work = true
+            transition_to :running
+            break
+          end
+        end
       }
 
-      if job
-        begin
-          transition_to :performing
-          job.perform
-        ensure
-          transition_to :running
-        end
-      end
+      did_work
     end
 
     def start

@@ -12,29 +12,67 @@ describe Qu::Worker do
   end
 
   describe 'work' do
-    context "with job" do
+    context 'with job in first queue' do
       before do
         Qu.stub(:pop).and_return(job)
       end
 
-      it 'should pop a job' do
+      it 'should pop a payload and perform it' do
         Qu.should_receive(:pop).with(subject.queues.first).and_return(job)
-        subject.work
-      end
-
-      it 'should perform the job' do
         job.should_receive(:perform)
         subject.work
       end
+
+      it 'returns true' do
+        subject.work.should be(true)
+      end
     end
 
-    context "with no job" do
+    context 'with job in a middle of queue' do
+      before do
+        Qu.stub(:pop).and_return(nil, job)
+      end
+
+      it 'should not pop once job is found' do
+        job.should_receive(:perform)
+        Qu.should_not_receive(:pop).with('c')
+        Qu::Worker.new('a', 'b', 'c').work.should be(true)
+      end
+    end
+
+    context 'with job in last queue' do
+      before do
+        Qu.stub(:pop).and_return(nil, nil, nil, job)
+      end
+
+      it 'pops until job found and performs it' do
+        job.should_receive(:perform)
+        Qu::Worker.new('a', 'b', 'c', 'd').work
+      end
+
+      it 'returns true' do
+        Qu::Worker.new('a', 'b', 'c', 'd').work.should be(true)
+      end
+    end
+
+    context 'with no job in any queue' do
       before do
         Qu.stub(:pop).and_return(nil)
       end
 
       it 'not error' do
         expect { subject.work }.to_not raise_error
+      end
+
+      it 'pops once for each queue' do
+        Qu.should_receive(:pop).with('a').once.ordered.and_return(nil)
+        Qu.should_receive(:pop).with('b').once.ordered.and_return(nil)
+        Qu.should_receive(:pop).with('c').once.ordered.and_return(nil)
+        Qu::Worker.new('a', 'b', 'c').work
+      end
+
+      it 'returns false' do
+        Qu::Worker.new('a', 'b', 'c').work.should be(false)
       end
     end
   end
