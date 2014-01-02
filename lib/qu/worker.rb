@@ -4,6 +4,9 @@ module Qu
   class Worker
     include Logger
 
+    # Private: The states that the worker can be in.
+    States = [:initialized, :running, :performing, :stopped]
+
     attr_accessor :queues
 
     class Abort < StandardError
@@ -16,24 +19,21 @@ module Qu
       @queues = queues.flatten
       self.attributes = @queues.pop if @queues.last.is_a?(Hash)
       @queues << 'default' if @queues.empty?
-      @running = false
-      @performing = false
+      transition_to :initialized
     end
 
-    def attributes=(attrs)
-      attrs.each do |attr, value|
-        self.instance_variable_set("@#{attr}", value)
-      end
+    def id
+      @id ||= "#{hostname}:#{pid}:#{queues.join(',')}"
     end
 
     def attributes
       {'hostname' => hostname, 'pid' => pid, 'queues' => queues}
     end
 
-    def handle_signals
-      logger.debug "Worker #{id} registering traps for INT and TERM signals"
-      trap(:INT)  { stop }
-      trap(:TERM) { stop }
+    def attributes=(attrs)
+      attrs.each do |attr, value|
+        self.instance_variable_set("@#{attr}", value)
+      end
     end
 
     def work
@@ -46,32 +46,31 @@ module Qu
 
       if job
         begin
-          @performing = true
+          transition_to :performing
           job.perform
         ensure
-          @performing = false
+          transition_to :running
         end
       end
     end
 
     def start
-      return if @running
-      @running = true
+      return if running?
+      transition_to :running
 
       logger.warn "Worker #{id} starting"
       handle_signals
 
       loop do
-        break unless @running
+        break unless running?
         work
       end
     ensure
-      logger.debug "Worker #{id} stopping"
-      @running = false
+      stop
     end
 
     def stop
-      @running = false
+      transition_to :stopped
 
       # If the backend is blocked waiting for a new job, this will
       # break them out.
@@ -82,9 +81,15 @@ module Qu
       raise Abort unless Qu.graceful_shutdown
     end
 
-    def id
-      @id ||= "#{hostname}:#{pid}:#{queues.join(',')}"
+    def performing?
+      @state == :performing
     end
+
+    def running?
+      @state == :running || performing?
+    end
+
+    private
 
     def pid
       @pid ||= Process.pid
@@ -94,12 +99,18 @@ module Qu
       @hostname ||= Socket.gethostname
     end
 
-    def performing?
-      !!@performing
+    def transition_to(state)
+      if States.include?(state)
+        @state = state
+      else
+        raise "Invalid transition: #{state} not one of #{States.join(', ')}"
+      end
     end
 
-    def running?
-      !!@running
+    def handle_signals
+      logger.debug "Worker #{id} registering traps for INT and TERM signals"
+      trap(:INT)  { stop }
+      trap(:TERM) { stop }
     end
   end
 end

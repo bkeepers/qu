@@ -116,34 +116,19 @@ describe Qu::Worker do
     end
   end
 
-  describe 'pid' do
-    it 'should equal process id' do
-      subject.pid.should == Process.pid
-    end
-
-    it 'should use provided pid' do
-      Qu::Worker.new(:pid => 1).pid.should == 1
-    end
-  end
-
   describe 'id' do
     it 'should return hostname, pid, and queues' do
       worker = Qu::Worker.new('a', 'b', :hostname => 'quspec', :pid => 123)
       worker.id.should == 'quspec:123:a,b'
     end
 
+    it "should default hostname and pid" do
+      worker = Qu::Worker.new('a', 'b')
+      worker.id.should eq("#{Socket.gethostname}:#{Process.pid}:a,b")
+    end
+
     it 'should not expand star in queue names' do
       Qu::Worker.new('a', '*').id.should =~ /a,*/
-    end
-  end
-
-  describe 'hostname' do
-    it 'should get hostname' do
-      subject.hostname.should_not be_empty
-    end
-
-    it 'should use provided hostname' do
-      Qu::Worker.new(:hostname => 'quspec').hostname.should == 'quspec'
     end
   end
 
