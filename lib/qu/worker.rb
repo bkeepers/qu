@@ -6,9 +6,12 @@ module Qu
 
     attr_accessor :queues
 
+    # Internal: Raised when signal received, no job is being performed, and
+    # graceful shutdown is disabled.
     class Abort < StandardError
     end
 
+    # Internal: Raised when signal received and no job is being performed.
     class Stop < Exception
     end
 
