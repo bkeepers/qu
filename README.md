@@ -125,6 +125,7 @@ However, if you do need to customize it, you can by calling the `Qu.configure`:
 ``` ruby
 Qu.configure do |c|
   c.logger = Logger.new('log/qu.log')
+  c.graceful_shutdown = true
 end
 ```
 
