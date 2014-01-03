@@ -150,7 +150,6 @@ delayed_job was a brilliantly simple pioneer in the world of database-backed que
 Resque, the wiser relative of delayed_job, fixes most of those issues. But in doing so, it forces some of its beliefs on you, and sometimes those beliefs just don't make sense for your environment. Here are some of the flaws of Resque:
 
 * Redis is a great queue backend, but it doesn't make sense for every environment.
-* Workers lose jobs when they are forced to quit. This has especially been an issue on Heroku.
 * Forking before each job prevents memory leaks, but it is terribly inefficient in environments with a lot of fast jobs (the resque-jobs-per-fork plugin alleviates this)
 
 Those shortcomings lead us to write Qu. It is not perfect, but we hope to overcome the issues we faced with other queuing libraries.
