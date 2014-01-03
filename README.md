@@ -88,7 +88,7 @@ However, if you have some background jobs that are more or less important, or so
 Jobs can be placed in a specific queue by setting the queue:
 
 ``` ruby
-class CallThePresident < Qu:Job
+class CallThePresident < Qu::Job
   queue :urgent
 
   def initialize(message)
