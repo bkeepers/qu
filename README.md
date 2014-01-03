@@ -48,11 +48,11 @@ Jobs are defined by extending the `Qu::Job` class:
 ``` ruby
 class ProcessPresentation < Qu::Job
   def initialize(presentation_id)
-    @presentation = Presentation.find(presentation_id)
+    @presentation_id = presentation_id
   end
 
   def perform
-    @presentation.process!
+    Presentation.find(@presentation_id).process!
   end
 end
 ```
