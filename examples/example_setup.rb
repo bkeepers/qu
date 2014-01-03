@@ -12,6 +12,5 @@ backend.connection.flushdb
 Qu.configure do |config|
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::DEBUG
-  config.graceful_shutdown = false
   config.backend = backend
 end
