@@ -32,12 +32,6 @@ module Qu
       {'hostname' => hostname, 'pid' => pid, 'queues' => queues}
     end
 
-    def attributes=(attrs)
-      attrs.each do |attr, value|
-        self.instance_variable_set("@#{attr}", value)
-      end
-    end
-
     def work
       did_work = false
 
@@ -98,6 +92,12 @@ module Qu
     end
 
     private
+
+    def attributes=(attrs)
+      attrs.each do |attr, value|
+        self.instance_variable_set("@#{attr}", value)
+      end
+    end
 
     def pid
       @pid ||= Process.pid
