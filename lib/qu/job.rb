@@ -23,7 +23,7 @@ module Qu
 
     # Public: Feel free to override this in your class with specific arg names
     # and all that.
-    def initialize(*args)
+    def initialize(*)
     end
 
     # Public: Feel free to override this as well.
