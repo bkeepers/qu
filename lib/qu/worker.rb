@@ -16,7 +16,7 @@ module Qu
     end
 
     def initialize(*queues)
-      @queues = queues.flatten.map { |q| q.strip }
+      @queues = queues.flatten.map { |q| q.to_s.strip }
       @queues << 'default' if @queues.empty?
       @running = false
       @performing = false
