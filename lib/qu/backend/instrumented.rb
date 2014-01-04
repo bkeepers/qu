@@ -44,9 +44,9 @@ module Qu
 
       def pop(queue_name = 'default')
         instrument("pop.#{InstrumentationNamespace}") { |ipayload|
-          ipayload[:queue_name] = queue_name
           result = @backend.pop(queue_name)
-          ipayload[:empty] = result.nil?
+          ipayload[:payload] = result
+          ipayload[:queue_name] = queue_name
           result
         }
       end

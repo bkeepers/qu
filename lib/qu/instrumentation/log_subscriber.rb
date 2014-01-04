@@ -6,18 +6,7 @@ module Qu
   module Instrumentation
     class LogSubscriber < ::ActiveSupport::LogSubscriber
       def pop(event)
-        return unless logger.debug?
-
-        queue_name = event.payload[:queue_name]
-        empty = event.payload[:empty]
-
-        description = "Qu pop"
-        details = "queue_name=#{queue_name} empty=#{empty}"
-
-        name = '%s (%.1fms)' % [description, event.duration]
-        name_color = odd? ? CYAN : MAGENTA
-
-        debug "  #{color(name, name_color, true)}  [ #{details} ]"
+        log_event(:pop, event)
       end
 
       def push(event)
@@ -45,22 +34,33 @@ module Qu
       def log_event(type, event)
         return unless logger.debug?
 
-        payload = event.payload[:payload]
-
         description = "Qu #{type}"
-        details = "payload=#{payload}"
+        details = []
+
+        if queue_name = event.payload[:queue_name]
+          details << "queue_name=#{queue_name}"
+        end
+
+        if payload = event.payload[:payload]
+          details << "payload=#{payload}"
+        end
 
         name = '%s (%.1fms)' % [description, event.duration]
         name_color = odd? ? CYAN : MAGENTA
 
-        debug "  #{color(name, name_color, true)}  [ #{details} ]"
+        debug "  #{color(name, name_color, true)}  [ #{details.join(' ')} ]"
       end
 
       def odd?
         @odd_or_even = !@odd_or_even
       end
     end
+
+    LogSubscriber.logger = Qu.logger
+    LogSubscriber.attach_to :qu
   end
 end
 
-Qu::Instrumentation::LogSubscriber.attach_to :qu
+Qu.configure do |config|
+  config.instrumenter = ActiveSupport::Notifications
+end
