@@ -1,10 +1,6 @@
 # Example of how Qu works with graceful shutdown turned on.
 require_relative './example_setup'
 
-Qu.configure do |config|
-  config.graceful_shutdown = true
-end
-
 class MaybeJob < Qu::Job
   before_push :determine_for_real
   after_push :log_push

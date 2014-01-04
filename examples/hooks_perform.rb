@@ -1,10 +1,6 @@
 # Example of how Qu works with graceful shutdown turned on.
 require_relative './example_setup'
 
-Qu.configure do |config|
-  config.graceful_shutdown = true
-end
-
 class CookJob < Qu::Job
   around_perform :instrument
 
