@@ -5,7 +5,7 @@ Qu.configure do |config|
   config.graceful_shutdown = true
 end
 
-class Cook < Qu::Job
+class CookJob < Qu::Job
   around_perform :instrument
 
   before_perform :purchase
@@ -34,6 +34,6 @@ class Cook < Qu::Job
   end
 end
 
-Cook.create
+CookJob.create
 
 work_and_die
