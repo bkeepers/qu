@@ -9,6 +9,15 @@ describe Qu::Worker do
       Qu::Worker.new('default').queues.should == ['default']
       Qu::Worker.new(['default']).queues.should == ['default']
     end
+
+    it 'should use specified if any' do
+      Qu::Worker.new('a', 'b').queues.should == ['a', 'b']
+      Qu::Worker.new(['a', 'b']).queues.should == ['a', 'b']
+    end
+
+    it 'should drop queue name whitespace' do
+      Qu::Worker.new(' a ', ' b ').queues.should == ['a', 'b']
+    end
   end
 
   describe 'id' do

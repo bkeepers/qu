@@ -18,6 +18,7 @@ module Qu
     def initialize(*queues)
       @queues = queues.flatten
       self.attributes = @queues.pop if @queues.last.is_a?(Hash)
+      @queues.map! { |q| q.strip }
       @queues << 'default' if @queues.empty?
       @running = false
       @performing = false
