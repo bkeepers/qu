@@ -17,6 +17,12 @@ class SleepJob < Qu::Job
   end
 end
 
+# job created
 SleepJob.create 3
+Qu.logger.info "# of jobs: #{Qu.size}"
 
+# die before job is performed
 work_and_die 0.1
+
+# job is aborted and pushed back on queue
+Qu.logger.info "# of jobs: #{Qu.size}"
