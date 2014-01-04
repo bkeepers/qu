@@ -17,14 +17,6 @@ class SleepJob < Qu::Job
   end
 end
 
-SleepJob.create
+SleepJob.create 3
 
-# tell qu worker to terminate after a wee bit
-Thread.new { sleep 0.1; Process.kill 'SIGTERM', $$ }
-
-worker = Qu::Worker.new
-begin
-  worker.start
-rescue Qu::Worker::Stop
-  puts 'Received stop. Worker done.'
-end
+work_and_die 1

@@ -14,3 +14,23 @@ Qu.configure do |config|
   config.logger.level = Logger::DEBUG
   config.backend = backend
 end
+
+def work_and_die(die_after_seconds = 1, *queues)
+  queues = queues.flatten
+
+  # tell qu worker to terminate after N seconds by sending terminate signal
+  Thread.new {
+    sleep die_after_seconds
+    Process.kill 'SIGTERM', $$
+  }
+
+  worker = Qu::Worker.new(*queues)
+
+  begin
+    worker.start
+  rescue Qu::Worker::Stop
+    puts 'worker stopped'
+  rescue Qu::Worker::Abort
+    puts 'worker aborted'
+  end
+end
