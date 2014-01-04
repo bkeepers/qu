@@ -1,23 +1,31 @@
 # Example of how Qu works with graceful shutdown turned on.
 require_relative './example_setup'
 
-class CallThePresident < Qu::Job
+class CallThePresidentJob < Qu::Job
   queue :low
 
+  def initialize(message)
+    @message = message
+  end
+
   def perform
-    logger.info 'calling the president'
+    logger.info "calling the president: #{@message}"
   end
 end
 
-class CallTheNunes < Qu::Job
+class CallTheNunesJob < Qu::Job
   queue :high
 
+  def initialize(message)
+    @message = message
+  end
+
   def perform
-    logger.info 'calling the nunes'
+    logger.info "calling the nunes: #{@message}"
   end
 end
 
-CallThePresident.create('blah blah blah...')
-CallTheNunes.create('blah blah blah...')
+CallThePresidentJob.create('blah blah blah...')
+CallTheNunesJob.create('blah blah blah...')
 
-work_and_die
+work_and_die 1, :high, :low
