@@ -16,15 +16,13 @@ Qu.configure do |config|
 end
 
 def work_and_die(die_after_seconds = 1, *queues)
-  queues = queues.flatten
-
   # tell qu worker to terminate after N seconds by sending terminate signal
   Thread.new {
     sleep die_after_seconds
     Process.kill 'SIGTERM', $$
   }
 
-  worker = Qu::Worker.new(*queues)
+  worker = Qu::Worker.new(queues)
 
   begin
     worker.start
