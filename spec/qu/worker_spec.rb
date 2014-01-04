@@ -21,28 +21,15 @@ describe Qu::Worker do
   end
 
   describe 'id' do
-    it 'should return hostname, pid, and queues' do
-      worker = Qu::Worker.new('a', 'b', :hostname => 'quspec', :pid => 123)
-      worker.id.should == 'quspec:123:a,b'
-    end
-
     it "should default hostname and pid" do
+      Socket.stub(:gethostname).and_return("foo")
+      Process.stub(:pid).and_return(12345)
       worker = Qu::Worker.new('a', 'b')
-      worker.id.should eq("#{Socket.gethostname}:#{Process.pid}:a,b")
+      worker.id.should eq("foo:12345:a,b")
     end
 
     it 'should not expand star in queue names' do
       Qu::Worker.new('a', '*').id.should =~ /a,*/
-    end
-  end
-
-  describe 'attributes' do
-    let(:attrs) do
-      {'hostname' => 'omgbbq', 'pid' => 987, 'queues' => ['a', '*']}
-    end
-
-    it 'should return hash of attributes' do
-      Qu::Worker.new(attrs).attributes.should == attrs
     end
   end
 

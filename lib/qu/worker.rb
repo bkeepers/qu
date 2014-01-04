@@ -16,9 +16,7 @@ module Qu
     end
 
     def initialize(*queues)
-      @queues = queues.flatten
-      self.attributes = @queues.pop if @queues.last.is_a?(Hash)
-      @queues.map! { |q| q.strip }
+      @queues = queues.flatten.map { |q| q.strip }
       @queues << 'default' if @queues.empty?
       @running = false
       @performing = false
@@ -26,10 +24,6 @@ module Qu
 
     def id
       @id ||= "#{hostname}:#{pid}:#{queues.join(',')}"
-    end
-
-    def attributes
-      {'hostname' => hostname, 'pid' => pid, 'queues' => queues}
     end
 
     def work
@@ -92,12 +86,6 @@ module Qu
     end
 
     private
-
-    def attributes=(attrs)
-      attrs.each do |attr, value|
-        self.instance_variable_set("@#{attr}", value)
-      end
-    end
 
     def pid
       @pid ||= Process.pid
