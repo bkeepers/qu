@@ -12,7 +12,7 @@ module Qu
     end
 
     # Internal: Raised when signal received and no job is being performed.
-    class Stop < Exception
+    class Stop < StandardError
     end
 
     def initialize(*queues)
