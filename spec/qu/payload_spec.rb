@@ -89,6 +89,11 @@ describe Qu::Payload do
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
 
+      it 'should not call complete' do
+        Qu.should_not_receive(:complete)
+        lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
+      end
+
       it 'should run abort hook' do
         subject.job.stub(:run_hook).and_yield
         subject.job.should_receive(:run_hook).with(:abort)
