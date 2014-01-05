@@ -123,6 +123,11 @@ describe Qu::Payload do
         subject.job.should_receive(:run_hook).with(:fail, error)
         subject.perform
       end
+
+      it 'should call create for failure backend' do
+        Qu::Failure.should_receive(:create).with(subject, error)
+        subject.perform
+      end
     end
   end
 

@@ -38,6 +38,7 @@ module Qu
       raise
     rescue => exception
       job.run_hook(:fail, exception) { Qu.fail(self) }
+      Qu::Failure.create(self, exception)
     end
 
     # Internal: Pushes payload to backend.
