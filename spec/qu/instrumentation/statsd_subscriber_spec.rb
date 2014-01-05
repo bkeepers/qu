@@ -69,27 +69,27 @@ describe Qu::Instrumentation::StatsdSubscriber do
     end
   end
 
-  it "instruments abort when exception happens" do
+  it "instruments fail when exception happens" do
     payload = SimpleJob.create
     payload.job.stub(:perform).and_raise(StandardError.new)
     begin
       payload.perform
       flunk # should not get here
     rescue => exception
-      assert_timer "qu.op.abort"
-      assert_timer "qu.job.SimpleJob.abort"
+      assert_timer "qu.op.fail"
+      assert_timer "qu.job.SimpleJob.fail"
     end
   end
 
-  it "instruments failure when exception happens" do
+  it "instruments fail" do
     payload = SimpleJob.create
     payload.job.stub(:perform).and_raise(StandardError.new)
     begin
       payload.perform
       flunk # should not get here
     rescue => exception
-      assert_timer "qu.op.failure"
-      assert_timer "qu.job.SimpleJob.failure"
+      assert_timer "qu.op.fail"
+      assert_timer "qu.job.SimpleJob.fail"
     end
   end
 end

@@ -30,6 +30,9 @@ module Qu
         end
       end
 
+      def fail(payload)
+      end
+
       def complete(payload)
       end
 

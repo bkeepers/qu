@@ -63,6 +63,7 @@ RSpec.configure do |config|
       :pop => nil,
       :complete => nil,
       :abort => nil,
+      :fail => nil,
     })
   end
 end

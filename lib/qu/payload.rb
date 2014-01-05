@@ -32,13 +32,12 @@ module Qu
         end
       end
 
-      complete
+      job.run_hook(:complete) { Qu.complete(self) }
     rescue Qu::Worker::Abort
-      abort
+      job.run_hook(:abort) { Qu.abort(self) }
       raise
     rescue => exception
-      abort
-      job.run_hook(:failure, exception) { Qu::Failure.create(self, exception) }
+      job.run_hook(:fail, exception) { Qu.fail(self) }
     end
 
     # Internal: Pushes payload to backend.
@@ -65,14 +64,6 @@ module Qu
     end
 
     private
-
-    def complete
-      job.run_hook(:complete) { Qu.complete(self) }
-    end
-
-    def abort
-      job.run_hook(:abort) { Qu.abort(self) }
-    end
 
     def constantize(class_name)
       return unless class_name

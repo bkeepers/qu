@@ -24,6 +24,9 @@ module Qu
         connection.rpush("queue:#{payload.queue}", payload.id)
       end
 
+      def fail(payload)
+      end
+
       def complete(payload)
         connection.del("job:#{payload.id}")
       end

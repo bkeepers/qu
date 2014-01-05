@@ -20,6 +20,10 @@ shared_examples_for 'a backend interface' do
     subject.abort payload
   end
 
+  it "can fail a payload" do
+    subject.fail payload
+  end
+
   it "can pop" do
     subject.pop
   end
@@ -127,6 +131,16 @@ shared_examples_for 'a backend' do
       subject.size(payload.queue).should == 0
       subject.abort(popped_payload)
       subject.size(payload.queue).should == 1
+    end
+  end
+
+  describe 'fail' do
+    before do
+      subject.fail(payload)
+    end
+
+    it 'should add the job back on the queue' do
+      subject.fail(payload)
     end
   end
 

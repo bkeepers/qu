@@ -22,7 +22,7 @@ module Qu
 
   attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval
 
-  def_delegators :backend, :push, :pop, :complete, :abort, :size, :clear
+  def_delegators :backend, :push, :pop, :complete, :abort, :fail, :size, :clear
 
   def backend
     @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
