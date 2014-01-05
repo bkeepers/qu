@@ -42,6 +42,13 @@ module Qu
         }
       end
 
+      def fail(payload)
+        instrument("fail.#{InstrumentationNamespace}") { |ipayload|
+          ipayload[:payload] = payload
+          @backend.fail(payload)
+        }
+      end
+
       def pop(queue_name = 'default')
         instrument("pop.#{InstrumentationNamespace}") { |ipayload|
           result = @backend.pop(queue_name)

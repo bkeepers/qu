@@ -34,6 +34,17 @@ module Qu
         end
       end
 
+      def fail(payload)
+        if fake_sqs?
+          # should only get here in localhost; it is ok to remove this when
+          # fake_sqs supports changing a messages visibility timeout
+          payload.message.delete if payload.message
+          push(payload)
+        else
+          payload.message.visibility_timeout = 0
+        end
+      end
+
       def pop(queue_name = 'default')
         begin
           queue = connection.queues.named(queue_name)

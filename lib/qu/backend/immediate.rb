@@ -16,6 +16,9 @@ module Qu
       def abort(payload)
       end
 
+      def fail(payload)
+      end
+
       def pop(queue = 'default')
       end
 
