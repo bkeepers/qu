@@ -29,18 +29,24 @@ module Qu
       # Private
       def update
         op = @name.split('.', 2).first
+        return unless op
 
-        if op == "pop"
-          update_timer "qu.pop"
+        update_timer "qu.op.#{op}"
 
-          if queue_name = @payload[:queue_name]
-            update_timer "qu.pop.#{queue_name}"
+        case op
+        when "push"
+          if payload = @payload[:payload]
+            update_timer "qu.queue.#{payload.queue}.#{op}"
+            update_timer "qu.job.#{payload.klass}.#{op}"
           end
-        end
-
-        if payload = @payload[:payload]
-          update_timer "qu.#{op}"
-          update_timer "qu.#{op}.#{payload.klass}"
+        when "pop"
+          if queue_name = @payload[:queue_name]
+            update_timer "qu.queue.#{queue_name}.#{op}"
+          end
+        else
+          if payload = @payload[:payload]
+            update_timer "qu.job.#{payload.klass}.#{op}"
+          end
         end
       end
     end

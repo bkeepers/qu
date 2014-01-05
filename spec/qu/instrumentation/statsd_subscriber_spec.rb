@@ -32,28 +32,29 @@ describe Qu::Instrumentation::StatsdSubscriber do
   it "instruments pop" do
     worker = Qu::Worker.new
     worker.work
-    assert_timer "qu.pop"
-    assert_timer "qu.pop.default"
+    assert_timer "qu.op.pop"
+    assert_timer "qu.queue.default.pop"
   end
 
   it "instruments push" do
     payload = SimpleJob.create
-    assert_timer "qu.push"
-    assert_timer "qu.push.SimpleJob"
+    assert_timer "qu.op.push"
+    assert_timer "qu.job.SimpleJob.push"
+    assert_timer "qu.queue.default.push"
   end
 
   it "instruments perform" do
     payload = SimpleJob.create
     payload.perform
-    assert_timer "qu.perform"
-    assert_timer "qu.perform.SimpleJob"
+    assert_timer "qu.op.perform"
+    assert_timer "qu.job.SimpleJob.perform"
   end
 
   it "instruments complete" do
     payload = SimpleJob.create
     payload.perform
-    assert_timer "qu.complete"
-    assert_timer "qu.complete.SimpleJob"
+    assert_timer "qu.op.complete"
+    assert_timer "qu.job.SimpleJob.complete"
   end
 
   it "instruments abort" do
@@ -63,8 +64,8 @@ describe Qu::Instrumentation::StatsdSubscriber do
       payload.perform
       flunk # should not get here
     rescue Qu::Worker::Abort
-      assert_timer "qu.abort"
-      assert_timer "qu.abort.SimpleJob"
+      assert_timer "qu.op.abort"
+      assert_timer "qu.job.SimpleJob.abort"
     end
   end
 
@@ -75,8 +76,8 @@ describe Qu::Instrumentation::StatsdSubscriber do
       payload.perform
       flunk # should not get here
     rescue => exception
-      assert_timer "qu.abort"
-      assert_timer "qu.abort.SimpleJob"
+      assert_timer "qu.op.abort"
+      assert_timer "qu.job.SimpleJob.abort"
     end
   end
 end
