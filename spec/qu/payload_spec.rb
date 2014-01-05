@@ -113,6 +113,11 @@ describe Qu::Payload do
         subject.perform
       end
 
+      it 'should call fail' do
+        Qu.should_receive(:fail).with(subject)
+        subject.perform
+      end
+
       it 'should run fail hook' do
         subject.job.stub(:run_hook).and_yield
         subject.job.should_receive(:run_hook).with(:fail, error)
