@@ -13,7 +13,7 @@ module Qu
     #
     # Returns nothing.
     def self.create(payload, exception)
-      instrument("failure.#{InstrumentationNamespace}") do |ipayload|
+      instrument("failure_create.#{InstrumentationNamespace}") do |ipayload|
         ipayload[:payload] = payload
         ipayload[:exception] = exception
 
