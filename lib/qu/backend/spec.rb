@@ -115,8 +115,8 @@ shared_examples_for 'a backend' do
   end
 
   describe 'complete' do
-    it 'should be defined' do
-      subject.respond_to?(:complete).should be_true
+    it 'should be defined and accept payload' do
+      subject.complete(payload)
     end
   end
 
@@ -135,11 +135,7 @@ shared_examples_for 'a backend' do
   end
 
   describe 'fail' do
-    before do
-      subject.fail(payload)
-    end
-
-    it 'should add the job back on the queue' do
+    it 'should be defined and accept payload' do
       subject.fail(payload)
     end
   end
