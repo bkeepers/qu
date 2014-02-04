@@ -5,6 +5,11 @@ require 'active_support/log_subscriber'
 module Qu
   module Instrumentation
     class LogSubscriber < ::ActiveSupport::LogSubscriber
+
+      def logger
+        LogSubscriber.logger
+      end
+
       def pop(event)
         log_event(:pop, event)
       end

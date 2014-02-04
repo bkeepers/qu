@@ -16,7 +16,7 @@ Qu was created to overcome some shortcomings in the existing queuing libraries t
 
 ## Installation
 
-### Rails 3
+### Rails 3 and 4
 
 Decide which backend you want to use and add the gem to your `Gemfile`.
 
