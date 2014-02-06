@@ -24,25 +24,11 @@ module Qu
       end
 
       def abort(payload)
-        if fake_sqs?
-          # should only get here in localhost; it is ok to remove this when
-          # fake_sqs supports changing a messages visibility timeout
-          payload.message.delete if payload.message
-          push(payload)
-        else
-          payload.message.visibility_timeout = 0
-        end
+        payload.message.visibility_timeout = 0
       end
 
       def fail(payload)
-        if fake_sqs?
-          # should only get here in localhost; it is ok to remove this when
-          # fake_sqs supports changing a messages visibility timeout
-          payload.message.delete if payload.message
-          push(payload)
-        else
-          payload.message.visibility_timeout = 0
-        end
+        payload.message.visibility_timeout = 0
       end
 
       def pop(queue_name = 'default')
@@ -87,11 +73,6 @@ module Qu
         @connection ||= ::AWS::SQS.new
       end
 
-      private
-
-      def fake_sqs?
-        ::AWS.config.sqs_endpoint == "localhost"
-      end
     end
   end
 end
