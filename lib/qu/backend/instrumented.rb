@@ -1,25 +1,12 @@
 require 'forwardable'
+require 'qu/backend/wrapper'
 
 module Qu
   module Backend
     # Internal: Backend that wraps all backends with instrumentation.
     class Instrumented < Base
-      extend Forwardable
+      include Wrapper
       include Qu::Instrumenter
-
-      def self.wrap(backend)
-        if backend.nil?
-          backend
-        else
-          new(backend)
-        end
-      end
-
-      def_delegators :@backend, :connection, :connection=
-
-      def initialize(backend)
-        @backend = backend
-      end
 
       def push(payload)
         instrument("push.#{InstrumentationNamespace}") { |ipayload|

@@ -8,6 +8,23 @@ Dir[root_path.join("spec/support/**/*.rb")].each { |f| require f }
 
 module Qu
   module Specs
+
+    def self.setup_fake_sqs
+      AWS.config(
+        use_ssl:            false,
+        sqs_endpoint:       'localhost',
+        sqs_port:           5111,
+        access_key_id:      'asdf',
+        secret_access_key:  'asdf',
+      )
+    end
+
+    def self.reset_service(service)
+      host = AWS.config.send("#{service}_endpoint")
+      port = AWS.config.send("#{service}_port")
+      Net::HTTP.new(host, port).request(Net::HTTP::Delete.new("/"))
+    end
+
     def self.perform?(class_under_spec, *service_names)
       services = service_names.flatten
       return true if services.size == 0
@@ -53,6 +70,7 @@ module Qu
         false
       end
     rescue => exception
+      puts "Failed to talk to service #{exception.message}\n#{exception.backtrace.join("\n")}"
       false
     end
   end

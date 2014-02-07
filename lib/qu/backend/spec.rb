@@ -5,6 +5,20 @@ class CustomQueue < Qu::Job
   queue :custom
 end
 
+class SimpleNumericJob < Qu::Job
+  attr_reader :numbers
+  def initialize(*numbers)
+    @numbers = numbers
+  end
+end
+
+class OtherNumericJob < Qu::Job
+  attr_reader :numbers
+  def initialize(*numbers)
+    @numbers = numbers
+  end
+end
+
 shared_examples_for 'a backend interface' do
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
@@ -174,4 +188,59 @@ shared_examples_for 'a backend' do
       subject.connection.should_not be_nil
     end
   end
+end
+
+shared_examples_for 'a batch capable backend' do
+
+  def create_payloads(size)
+    (1..size).map do |number|
+      Qu::Payload.new( :klass => SimpleNumericJob, :queue => 'default', :args => number )
+    end
+  end
+
+  describe 'pushing many messages' do
+
+    it 'should push them all at once' do
+      expect(subject.size).to eq(0)
+
+      numbers = create_payloads(10)
+
+      subject.batch_push( numbers )
+      expect(subject.size).to eq(10)
+    end
+
+    it 'should push and all messages' do
+      numbers = create_payloads(10)
+
+      subject.batch_push( numbers )
+
+      result = subject.batch_pop('default', 10).map { |payload| payload.args }
+
+      expect(result.sort).to eq((1..10).to_a)
+      expect(subject.size).to eq(0)
+    end
+
+  end
+
+  describe 'when completing many messages' do
+
+    it 'should complete all payloads' do
+      numbers = create_payloads(10)
+      subject.batch_push( numbers )
+
+
+    end
+
+  end
+
+  describe 'batch abort' do
+    it 'should abort all messages'
+    it 'should abort all messages independent of type'
+  end
+
+  describe 'batch fail' do
+    it 'should fail all messages'
+    it 'should fail all messages independent of type'
+  end
+
 end
