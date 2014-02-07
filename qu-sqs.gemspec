@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'aws-sdk', '~> 1.0'
   s.add_dependency 'qu', Qu::VERSION
 
-  s.add_development_dependency 'fake_sqs', '~> 0.0.10'
+  s.add_development_dependency 'fake_sqs', '~> 0.1.0'
 end
