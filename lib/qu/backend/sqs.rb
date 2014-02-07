@@ -24,11 +24,11 @@ module Qu
       end
 
       def abort(payload)
-        payload.message.visibility_timeout = 0
+        payload.message.visibility_timeout = 0 if payload.message
       end
 
       def fail(payload)
-        payload.message.visibility_timeout = 0
+        payload.message.visibility_timeout = 0 if payload.message
       end
 
       def pop(queue_name = 'default')
