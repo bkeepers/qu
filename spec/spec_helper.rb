@@ -13,8 +13,10 @@ module Qu
       return true if services.size == 0
 
       down_services = services.select { |service| !running?(service) }
-      unless down_services.empty?
+      if down_services.any?
         puts "Skipping #{class_under_spec}. Required services are not running (#{down_services.join(', ')})."
+      else
+        true
       end
     end
 
