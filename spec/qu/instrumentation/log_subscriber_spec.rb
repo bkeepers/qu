@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'qu/backend/redis'
 require 'qu/instrumentation/log_subscriber'
 
 describe Qu::Instrumentation::LogSubscriber do
