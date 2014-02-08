@@ -6,7 +6,8 @@ module Qu
     class SQS < Base
 
       def push(payload)
-        find_or_create_queue(payload.queue).send_message(generate_dump(payload))
+        message = find_or_create_queue(payload.queue).send_message(generate_dump(payload))
+        payload.message = message
         payload
       end
 
@@ -14,6 +15,7 @@ module Qu
         map_by_queue(payloads) do |queue,group|
           messages = group.map { |payload| generate_dump(payload) }
           find_or_create_queue(queue).batch_send(*messages)
+          group
         end.flatten
       end
 
@@ -22,11 +24,9 @@ module Qu
       end
 
       def batch_complete(payloads)
-        begin
-          map_by_queue(payloads) do |queue,group|
-            connection.queues.named(queue).batch_delete(*group)
-          end
-        rescue ::AWS::SQS::Errors::NonExistentQueue
+        map_by_queue(payloads) do |queue,group|
+          receipts = group.map { |payload| payload.message.handle }
+          connection.queues.named(queue).batch_delete(*receipts)
         end
       end
 
@@ -34,9 +34,14 @@ module Qu
         payload.message.visibility_timeout = 0 if payload.message
       end
 
-      def fail(payload)
-        payload.message.visibility_timeout = 0 if payload.message
+      def batch_abort(payload)
+        map_by_queue(payload) do |queue,group|
+          connection.queues.named(queue).batch_change_visibility(0, *group.map(&:message))
+        end
       end
+
+      alias fail abort
+      alias batch_fail batch_abort
 
       def pop(queue_name = 'default')
         begin
@@ -82,6 +87,11 @@ module Qu
         @connection ||= ::AWS::SQS.new
       end
 
+      # private api
+      def messages_not_visible(queue_name = 'default')
+        connection.queues.named(queue_name).approximate_number_of_messages_not_visible
+      end
+
       private
 
       def find_or_create_queue(queue_name)
@@ -107,8 +117,11 @@ module Qu
 
       def map_by_queue( payloads )
         return unless payloads
-        payloads.group_by { |p| p.queue }.map do |queue,group|
-          yield(queue,group)
+        begin
+          payloads.group_by { |p| p.queue }.map do |queue,group|
+            yield(queue,group)
+          end
+        rescue ::AWS::SQS::Errors::NonExistentQueue
         end
       end
 

@@ -198,6 +198,11 @@ shared_examples_for 'a batch capable backend' do
     end
   end
 
+  def push_messages(size)
+    payloads = create_payloads(size)
+    subject.batch_push(payloads)
+  end
+
   describe 'pushing many messages' do
 
     it 'should push them all at once' do
@@ -210,9 +215,7 @@ shared_examples_for 'a batch capable backend' do
     end
 
     it 'should push and all messages' do
-      numbers = create_payloads(10)
-
-      subject.batch_push( numbers )
+      push_messages(10)
 
       result = subject.batch_pop('default', 10).map { |payload| payload.args }
 
@@ -225,22 +228,38 @@ shared_examples_for 'a batch capable backend' do
   describe 'when completing many messages' do
 
     it 'should complete all payloads' do
-      numbers = create_payloads(10)
-      subject.batch_push( numbers )
+      push_messages(10)
 
+      numbers = subject.batch_pop('default', 10)
+      expect(subject.messages_not_visible).to eq(10)
 
+      subject.batch_complete(numbers)
+      expect(subject.size).to eq(0)
+      expect(subject.messages_not_visible).to eq(0)
     end
 
   end
 
   describe 'batch abort' do
-    it 'should abort all messages'
-    it 'should abort all messages independent of type'
+    it 'should abort all messages' do
+      push_messages(10)
+
+      numbers = subject.batch_pop('default', 10)
+      expect(subject.size).to eq(0)
+      subject.batch_abort(numbers)
+      expect(subject.size).to eq(10)
+    end
   end
 
   describe 'batch fail' do
-    it 'should fail all messages'
-    it 'should fail all messages independent of type'
+    it 'should fail all messages' do
+      push_messages(10)
+
+      numbers = subject.batch_pop('default', 10)
+      expect(subject.size).to eq(0)
+      subject.batch_abort(numbers)
+      expect(subject.size).to eq(10)
+    end
   end
 
 end
