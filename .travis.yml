@@ -2,8 +2,12 @@ language: ruby
 rvm:
   - 1.9.3
   - 2.0.0
+  - 2.1.0
 services:
   - mongodb
   - redis
 script: bundle exec rake unattended_spec
 cache: bundler
+gemfile:
+  - Gemfile
+  - Gemfile-rails4
