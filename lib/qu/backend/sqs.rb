@@ -4,43 +4,57 @@ require 'aws/sqs'
 module Qu
   module Backend
     class SQS < Base
+
       def push(payload)
-        # id does not really matter for sqs as they have ids already so i'm just
-        # sending something relatively unique for errors and what not
-        payload.id = Digest::SHA1.hexdigest(payload.to_s + Time.now.to_s)
-
-        queue = begin
-          connection.queues.named(payload.queue)
-        rescue ::AWS::SQS::Errors::NonExistentQueue
-          connection.queues.create(payload.queue)
-        end
-
-        queue.send_message(dump(payload.attributes_for_push))
+        message = find_or_create_queue(payload.queue).send_message(generate_dump(payload))
+        payload.message = message
         payload
+      end
+
+      def batch_push(payloads)
+        map_by_queue(payloads) do |queue,group|
+          messages = group.map { |payload| generate_dump(payload) }
+          find_or_create_queue(queue).batch_send(*messages)
+          group
+        end.flatten
       end
 
       def complete(payload)
         payload.message.delete if payload.message
       end
 
+      def batch_complete(payloads)
+        map_by_queue(payloads) do |queue,group|
+          receipts = group.map { |payload| payload.message.handle }
+          connection.queues.named(queue).batch_delete(*receipts)
+        end
+      end
+
       def abort(payload)
         payload.message.visibility_timeout = 0 if payload.message
       end
 
-      def fail(payload)
-        payload.message.visibility_timeout = 0 if payload.message
+      def batch_abort(payload)
+        map_by_queue(payload) do |queue,group|
+          connection.queues.named(queue).batch_change_visibility(0, *group.map(&:message))
+        end
       end
+
+      alias fail abort
+      alias batch_fail batch_abort
 
       def pop(queue_name = 'default')
         begin
           queue = connection.queues.named(queue_name)
+          create_payload(queue.receive_message)
+        rescue ::AWS::SQS::Errors::NonExistentQueue
+        end
+      end
 
-          if message = queue.receive_message
-            doc = load(message.body)
-            payload = Payload.new(doc)
-            payload.message = message
-            return payload
-          end
+      def batch_pop( queue_name = 'default', limit = 10 )
+        begin
+          queue = connection.queues.named(queue_name)
+          queue.receive_messages( :limit => limit ).map { |message| create_payload(message) }
         rescue ::AWS::SQS::Errors::NonExistentQueue
         end
       end
@@ -71,6 +85,51 @@ module Qu
 
       def connection
         @connection ||= ::AWS::SQS.new
+      end
+
+      # private api
+      def messages_not_visible(queue_name = 'default')
+        connection.queues.named(queue_name).approximate_number_of_messages_not_visible
+      end
+
+      private
+
+      def find_or_create_queue(queue_name)
+        begin
+          connection.queues.named(queue_name)
+        rescue ::AWS::SQS::Errors::NonExistentQueue
+          connection.queues.create(queue_name)
+        end
+      end
+
+      def create_payload(message)
+        if message
+          doc = load(message.body)
+          payload = Payload.new(doc)
+          payload.message = message
+          payload
+        end
+      end
+
+      def generate_dump(payload)
+        dump(set_message_id(payload).attributes_for_push)
+      end
+
+      def map_by_queue( payloads )
+        return unless payloads
+        begin
+          payloads.group_by { |p| p.queue }.map do |queue,group|
+            yield(queue,group)
+          end
+        rescue ::AWS::SQS::Errors::NonExistentQueue
+        end
+      end
+
+      def set_message_id(payload)
+        # id does not really matter for sqs as they have ids already so i'm just
+        # sending something relatively unique for errors and what not
+        payload.id = Digest::SHA1.hexdigest(payload.to_s + Time.now.to_s)
+        payload
       end
 
     end
