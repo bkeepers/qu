@@ -20,7 +20,7 @@ module Qu
 
   @interval = 5
 
-  attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval
+  attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval, :runner
 
   def_delegators :backend, :push, :pop, :complete, :abort, :fail, :size, :clear
 
@@ -51,4 +51,5 @@ Qu.configure do |config|
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::INFO
   config.instrumenter = Qu::Instrumenters::Noop
+  config.runner = Qu::Runner::Direct.new
 end
