@@ -71,4 +71,9 @@ RSpec.configure do |config|
   end
 end
 
-Qu.logger = Logger.new(STDOUT)
+log_path = root_path.join("log")
+log_path.mkpath
+log_file = log_path.join("qu.log")
+log_to = ENV.fetch("QU_LOG_STDOUT", false) ? STDOUT : log_file
+
+Qu.logger = Logger.new(log_to)
