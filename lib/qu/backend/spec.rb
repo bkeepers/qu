@@ -47,6 +47,11 @@ shared_examples_for 'a backend interface' do
   it "can clear specific queue" do
     subject.clear('foo')
   end
+
+  it 'can reconnect' do
+    subject.reconnect
+  end
+
 end
 
 shared_examples_for 'a backend' do

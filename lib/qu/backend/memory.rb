@@ -11,13 +11,20 @@ module Qu
       def initialize
         @monitor = Monitor.new
         @queues = {}
+        @messages = {}
         @pending = {}
+        @connection = @messages
+      end
+
+      def reconnect
       end
 
       def push(payload)
-        synchronize do
-          payload.id = SecureRandom.uuid
-          queue_for(payload.queue) << payload
+        payload.id = SecureRandom.uuid
+        queue_for(payload.queue) do |queue|
+          queue << payload.id
+          @messages[payload.id] = dump(payload.attributes_for_push)
+          payload
         end
       end
 
@@ -34,9 +41,13 @@ module Qu
 
       alias fail abort
 
-      def pop(queue = 'default')
-        synchronize do
-          queue_for(queue).shift
+      def pop(queue_name = 'default')
+        queue_for(queue_name) do |queue|
+          if id = queue.shift
+            payload = Payload.new(load(@messages[id]))
+            @pending[id] = payload
+            payload
+          end
         end
       end
 
@@ -44,14 +55,18 @@ module Qu
         queue_for(queue).size
       end
 
-      def clear(queue = 'default')
-        synchronize { queue_for(queue).clear }
+      def clear(queue_name = 'default')
+        queue_for(queue_name) { |queue| queue.clear }
       end
 
       private
 
       def queue_for(queue)
-        synchronize { @queues[queue] ||= [] }
+        if block_given?
+          synchronize { yield(@queues[queue] ||= []) }
+        else
+          synchronize { @queues[queue] ||= [] }
+        end
       end
 
     end

@@ -142,8 +142,6 @@ describe Qu::Hooks do
     end
 
     describe 'with a halt before' do
-      let(:captain)  { Captain.new }
-
       before do
         Captain.before_pillage :fight_peter_pan, :drink
       end
@@ -161,8 +159,6 @@ describe Qu::Hooks do
     end
 
     describe 'with a halt after' do
-      let(:captain)  { Captain.new }
-
       before do
         Captain.after_pillage :drink, :fight_peter_pan
       end
@@ -179,4 +175,29 @@ describe Qu::Hooks do
       end
     end
   end
+
+  describe 'run_hook_by_type' do
+    before do
+      Captain.before_pillage :be_merry
+      Captain.after_pillage  :drink
+    end
+
+    it 'should not call the before hook' do
+      expect(captain).not_to receive(:be_merry).with(no_args())
+      captain.run_after_hook(:pillage)
+      expect(captain.events).to eq([:drink])
+    end
+
+    it 'should not call the after hook' do
+      expect(captain).not_to receive(:drink).with(no_args())
+      captain.run_before_hook(:pillage)
+      expect(captain.events).to eq([:be_merry])
+    end
+
+    it 'should not run hooks if they are not defined' do
+      expect { captain.run_before_hook(:some_hook) }.to_not raise_error
+    end
+
+  end
+
 end

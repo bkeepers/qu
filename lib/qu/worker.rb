@@ -1,8 +1,11 @@
 require 'socket'
+require 'qu/util/signal_handler'
 
 module Qu
   class Worker
     include Logger
+
+    SIGNALS = [:INT, :TERM]
 
     attr_accessor :queues
 
@@ -29,18 +32,20 @@ module Qu
     def work
       did_work = false
 
-      queues.each { |queue_name|
-        if payload = Qu.pop(queue_name)
-          begin
-            @performing = true
-            payload.perform
-          ensure
-            did_work = true
-            @performing = false
-            break
+      unless Qu.runner.full?
+        queues.each do |queue_name|
+          if payload = Qu.pop(queue_name)
+            begin
+              @performing = true
+              Qu.runner.run(self, payload)
+            ensure
+              did_work = true
+              @performing = false
+              break
+            end
           end
         end
-      }
+      end
 
       did_work
     end
@@ -61,12 +66,16 @@ module Qu
           sleep Qu.interval
         end
       end
+    rescue => e
+      logger.error("Failed run loop #{e.message}\n#{e.backtrace.join("\n")}")
+      raise
     ensure
       stop
     end
 
     def stop
       @running = false
+      Qu.runner.stop
 
       if performing?
         raise Abort unless Qu.graceful_shutdown
@@ -95,8 +104,11 @@ module Qu
 
     def register_signal_handlers
       logger.debug "Worker #{id} registering traps for INT and TERM signals"
-      trap(:INT)  { puts "Worker #{id} received INT, stopping"; stop }
-      trap(:TERM) { puts "Worker #{id} received TERM, stopping"; stop }
+      Qu::Util::SignalHandler.trap( *SIGNALS ) do |signal|
+        logger.info("Worker #{id} received #{signal}, stopping")
+        stop
+      end
     end
+
   end
 end

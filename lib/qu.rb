@@ -7,6 +7,7 @@ require 'qu/job'
 require 'qu/backend/base'
 require 'qu/backend/instrumented'
 require 'qu/instrumenters/noop'
+require 'qu/runner/direct'
 require 'qu/worker'
 
 require 'forwardable'

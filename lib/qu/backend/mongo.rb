@@ -81,6 +81,10 @@ module Qu
         end
       end
 
+      def reconnect
+        connection.connection.reconnect
+      end
+
       private
 
       def payload_attributes(payload)

@@ -34,9 +34,17 @@ module Qu
 
       job.run_hook(:complete) { Qu.complete(self) }
     rescue Qu::Worker::Abort
+      abort
+    rescue => exception
+      fail(exception)
+    end
+
+    def abort
       job.run_hook(:abort) { Qu.abort(self) }
       raise
-    rescue => exception
+    end
+
+    def fail(exception)
       job.run_hook(:fail, exception) { Qu.fail(self) }
       Qu::Failure.create(self, exception)
     end
