@@ -47,8 +47,6 @@ def changelog
   File.read('ChangeLog').split("\n\n\n", 2).first
 end
 
-task :default => :spec
-
 desc "Start fake services, run tests, cleanup"
 task :unattended_spec do |t|
   require 'tmpdir'
@@ -77,3 +75,5 @@ task :unattended_spec do |t|
 
   Rake::Task["spec"].invoke
 end
+
+task :default => :unattended_spec
