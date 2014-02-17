@@ -30,12 +30,6 @@ module Qu
         end
       end
 
-      def fail(payload)
-      end
-
-      def complete(payload)
-      end
-
       def pop(queue = 'default')
         begin
           doc = with_connection_retries do

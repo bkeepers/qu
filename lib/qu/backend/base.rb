@@ -6,12 +6,35 @@ module Qu
       include Logger
       attr_accessor :connection
 
-      def self.dump(data)
-        Qu.dump_json(data)
+      # Public: Override in subclass.
+      def push(payload)
+        payload.id = SecureRandom.uuid
+        payload.perform
       end
 
-      def self.load(data)
-        Qu.load_json(data)
+      # Public: Override in subclass.
+      def complete(payload)
+      end
+
+      # Public: Override in subclass.
+      def abort(payload)
+      end
+
+      # Public: Override in subclass.
+      def fail(payload)
+      end
+
+      # Public: Override in subclass.
+      def pop(queue = 'default')
+      end
+
+      # Public: Override in subclass.
+      def size(queue = 'default')
+        0
+      end
+
+      # Public: Override in subclass.
+      def clear(queue = 'default')
       end
 
       # Public: Override in subclass.
@@ -21,11 +44,11 @@ module Qu
       private
 
       def dump(data)
-        self.class.dump(data)
+        Qu.dump_json(data)
       end
 
       def load(data)
-        self.class.load(data)
+        Qu.load_json(data)
       end
     end
   end
