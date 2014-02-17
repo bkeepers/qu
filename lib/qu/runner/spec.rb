@@ -4,6 +4,10 @@ class RunnerJob < Qu::Job
 end
 
 class RedisPusherJob < Qu::Job
+  def self.client
+    @client ||= Qu.backend.connection
+  end
+
   def initialize(list, value)
     @list = list
     @value = value
@@ -11,10 +15,6 @@ class RedisPusherJob < Qu::Job
 
   def perform
     self.class.client.lpush(@list, @value)
-  end
-
-  def self.client
-    @client ||= Qu::Backend::Redis.create_connection("qu-test")
   end
 end
 
@@ -52,6 +52,7 @@ shared_examples_for 'a single job runner' do
   let(:timeout) { 5 }
 
   before do
+    Qu.backend = Qu::Backend::Redis.new
     RedisPusherJob.client.del(list)
   end
 
