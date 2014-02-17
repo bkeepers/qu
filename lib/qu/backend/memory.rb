@@ -65,7 +65,6 @@ module Qu
           synchronize { @queues[queue] ||= [] }
         end
       end
-
     end
   end
 end

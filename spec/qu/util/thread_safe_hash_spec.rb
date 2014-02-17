@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'qu/util/thread_safe_hash'
 
 describe Qu::Util::ThreadSafeHash do
-
   it 'should wrap a hash and dup it' do
     options = {options: 'some options'}
     hash = Qu::Util::ThreadSafeHash.new(options)
@@ -37,5 +36,4 @@ describe Qu::Util::ThreadSafeHash do
 
     expect(pairs).to eq([[:options, 'some options'], [:some, 'value']])
   end
-
 end

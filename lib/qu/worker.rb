@@ -109,6 +109,5 @@ module Qu
         stop
       end
     end
-
   end
 end

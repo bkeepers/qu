@@ -3,12 +3,10 @@ require 'qu/util/procline'
 
 module Qu
   module Util
-
     FailedToForkError = Class.new(StandardError)
     ExitFailureError = Class.new(StandardError)
 
     class ProcessWrapper
-
       attr_reader :pid, :payload, :worker, :kill_timeout
 
       def initialize(process_collection, worker, payload, kill_timeout = 5)
@@ -92,7 +90,6 @@ module Qu
       def logger
         Qu.logger
       end
-
     end
   end
 end

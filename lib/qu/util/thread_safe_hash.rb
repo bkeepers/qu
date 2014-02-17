@@ -30,7 +30,6 @@ module Qu
       def values
         synchronize { @items.values }
       end
-
     end
   end
 end

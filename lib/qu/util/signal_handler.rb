@@ -1,7 +1,6 @@
 module Qu
   module Util
     class SignalHandler
-
       def self.trap( *signals, &block )
         signals.each do |signal|
           Signal.trap(signal) do
@@ -19,7 +18,6 @@ module Qu
           end
         end
       end
-
     end
   end
 end
