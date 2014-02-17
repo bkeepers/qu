@@ -48,15 +48,11 @@ module Qu
       end
 
       def connection
-        @connection ||= self.class.create_connection(namespace)
+        @connection ||= ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']))
       end
 
       def reconnect
         connection.client.reconnect
-      end
-
-      def self.create_connection(namespace)
-        ::Redis::Namespace.new(namespace, :redis => ::Redis.connect(:url => ENV['REDISTOGO_URL'] || ENV['BOXEN_REDIS_URL']))
       end
     end
   end
