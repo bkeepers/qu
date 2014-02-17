@@ -1,5 +1,5 @@
 require 'redis-namespace'
-require 'simple_uuid'
+require 'securerandom'
 
 module Qu
   module Backend
@@ -11,7 +11,7 @@ module Qu
       end
 
       def push(payload)
-        payload.id = SimpleUUID::UUID.new.to_guid
+        payload.id = SecureRandom.uuid
         body = dump(payload.attributes_for_push)
         connection.multi do |multi|
           multi.set("job:#{payload.id}", body)

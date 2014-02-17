@@ -1,13 +1,11 @@
-require 'digest/sha1'
 require 'aws/sqs'
+require 'securerandom'
 
 module Qu
   module Backend
     class SQS < Base
       def push(payload)
-        # id does not really matter for sqs as they have ids already so i'm just
-        # sending something relatively unique for errors and what not
-        payload.id = Digest::SHA1.hexdigest(payload.to_s + Time.now.to_s)
+        payload.id = SecureRandom.uuid
 
         queue = begin
           connection.queues.named(payload.queue)
