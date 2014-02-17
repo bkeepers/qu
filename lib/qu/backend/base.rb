@@ -14,6 +14,10 @@ module Qu
         Qu.load_json(data)
       end
 
+      # Public: Override in subclass.
+      def reconnect
+      end
+
       private
 
       def dump(data)

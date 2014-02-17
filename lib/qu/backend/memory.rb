@@ -16,9 +16,6 @@ module Qu
         @connection = @messages
       end
 
-      def reconnect
-      end
-
       def push(payload)
         payload.id = SecureRandom.uuid
         queue_for(payload.queue) do |queue|

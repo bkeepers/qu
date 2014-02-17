@@ -70,10 +70,6 @@ module Qu
       def connection
         @connection ||= ::AWS::SQS.new
       end
-
-      def reconnect
-      end
-
     end
   end
 end
