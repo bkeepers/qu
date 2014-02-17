@@ -5,12 +5,10 @@ require 'qu/util/process_wrapper'
 
 module Qu
   module Runner
-
-    class Forking
-
+    class Forking < Base
       attr_reader :fork_limit, :forks
 
-      def initialize( fork_limit = 1 )
+      def initialize(fork_limit = 1)
         @fork_limit = fork_limit
         @forks = Qu::Util::ThreadSafeHash.new
       end
@@ -31,7 +29,6 @@ module Qu
           process.stop
         end
       end
-
     end
   end
 end

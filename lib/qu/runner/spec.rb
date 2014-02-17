@@ -4,7 +4,6 @@ class RunnerJob < Qu::Job
 end
 
 class RedisPusherJob < Qu::Job
-
   def initialize(list, value)
     @list = list
     @value = value
@@ -17,11 +16,9 @@ class RedisPusherJob < Qu::Job
   def self.client
     @client ||= Qu::Backend::Redis.create_connection("qu-test")
   end
-
 end
 
 class SleepJob < Qu::Job
-
   def initialize(sleep_time = 5)
     @sleep = sleep_time
   end
@@ -29,7 +26,6 @@ class SleepJob < Qu::Job
   def perform
     sleep(@sleep)
   end
-
 end
 
 shared_examples_for 'a runner interface' do
@@ -47,7 +43,6 @@ shared_examples_for 'a runner interface' do
   it 'can be stopped' do
     subject.stop
   end
-
 end
 
 shared_examples_for 'a single job runner' do
@@ -76,5 +71,4 @@ shared_examples_for 'a single job runner' do
     subject.run(double('worker'), payload)
     expect_values('1')
   end
-
 end
