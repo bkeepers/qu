@@ -8,13 +8,17 @@ module Qu
     module ClassMethods
       def define_hooks(*hooks)
         hooks.each do |hook|
-          %w(before after around).each do |kind|
-            class_eval <<-end_eval, __FILE__, __LINE__
-              def self.#{kind}_#{hook}(*methods)
-                hooks(:#{hook}).add(:#{kind}, *methods)
-              end
-            end_eval
-          end
+          define_hook_by_kinds(hook, *%w(before after around))
+        end
+      end
+
+      def define_hook_by_kinds( hook, *kinds )
+        kinds.each do |kind|
+          class_eval <<-end_eval, __FILE__, __LINE__
+            def self.#{kind}_#{hook}(*methods)
+              hooks(:#{hook}).add(:#{kind}, *methods)
+            end
+          end_eval
         end
       end
 
@@ -25,19 +29,39 @@ module Qu
     end
 
     module InstanceMethods
+
       def run_hook(name, *args, &block)
-        hooks = if self.class.superclass < Qu::Hooks
+        find_hooks_for(name).run(self, args, &block)
+      end
+
+      def run_before_hook( name, *args )
+        run_hook_by_type(name, *args, :before)
+      end
+
+      def run_after_hook( name, *args )
+        run_hook_by_type(name, *args, :after)
+      end
+
+      def find_hooks_for(name)
+        if self.class.superclass < Qu::Hooks
           self.class.superclass.hooks(name).dup.concat self.class.hooks(name)
         else
           self.class.hooks(name)
         end
-
-        hooks.run(self, args, &block)
       end
 
       def halt
         throw :halt
       end
+
+      private
+
+      def run_hook_by_type( name, type, *args, &block )
+        if hook = find_hooks_for(name).find { |hook| hook.type == type }
+          hook.call(self, args, &block)
+        end
+      end
+
     end
 
     class Chain < Array
@@ -52,6 +76,7 @@ module Qu
       def add(kind, *methods)
         methods.each {|method| self << Hook.new(kind, method) }
       end
+
     end
 
     class Hook
@@ -66,7 +91,7 @@ module Qu
           obj.send method, *args, &chain
         else
           obj.send method, *args if type == :before
-          chain.call
+          chain.call if chain
           obj.send method, *args if type == :after
         end
       end

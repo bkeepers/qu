@@ -2,6 +2,7 @@ module Qu
   class Job
     include Qu::Hooks
     define_hooks :push, :perform, :complete, :abort, :fail
+    define_hook_by_kinds :fork, :before, :after
 
     attr_accessor :payload
 

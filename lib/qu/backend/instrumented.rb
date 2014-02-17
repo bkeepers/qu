@@ -15,7 +15,7 @@ module Qu
         end
       end
 
-      def_delegators :@backend, :connection, :connection=
+      def_delegators :@backend, :connection, :connection=, :reconnect
 
       def initialize(backend)
         @backend = backend

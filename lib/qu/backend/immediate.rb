@@ -28,6 +28,10 @@ module Qu
 
       def clear(queue = 'default')
       end
+
+      def reconnect
+      end
+
     end
   end
 end

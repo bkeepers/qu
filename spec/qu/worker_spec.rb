@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'qu/backend/memory'
 
 describe Qu::Worker do
   let(:job) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
@@ -91,13 +92,13 @@ describe Qu::Worker do
 
   describe 'work' do
     context 'with job in first queue' do
+
       before do
-        Qu.stub(:pop).and_return(job)
+        expect(Qu).to receive(:pop).with(subject.queues.first).and_return(job)
       end
 
       it 'should pop a payload and perform it' do
-        Qu.should_receive(:pop).with(subject.queues.first).and_return(job)
-        job.should_receive(:perform)
+        expect(job).to receive(:perform)
         subject.work
       end
 
