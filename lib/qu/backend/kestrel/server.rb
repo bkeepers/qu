@@ -17,7 +17,6 @@ module Qu
         # TODO: add timeout for socket operations
         def stats
           socket = TCPSocket.new(host, memcache_port)
-          p socket
           socket.puts "STATS"
 
           stats = {}
