@@ -62,6 +62,7 @@ module Qu
         false
       end
     rescue => exception
+      p exception
       false
     end
   end
