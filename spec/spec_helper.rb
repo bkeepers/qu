@@ -50,6 +50,14 @@ module Qu
 
         client.ping
         true
+      when "kestrel"
+        host = ENV["KESTREL_HOST"] || "127.0.0.1"
+        port = ENV["KESTREL_MEMCACHE_PORT"] || 22134
+        server = Qu::Backend::Kestrel::Server.new({
+          host: host,
+          memcache_port: port,
+        })
+        server.stats
       else
         false
       end
