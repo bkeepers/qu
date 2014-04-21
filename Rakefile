@@ -52,12 +52,16 @@ task :unattended_spec do |t|
   require 'tmpdir'
   require 'socket'
 
+  system "script/kestrel"
+  kestrel_pid = File.read("tmp/kestrel.pid").chomp.to_i
+
   dir = Dir.mktmpdir
   data_file = File.join(dir, "data.fdb")
 
   sqs_pid = Process.spawn 'fake_sqs', '-p', '5111', err: '/dev/null', out: '/dev/null'
 
   at_exit {
+    Process.kill('TERM', kestrel_pid)
     Process.kill('TERM', sqs_pid)
     FileUtils.rmtree(dir)
   }
