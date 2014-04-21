@@ -29,7 +29,7 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 namespace :spec do
-  Backends = %w(mongo redis)
+  Backends = %w(kestrel mongo redis sqs)
 
   Backends.each do |backend|
     desc "Run specs for #{backend} backend"
