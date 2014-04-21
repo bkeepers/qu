@@ -3,3 +3,5 @@
 Gemfile.lock
 pkg/*
 log/*.log
+tmp
+script/config/kestrel/target
