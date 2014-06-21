@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files -- lib | grep sqs`.split("\n")
   s.require_paths = ["lib"]
 
-  s.add_dependency 'thrift_client', '~> 0.8.0'
+  s.add_dependency 'thrift_client', '~> 0.9.2'
+  s.add_dependency 'thin'
   s.add_dependency 'qu', Qu::VERSION
 end
