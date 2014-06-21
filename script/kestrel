@@ -1,0 +1,60 @@
+#!/bin/bash
+
+kestrel_version=2.3.4
+
+dir=`dirname "$0"`
+pwd=`cd "$dir" > /dev/null 2>&1 && pwd`
+tmpdir="$pwd/../tmp"
+port=22134
+
+mkdir -p $tmpdir
+pushd $tmpdir
+
+set -e
+if [[ ! -f "kestrel-$kestrel_version.zip" ]]; then
+  curl -O -L http://robey.github.io/kestrel/download/kestrel-$kestrel_version.zip
+fi
+
+if [[ ! -d "$tmpdir/kestrel-$kestrel_version" ]]; then
+  unzip kestrel-$kestrel_version.zip
+fi
+set +e
+
+kestrel_is_alive=0
+if [[ -f "kestrel.pid" ]]; then
+  existing_pid=$(cat kestrel.pid)
+  echo "Checking to see if kestrel (PID $existing_pid) is still running"
+
+  kill -0 $existing_pid > /dev/null 2&>1
+  if [[ $? -eq "0" ]]; then
+    echo "Kestrel is already running!"
+    kestrel_is_alive=1
+  fi
+fi
+
+if [[ $kestrel_is_alive -eq "0" ]]; then
+  mkdir -p kestrel_queues
+
+  java -jar kestrel-$kestrel_version/kestrel_2.9.1-$kestrel_version.jar -f ../script/config/kestrel/development.scala &
+
+  pid=$!
+  echo $pid > kestrel.pid
+
+  echo -n "Waiting for kestrel to start"
+  while [[ $kestrel_is_alive -eq "0" ]]; do
+    echo -n "."
+
+    set +e
+    echo "" | nc 127.0.0.1 $port > /dev/null 2>&1
+    res=$?
+    set -e
+
+    if [[ $res -eq "0" ]]; then
+      kestrel_is_alive=1
+    else
+      sleep 1
+    fi
+  done
+
+  echo
+fi
