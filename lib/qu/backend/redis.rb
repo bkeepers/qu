@@ -12,28 +12,25 @@ module Qu
 
       def push(payload)
         payload.id = SecureRandom.uuid
-        body = dump(payload.attributes_for_push)
-        connection.multi do |multi|
-          multi.set("job:#{payload.id}", body)
-          multi.rpush("queue:#{payload.queue}", payload.id)
-        end
+        connection.rpush("queue:#{payload.queue}", dump(payload.attributes_for_push))
         payload
       end
 
       def abort(payload)
-        connection.rpush("queue:#{payload.queue}", payload.id)
+        connection.rpush("queue:#{payload.queue}", dump(payload.attributes_for_push))
       end
 
       def complete(payload)
-        connection.del("job:#{payload.id}")
       end
 
       def pop(queue = 'default')
-        if id = connection.lpop("queue:#{queue}")
-          if data = connection.get("job:#{id}")
-            data = load(data)
-            return Payload.new(:id => id, :klass => data['klass'], :args => data['args'])
-          end
+        if data = connection.lpop("queue:#{queue}")
+          data = load(data)
+          return Payload.new({
+            id: data['id'],
+            klass: data['klass'],
+            args: data['args'],
+          })
         end
       end
 
@@ -42,9 +39,7 @@ module Qu
       end
 
       def clear(queue = 'default')
-        while id = connection.lpop("queue:#{queue}")
-          connection.del("job:#{id}")
-        end
+        connection.del("queue:#{queue}")
       end
 
       def connection
