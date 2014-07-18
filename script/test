@@ -1,15 +1,12 @@
 #!/bin/sh
-#/ Usage: test [individual test file]
+#/ Usage: test
 #/
-#/ Bootstrap and run all tests or an individual test.
+#/ Bootstrap and run all tests.
 #/
 #/ Examples:
 #/
 #/   # run all tests
 #/   test
-#/
-#/   # run individual test
-#/   test spec/qu_spec.rb
 #/
 
 set -e
