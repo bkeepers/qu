@@ -1,10 +1,10 @@
 require 'spec_helper'
 require 'qu-mongo'
 
-describe Qu::Backend::Mongo do
+describe Qu::Queues::Mongo do
   if Qu::Specs.perform?(described_class, :mongo)
-    it_should_behave_like 'a backend'
-    it_should_behave_like 'a backend interface'
+    it_should_behave_like 'a queue'
+    it_should_behave_like 'a queue interface'
 
     describe 'connection' do
       it 'should default the qu database' do

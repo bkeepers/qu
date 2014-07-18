@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["John Nunemaker"]
   s.email       = ["nunemaker@gmail.com"]
   s.homepage    = "http://github.com/bkeepers/qu"
-  s.summary     = "SQS backend for qu"
-  s.description = "SQS backend for qu"
+  s.summary     = "SQS queue for qu"
+  s.description = "SQS queue for qu"
 
   s.files         = `git ls-files -- lib | grep sqs`.split("\n")
   s.require_paths = ["lib"]

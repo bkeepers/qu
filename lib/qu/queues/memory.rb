@@ -2,7 +2,7 @@ require 'forwardable'
 require 'securerandom'
 
 module Qu
-  module Backend
+  module Queues
     class Memory < Base
       extend Forwardable
 

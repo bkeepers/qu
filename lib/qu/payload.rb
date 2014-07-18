@@ -49,7 +49,7 @@ module Qu
       Qu::Failure.create(self, exception)
     end
 
-    # Internal: Pushes payload to backend.
+    # Internal: Pushes payload to queue.
     def push
       self.pushed_at = Time.now.utc
 

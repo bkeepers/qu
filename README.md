@@ -4,7 +4,7 @@ Qu is a Ruby library for queuing and processing background jobs. It is heavily i
 
 Qu was created to overcome some shortcomings in the existing queuing libraries that we experienced at [Ordered List](http://orderedlist.com) while building [SpeakerDeck](http://speakerdeck.com), [Gaug.es](http://get.gaug.es) and [Harmony](http://get.harmonyapp.com). The advantages of Qu are:
 
-* Multiple backends (redis, mongo)
+* Multiple queues (redis, mongo)
 * Jobs are requeued when worker is killed
 * Resque-like API
 
@@ -18,7 +18,7 @@ Qu was created to overcome some shortcomings in the existing queuing libraries t
 
 ### Rails 3 and 4
 
-Decide which backend you want to use and add the gem to your `Gemfile`.
+Decide which queue you want to use and add the gem to your `Gemfile`.
 
 ``` ruby
 gem 'qu-rails'
@@ -29,7 +29,7 @@ That's all you need to do!
 
 ### Rails 2
 
-Decide which backend you want to use and add the gem to `config.gems` in `environment.rb`:
+Decide which queue you want to use and add the gem to `config.gems` in `environment.rb`:
 
 ``` ruby
 config.gem 'qu-redis'
@@ -64,7 +64,7 @@ job = ProcessPresentation.create(@presentation.id)
 puts "Created job #{job.id}"
 ```
 
-The job will be initialized with any parameters that are passed to it when it is performed. These parameters will be stored in the backend, so they must be simple types that can easily be serialized and unserialized. Don't try to pass in an ActiveRecord object.
+The job will be initialized with any parameters that are passed to it when it is performed. These parameters will be stored in the queue, so they must be simple types that can easily be serialized and unserialized. Don't try to pass in an ActiveRecord object.
 
 Processing the jobs on the queue can be done with a Rake task:
 
@@ -114,7 +114,7 @@ Qu.clear(:urgent)
 
 ## Configuration
 
-Most of the configuration for Qu should be automatic. It will also automatically detect ENV variables from Heroku for backend connections, so you shouldn't need to do anything to configure the backend.
+Most of the configuration for Qu should be automatic. It will also automatically detect ENV variables from Heroku for queue connections, so you shouldn't need to do anything to configure the queue.
 
 However, if you do need to customize it, you can by calling the `Qu.configure`:
 
@@ -127,7 +127,7 @@ end
 
 ## Tests
 
-If you prefer to have jobs processed immediatly in your tests, there is an `Immediate` backend that will perform the job instead of enqueuing it. In your test helper, require qu-immediate:
+If you prefer to have jobs processed immediatly in your tests, there is an `Immediate` queue that will perform the job instead of enqueuing it. In your test helper, require qu-immediate:
 
 ``` ruby
 require 'qu-immediate'
@@ -141,11 +141,11 @@ delayed_job was a brilliantly simple pioneer in the world of database-backed que
 
 * Occasionally fails silently.
 * Use of priority instead of separate named queues.
-* Contention in the ActiveRecord backend with multiple workers. Occasionally the same job gets performed by multiple workers.
+* Contention in the ActiveRecord queue with multiple workers. Occasionally the same job gets performed by multiple workers.
 
 Resque, the wiser relative of delayed_job, fixes most of those issues. But in doing so, it forces some of its beliefs on you, and sometimes those beliefs just don't make sense for your environment. Here are some of the flaws of Resque:
 
-* Redis is a great queue backend, but it doesn't make sense for every environment.
+* Redis is a great queue queue, but it doesn't make sense for every environment.
 * Forking before each job prevents memory leaks, but it is terribly inefficient in environments with a lot of fast jobs (the resque-jobs-per-fork plugin alleviates this)
 
 Those shortcomings lead us to write Qu. It is not perfect, but we hope to overcome the issues we faced with other queuing libraries.

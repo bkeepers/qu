@@ -4,8 +4,8 @@ require 'qu/failure'
 require 'qu/hooks'
 require 'qu/payload'
 require 'qu/job'
-require 'qu/backend/base'
-require 'qu/backend/instrumented'
+require 'qu/queues/base'
+require 'qu/queues/instrumented'
 require 'qu/instrumenters/noop'
 require 'qu/runner/direct'
 require 'qu/worker'
@@ -23,14 +23,14 @@ module Qu
 
   attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval, :runner
 
-  def_delegators :backend, :push, :pop, :complete, :abort, :fail, :size, :clear
+  def_delegators :queue, :push, :pop, :complete, :abort, :fail, :size, :clear
 
-  def backend
-    @backend || raise("Qu backend not configured. Install one of the backend gems like qu-redis.")
+  def queue
+    @queue || raise("Qu queue not configured. Install one of the queue gems like qu-redis.")
   end
 
-  def backend=(backend)
-    @backend = Backend::Instrumented.wrap(backend)
+  def queue=(queue)
+    @queue = Queues::Instrumented.wrap(queue)
   end
 
   def configure(&block)

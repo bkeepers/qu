@@ -1,10 +1,10 @@
 require 'spec_helper'
 require 'qu-redis'
 
-describe Qu::Backend::Redis do
+describe Qu::Queues::Redis do
   if Qu::Specs.perform?(described_class, :redis)
-    it_should_behave_like 'a backend'
-    it_should_behave_like 'a backend interface'
+    it_should_behave_like 'a queue'
+    it_should_behave_like 'a queue interface'
 
     describe 'connection' do
       it 'should create default connection if one not provided' do

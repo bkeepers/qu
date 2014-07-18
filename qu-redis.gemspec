@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Brandon Keepers"]
   s.email       = ["brandon@opensoul.org"]
   s.homepage    = "http://github.com/bkeepers/qu"
-  s.summary     = "Redis backend for qu"
-  s.description = "Redis backend for qu"
+  s.summary     = "Redis queue for qu"
+  s.description = "Redis queue for qu"
 
   s.files         = `git ls-files -- lib | grep redis`.split("\n")
   s.require_paths = ["lib"]

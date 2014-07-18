@@ -24,7 +24,7 @@ module Qu
             $stdout.sync = true
             $stderr.sync = true
             Qu::Util::Procline.set("fork of #{parent_pid} working on #{payload.id} from #{payload.queue}")
-            Qu.backend.reconnect
+            Qu.queue.reconnect
             SignalHandler.clear(*Qu::Worker::SIGNALS)
             payload.job.run_after_hook(:fork)
             payload.perform

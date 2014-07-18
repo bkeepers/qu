@@ -1,7 +1,7 @@
 require 'bundler'
 Bundler.require :test
 require 'qu'
-require 'qu/backend/spec'
+require 'qu/queues/spec'
 require 'qu/runner/spec'
 
 root_path = Pathname(__FILE__).dirname.join('..').expand_path
@@ -61,7 +61,7 @@ end
 
 RSpec.configure do |config|
   config.before(:each) do
-    Qu.backend = double('a backend', {
+    Qu.queue = double('a queue', {
       :push => nil,
       :pop => nil,
       :complete => nil,

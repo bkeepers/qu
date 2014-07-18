@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'qu/backend/memory'
+require 'qu/queues/memory'
 
 describe Qu::Worker do
   let(:job) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }

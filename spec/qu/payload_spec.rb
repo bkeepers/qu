@@ -70,7 +70,7 @@ describe Qu::Payload do
       subject.perform
     end
 
-    it 'should call complete on backend' do
+    it 'should call complete on queue' do
       Qu.should_receive(:complete)
       subject.perform
     end
@@ -126,7 +126,7 @@ describe Qu::Payload do
         subject.perform
       end
 
-      it 'should call create for failure backend' do
+      it 'should call create for failure queue' do
         Qu::Failure.should_receive(:create).with(subject, error)
         subject.perform
       end
@@ -136,7 +136,7 @@ describe Qu::Payload do
   describe "push" do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
-    it "pushes payload to backend" do
+    it "pushes payload to queue" do
       Qu.should_receive(:push).with(subject)
       subject.push
     end

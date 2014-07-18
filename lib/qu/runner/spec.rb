@@ -1,4 +1,4 @@
-require 'qu/backend/redis'
+require 'qu/queues/redis'
 
 class RunnerJob < Qu::Job
   queue :runner
@@ -8,7 +8,7 @@ class RedisPusherJob < Qu::Job
   queue :redis_pusher
 
   def self.client
-    @client ||= Qu.backend.connection
+    @client ||= Qu.queue.connection
   end
 
   def initialize(list, value)
@@ -45,7 +45,7 @@ shared_examples_for 'a single job runner' do
   let(:timeout) { 5 }
 
   before do
-    Qu.backend = Qu::Backend::Redis.new
+    Qu.queue = Qu::Queues::Redis.new
     RedisPusherJob.client.del(list)
   end
 

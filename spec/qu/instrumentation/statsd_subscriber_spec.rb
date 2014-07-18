@@ -6,7 +6,7 @@ describe Qu::Instrumentation::StatsdSubscriber do
   let(:socket) { FakeUDPSocket.new }
 
   before do
-    Qu.backend = Qu::Backend::Redis.new
+    Qu.queue = Qu::Queues::Redis.new
     Qu.clear(SimpleJob.queue)
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications

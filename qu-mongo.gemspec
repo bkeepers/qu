@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Brandon Keepers"]
   s.email       = ["brandon@opensoul.org"]
   s.homepage    = "http://github.com/bkeepers/qu"
-  s.summary     = "Mongo backend for qu"
-  s.description = "Mongo backend for qu"
+  s.summary     = "Mongo queue for qu"
+  s.description = "Mongo queue for qu"
 
   s.files         = `git ls-files -- lib | grep mongo`.split("\n")
   s.require_paths = ["lib"]

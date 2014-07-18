@@ -6,13 +6,13 @@ $:.unshift(lib_path)
 
 require 'qu-redis'
 
-backend = Qu::Backend::Redis.new
-backend.connection.flushdb
+queue = Qu::Queues::Redis.new
+queue.connection.flushdb
 
 Qu.configure do |config|
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::DEBUG
-  config.backend = backend
+  config.queue = queue
 end
 
 def work_and_die(die_after_seconds = 1, *queues)

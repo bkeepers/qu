@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'qu/backend/redis'
+require 'qu/queues/redis'
 require 'qu/instrumentation/log_subscriber'
 
 describe Qu::Instrumentation::LogSubscriber do
@@ -7,7 +7,7 @@ describe Qu::Instrumentation::LogSubscriber do
   let(:log) { io.string }
 
   before(:each) do
-    Qu.backend = Qu::Backend::Redis.new
+    Qu.queue = Qu::Queues::Redis.new
     Qu.clear(SimpleJob.queue)
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications

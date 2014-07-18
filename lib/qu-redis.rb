@@ -1,4 +1,4 @@
 require 'qu'
-require 'qu/backend/redis'
+require 'qu/queues/redis'
 
-Qu.backend = Qu::Backend::Redis.new
+Qu.queue = Qu::Queues::Redis.new

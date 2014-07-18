@@ -1,4 +1,4 @@
 require 'qu'
-require 'qu/backend/immediate'
+require 'qu/queues/immediate'
 
-Qu.backend = Qu::Backend::Immediate.new
+Qu.queue = Qu::Queues::Immediate.new

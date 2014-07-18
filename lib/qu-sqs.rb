@@ -1,4 +1,4 @@
 require 'qu'
-require 'qu/backend/sqs'
+require 'qu/queues/sqs'
 
-Qu.backend = Qu::Backend::SQS.new
+Qu.queue = Qu::Queues::SQS.new

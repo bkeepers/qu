@@ -1,4 +1,4 @@
 require 'qu'
-require 'qu/backend/mongo'
+require 'qu/queues/mongo'
 
-Qu.backend = Qu::Backend::Mongo.new
+Qu.queue = Qu::Queues::Mongo.new

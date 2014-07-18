@@ -29,18 +29,18 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 namespace :spec do
-  Backends = %w(mongo redis)
+  Queues = %w(mongo redis sqs)
 
-  Backends.each do |backend|
-    desc "Run specs for #{backend} backend"
-    RSpec::Core::RakeTask.new(backend) do |t|
+  Queues.each do |queue|
+    desc "Run specs for #{queue} queue"
+    RSpec::Core::RakeTask.new(queue) do |t|
       t.rspec_opts = %w[--color]
       t.verbose = false
-      t.pattern = "spec/qu/backend/#{backend}_spec.rb"
+      t.pattern = "spec/qu/queues/#{queue}_spec.rb"
     end
   end
 
-  task :backends => Backends
+  task :queues => Queues
 end
 
 def changelog

@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email       = ["brandon@opensoul.org"]
   s.homepage    = "http://github.com/bkeepers/qu"
   s.summary     = %q{a Ruby library for queuing and processing background jobs.}
-  s.description = %q{a Ruby library for queuing and processing background jobs with configurable backends.}
+  s.description = %q{a Ruby library for queuing and processing background jobs with configurable queues.}
 
   s.files         = `git ls-files`.split("\n") - plugin_files
   s.test_files    = `git ls-files -- spec`.split("\n")

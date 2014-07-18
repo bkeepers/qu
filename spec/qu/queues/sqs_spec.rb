@@ -15,7 +15,7 @@ AWS.config(
   secret_access_key:  'asdf',
 )
 
-describe Qu::Backend::SQS do
+describe Qu::Queues::SQS do
   def reset_service(service)
     host = AWS.config.send("#{service}_endpoint")
     port = AWS.config.send("#{service}_port")
@@ -28,7 +28,7 @@ describe Qu::Backend::SQS do
       subject.connection.queues.create(SimpleJob.queue)
     end
 
-    it_should_behave_like 'a backend'
-    it_should_behave_like 'a backend interface'
+    it_should_behave_like 'a queue'
+    it_should_behave_like 'a queue interface'
   end
 end

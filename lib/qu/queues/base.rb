@@ -1,7 +1,7 @@
 require 'json'
 
 module Qu
-  module Backend
+  module Queues
     class Base
       include Logger
       attr_accessor :connection

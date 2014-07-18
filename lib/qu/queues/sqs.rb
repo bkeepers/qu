@@ -2,7 +2,7 @@ require 'aws/sqs'
 require 'securerandom'
 
 module Qu
-  module Backend
+  module Queues
     class SQS < Base
       def initialize
         @queues = Hash.new { |h, k|

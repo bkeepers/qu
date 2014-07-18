@@ -6,7 +6,7 @@ module Qu
     extend Qu::Instrumenter
 
     # Public: Creates a failure for the given payload and exception using the
-    # current failure backend.
+    # current failure queue.
     #
     # payload - The Qu::Payload that raised an exception when performing.
     # exception - The exception raised.
@@ -17,18 +17,18 @@ module Qu
         ipayload[:payload] = payload
         ipayload[:exception] = exception
 
-        backend.create(payload, exception)
+        queue.create(payload, exception)
       end
     end
 
-    # Public: Allows user to change failure backend.
-    def self.backend=(backend)
-      @backend = backend
+    # Public: Allows user to change failure queue.
+    def self.queue=(queue)
+      @queue = queue
     end
 
-    # Private: Returns the current failure backend.
-    def self.backend
-      @backend ||= Failure::Log
+    # Private: Returns the current failure queue.
+    def self.queue
+      @queue ||= Failure::Log
     end
   end
 end

@@ -1,7 +1,7 @@
 require 'securerandom'
 
 module Qu
-  module Backend
+  module Queues
     class Immediate < Base
       def push(payload)
         payload.id = SecureRandom.uuid

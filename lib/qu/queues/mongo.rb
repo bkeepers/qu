@@ -1,7 +1,7 @@
 require 'mongo'
 
 module Qu
-  module Backend
+  module Queues
     class Mongo < Base
 
       # Number of times to retry connection on connection failure (default: 5)

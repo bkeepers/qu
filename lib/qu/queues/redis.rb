@@ -2,7 +2,7 @@ require 'redis-namespace'
 require 'securerandom'
 
 module Qu
-  module Backend
+  module Queues
     class Redis < Base
       attr_accessor :namespace
 

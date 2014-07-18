@@ -6,7 +6,7 @@ class CustomQueue < Qu::Job
   queue :custom
 end
 
-shared_examples_for 'a backend interface' do
+shared_examples_for 'a queue interface' do
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   it "can push a payload" do
@@ -43,7 +43,7 @@ shared_examples_for 'a backend interface' do
 
 end
 
-shared_examples_for 'a backend' do
+shared_examples_for 'a queue' do
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   before do
