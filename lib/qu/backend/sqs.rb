@@ -4,16 +4,15 @@ require 'securerandom'
 module Qu
   module Backend
     class SQS < Base
+      def initialize
+        @queues = Hash.new { |h, k|
+          h[k] = connection.queues.named(k)
+        }
+      end
+
       def push(payload)
         payload.id = SecureRandom.uuid
-
-        queue = begin
-          connection.queues.named(payload.queue)
-        rescue ::AWS::SQS::Errors::NonExistentQueue
-          connection.queues.create(payload.queue)
-        end
-
-        queue.send_message(dump(payload.attributes_for_push))
+        @queues[payload.queue].send_message(dump(payload.attributes_for_push))
         payload
       end
 
@@ -31,9 +30,7 @@ module Qu
 
       def pop(queue_name = 'default')
         begin
-          queue = connection.queues.named(queue_name)
-
-          if message = queue.receive_message
+          if message = @queues[queue_name].receive_message
             doc = load(message.body)
             payload = Payload.new(doc)
             payload.message = message
@@ -45,7 +42,7 @@ module Qu
 
       def size(queue_name = 'default')
         begin
-          connection.queues.named(queue_name).visible_messages
+          @queues[queue_name].visible_messages
         rescue ::AWS::SQS::Errors::NonExistentQueue
           0
         end
@@ -53,7 +50,7 @@ module Qu
 
       def clear(queue_name = 'default')
         begin
-          queue = connection.queues.named(queue_name)
+          queue = @queues[queue_name]
           messages = []
           begin
             begin

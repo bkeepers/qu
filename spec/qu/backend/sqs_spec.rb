@@ -25,6 +25,7 @@ describe Qu::Backend::SQS do
   if Qu::Specs.perform?(described_class, :sqs)
     before(:each) do
       reset_service(:sqs)
+      subject.connection.queues.create('default')
     end
 
     it_should_behave_like 'a backend'
