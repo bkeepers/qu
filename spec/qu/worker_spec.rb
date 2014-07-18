@@ -4,22 +4,22 @@ require 'qu/backend/memory'
 describe Qu::Worker do
   let(:job) { Qu::Payload.new(:id => '1', :klass => SimpleJob) }
 
+  subject { described_class.new(SimpleJob.queue)}
+
   describe 'queues' do
-    it 'should use default if none specified' do
-      Qu::Worker.new.queues.should == ['default']
-      Qu::Worker.new('default').queues.should == ['default']
-      Qu::Worker.new(['default']).queues.should == ['default']
+    it 'should raise error if no queue specified' do
+      expect { described_class.new }.to raise_error(RuntimeError, "Please provide one or more queues to work on.")
     end
 
     it 'should use specified if any' do
-      Qu::Worker.new('a', 'b').queues.should == ['a', 'b']
-      Qu::Worker.new(['a', 'b']).queues.should == ['a', 'b']
-      Qu::Worker.new(:a, :b).queues.should == ['a', 'b']
-      Qu::Worker.new([:a, :b]).queues.should == ['a', 'b']
+      described_class.new('a', 'b').queues.should == ['a', 'b']
+      described_class.new(['a', 'b']).queues.should == ['a', 'b']
+      described_class.new(:a, :b).queues.should == ['a', 'b']
+      described_class.new([:a, :b]).queues.should == ['a', 'b']
     end
 
     it 'should drop queue name whitespace' do
-      Qu::Worker.new(' a ', ' b ').queues.should == ['a', 'b']
+      described_class.new(' a ', ' b ').queues.should == ['a', 'b']
     end
   end
 
@@ -27,12 +27,12 @@ describe Qu::Worker do
     it "should default hostname and pid" do
       Socket.stub(:gethostname).and_return("foo")
       Process.stub(:pid).and_return(12345)
-      worker = Qu::Worker.new('a', 'b')
+      worker = described_class.new('a', 'b')
       worker.id.should eq("foo:12345:a,b")
     end
 
     it 'should not expand star in queue names' do
-      Qu::Worker.new('a', '*').id.should =~ /a,*/
+      described_class.new('a', '*').id.should =~ /a,*/
     end
   end
 
@@ -43,10 +43,10 @@ describe Qu::Worker do
         Qu.stub(:pop).and_return(nil)
 
         Timeout.timeout(0.1) do
-          Qu::Worker.new('a', 'b', 'c').start
+          described_class.new('a', 'b', 'c').start
         end
         flunk # should never get here as it should timeout
-      rescue Timeout::Error, Qu::Worker::Stop
+      rescue Timeout::Error, described_class::Stop
         # all good
       ensure
         Qu.interval = original_interval
@@ -54,7 +54,7 @@ describe Qu::Worker do
     end
 
     it 'stops worker if work loop is ever broken' do
-      worker = Qu::Worker.new('a', 'b', 'c')
+      worker = described_class.new('a', 'b', 'c')
 
       begin
         Timeout.timeout(0.1) { worker.start }
@@ -73,7 +73,7 @@ describe Qu::Worker do
 
       it 'raises abort with graceful shutdown disabled' do
         Qu.should_receive(:graceful_shutdown).and_return(false)
-        expect { subject.stop }.to raise_exception(Qu::Worker::Abort)
+        expect { subject.stop }.to raise_exception(described_class::Abort)
       end
 
       it 'does not raise if graceful shutdown enabled' do
@@ -85,7 +85,7 @@ describe Qu::Worker do
     context "when not performing a job" do
       it 'raises stop' do
         subject.should_receive(:performing?).and_return(false)
-        expect { subject.stop }.to raise_exception(Qu::Worker::Stop)
+        expect { subject.stop }.to raise_exception(described_class::Stop)
       end
     end
   end
@@ -115,7 +115,7 @@ describe Qu::Worker do
       it 'should not pop once job is found' do
         job.should_receive(:perform)
         Qu.should_not_receive(:pop).with('c')
-        Qu::Worker.new('a', 'b', 'c').work.should be(true)
+        described_class.new('a', 'b', 'c').work.should be(true)
       end
     end
 
@@ -126,11 +126,11 @@ describe Qu::Worker do
 
       it 'pops until job found and performs it' do
         job.should_receive(:perform)
-        Qu::Worker.new('a', 'b', 'c', 'd').work
+        described_class.new('a', 'b', 'c', 'd').work
       end
 
       it 'returns true' do
-        Qu::Worker.new('a', 'b', 'c', 'd').work.should be(true)
+        described_class.new('a', 'b', 'c', 'd').work.should be(true)
       end
     end
 
@@ -147,11 +147,11 @@ describe Qu::Worker do
         Qu.should_receive(:pop).with('a').once.ordered.and_return(nil)
         Qu.should_receive(:pop).with('b').once.ordered.and_return(nil)
         Qu.should_receive(:pop).with('c').once.ordered.and_return(nil)
-        Qu::Worker.new('a', 'b', 'c').work
+        described_class.new('a', 'b', 'c').work
       end
 
       it 'returns false' do
-        Qu::Worker.new('a', 'b', 'c').work.should be(false)
+        described_class.new('a', 'b', 'c').work.should be(false)
       end
     end
   end

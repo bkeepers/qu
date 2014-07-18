@@ -1,4 +1,5 @@
 class SimpleJob < Qu::Job
+  queue :simple
 end
 
 class CustomQueue < Qu::Job
@@ -24,27 +25,15 @@ shared_examples_for 'a backend interface' do
     subject.fail payload
   end
 
-  it "can pop" do
-    subject.pop
-  end
-
-  it "can pop from specific queue" do
+  it "can pop from a queue" do
     subject.pop('foo')
   end
 
-  it "can get size of default queue" do
-    subject.size
-  end
-
-  it "can get size of specific queue" do
+  it "can get size of a queue" do
     subject.size('foo')
   end
 
-  it "can clear default queue" do
-    subject.clear
-  end
-
-  it "can clear specific queue" do
+  it "can clear a queue" do
     subject.clear('foo')
   end
 
@@ -73,7 +62,7 @@ shared_examples_for 'a backend' do
 
     it 'should add a job to the queue' do
       subject.push(payload)
-      payload.queue.should == 'default'
+      payload.queue.should == SimpleJob.queue
       subject.size(payload.queue).should == 1
     end
 
@@ -146,10 +135,10 @@ shared_examples_for 'a backend' do
   end
 
   describe 'size' do
-    it 'should use the default queue by default' do
-      subject.size.should == 0
+    it 'should return number of items in queue' do
+      subject.size(SimpleJob.queue).should == 0
       subject.push(payload)
-      subject.size.should == 1
+      subject.size(SimpleJob.queue).should == 1
     end
   end
 

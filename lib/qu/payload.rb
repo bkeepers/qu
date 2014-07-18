@@ -21,7 +21,7 @@ module Qu
     end
 
     def queue
-      @queue ||= (klass.instance_variable_get(:@queue) || 'default').to_s
+      @queue ||= (klass && klass.queue.to_s) || raise("Please set the klass for the payload.")
     end
 
     def perform

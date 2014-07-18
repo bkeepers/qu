@@ -27,4 +27,4 @@ if [ $# -gt 0 ]
     specs=$@
 fi
 
-script/bootstrap && bundle exec rspec $specs
+script/bootstrap && bundle exec rake unattended_spec

@@ -7,7 +7,7 @@ describe Qu::Instrumentation::StatsdSubscriber do
 
   before do
     Qu.backend = Qu::Backend::Redis.new
-    Qu.clear
+    Qu.clear(SimpleJob.queue)
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications
     described_class.client = statsd_client
@@ -30,17 +30,17 @@ describe Qu::Instrumentation::StatsdSubscriber do
   end
 
   it "instruments pop" do
-    worker = Qu::Worker.new
+    worker = Qu::Worker.new(SimpleJob.queue)
     worker.work
     assert_timer "qu.op.pop"
-    assert_timer "qu.queue.default.pop"
+    assert_timer "qu.queue.#{SimpleJob.queue}.pop"
   end
 
   it "instruments push" do
     payload = SimpleJob.create
     assert_timer "qu.op.push"
     assert_timer "qu.job.SimpleJob.push"
-    assert_timer "qu.queue.default.push"
+    assert_timer "qu.queue.#{SimpleJob.queue}.push"
   end
 
   it "instruments perform" do

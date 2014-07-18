@@ -10,8 +10,10 @@ describe Qu::Payload do
   end
 
   describe 'queue' do
-    it 'should default to "default"' do
-      Qu::Payload.new.queue.should == 'default'
+    it 'should require the klass attribute' do
+      expect {
+        Qu::Payload.new.queue
+      }.to raise_error(RuntimeError, "Please set the klass for the payload.")
     end
 
     it 'should get queue from klass' do

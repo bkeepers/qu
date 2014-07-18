@@ -30,7 +30,7 @@ module Qu
         end
       end
 
-      def pop(queue = 'default')
+      def pop(queue)
         begin
           doc = with_connection_retries do
             jobs(queue).find_and_modify(:remove => true)
@@ -45,13 +45,13 @@ module Qu
         end
       end
 
-      def size(queue = 'default')
+      def size(queue)
         with_connection_retries do
           jobs(queue).count
         end
       end
 
-      def clear(queue = 'default')
+      def clear(queue)
         with_connection_retries do
           jobs(queue).drop
         end

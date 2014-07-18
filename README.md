@@ -81,10 +81,6 @@ Qu.clear
 
 ### Queues
 
-The `default` queue is used, um…by default. Jobs that don't specify a queue will be placed in that queue, and workers that don't specify a queue will work on that queue.
-
-However, if you have some background jobs that are more or less important, or some that take longer than others, you may want to consider using multiple queues. You can have workers dedicated to specific queues, or simply tell all your workers to work on the most important queue first.
-
 Jobs can be placed in a specific queue by setting the queue:
 
 ``` ruby
@@ -104,7 +100,7 @@ end
 You can then tell workers to work on this queue by passing an environment variable
 
 ``` sh
-$ bundle exec rake qu:work QUEUES=urgent,default
+$ bundle exec rake qu:work QUEUES=urgent
 ```
 
 Note that if you still want your worker to process the default queue, you must specify it. Queues will be process in the order they are specified.

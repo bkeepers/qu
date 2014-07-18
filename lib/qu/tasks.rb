@@ -1,7 +1,7 @@
 namespace :qu do
   desc "Start a worker"
   task :work  => :environment do
-    queues = (ENV['QUEUES'] || ENV['QUEUE'] || 'default').to_s.split(',')
+    queues = (ENV['QUEUES'] || ENV['QUEUE']).to_s.split(',')
     worker = Qu::Worker.new(*queues)
     begin
       worker.start

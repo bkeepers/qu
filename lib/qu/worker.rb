@@ -20,7 +20,7 @@ module Qu
 
     def initialize(*queues)
       @queues = queues.flatten.map { |q| q.to_s.strip }
-      @queues << 'default' if @queues.empty?
+      raise("Please provide one or more queues to work on.") if @queues.empty?
       @running = false
       @performing = false
     end

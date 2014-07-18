@@ -25,16 +25,16 @@ module Qu
       end
 
       # Public: Override in subclass.
-      def pop(queue = 'default')
+      def pop(queue)
       end
 
       # Public: Override in subclass.
-      def size(queue = 'default')
+      def size(queue)
         0
       end
 
       # Public: Override in subclass.
-      def clear(queue = 'default')
+      def clear(queue)
       end
 
       # Public: Override in subclass.

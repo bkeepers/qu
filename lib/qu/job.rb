@@ -8,7 +8,7 @@ module Qu
 
     def self.queue(name = nil)
       @queue = name.to_s if name
-      @queue ||= 'default'
+      @queue || raise("Please set the queue name")
     end
 
     def self.load(payload)

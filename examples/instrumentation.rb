@@ -20,6 +20,7 @@ end
 Qu::Instrumentation::StatsdSubscriber.client = Statsd.new('localhost', 6868)
 
 class SimpleJob < Qu::Job
+  queue :simple
 end
 
 SimpleJob.create

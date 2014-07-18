@@ -1,9 +1,12 @@
 require 'qu/backend/redis'
 
 class RunnerJob < Qu::Job
+  queue :runner
 end
 
 class RedisPusherJob < Qu::Job
+  queue :redis_pusher
+
   def self.client
     @client ||= Qu.backend.connection
   end
@@ -15,16 +18,6 @@ class RedisPusherJob < Qu::Job
 
   def perform
     self.class.client.lpush(@list, @value)
-  end
-end
-
-class SleepJob < Qu::Job
-  def initialize(sleep_time = 5)
-    @sleep = sleep_time
-  end
-
-  def perform
-    sleep(@sleep)
   end
 end
 

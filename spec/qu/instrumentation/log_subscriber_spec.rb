@@ -8,7 +8,7 @@ describe Qu::Instrumentation::LogSubscriber do
 
   before(:each) do
     Qu.backend = Qu::Backend::Redis.new
-    Qu.clear
+    Qu.clear(SimpleJob.queue)
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications
     described_class.logger = Logger.new(io).tap { |logger|
@@ -22,18 +22,18 @@ describe Qu::Instrumentation::LogSubscriber do
   end
 
   it "logs empty pop" do
-    worker = Qu::Worker.new
+    worker = Qu::Worker.new(SimpleJob.queue)
     worker.work
     line = find_line('Qu pop')
-    line.should include("queue_name=default")
+    line.should include("queue_name=#{SimpleJob.queue}")
   end
 
   it "logs pop with payload" do
     payload = SimpleJob.create
-    worker = Qu::Worker.new
+    worker = Qu::Worker.new(SimpleJob.queue)
     worker.work
     line = find_line('Qu pop')
-    line.should include("queue_name=default payload=#{payload}")
+    line.should include("queue_name=#{SimpleJob.queue} payload=#{payload}")
   end
 
   it "logs push" do

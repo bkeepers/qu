@@ -49,7 +49,7 @@ module Qu
         }
       end
 
-      def pop(queue_name = 'default')
+      def pop(queue_name)
         instrument("pop.#{InstrumentationNamespace}") { |ipayload|
           result = @backend.pop(queue_name)
           ipayload[:payload] = result
@@ -58,14 +58,14 @@ module Qu
         }
       end
 
-      def size(queue_name = 'default')
+      def size(queue_name)
         instrument("size.#{InstrumentationNamespace}") { |ipayload|
           ipayload[:queue_name] = queue_name
           @backend.size(queue_name)
         }
       end
 
-      def clear(queue_name = 'default')
+      def clear(queue_name)
         instrument("clear.#{InstrumentationNamespace}") { |ipayload|
           ipayload[:queue_name] = queue_name
           @backend.clear(queue_name)

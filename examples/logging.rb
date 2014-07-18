@@ -3,6 +3,7 @@ require_relative './example_setup'
 require 'qu/instrumentation/log_subscriber'
 
 class SimpleJob < Qu::Job
+  queue :simple
 end
 
 SimpleJob.create

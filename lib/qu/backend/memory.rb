@@ -38,7 +38,7 @@ module Qu
 
       alias fail abort
 
-      def pop(queue_name = 'default')
+      def pop(queue_name)
         queue_for(queue_name) do |queue|
           if id = queue.shift
             payload = Payload.new(load(@messages[id]))
@@ -48,11 +48,11 @@ module Qu
         end
       end
 
-      def size(queue = 'default')
+      def size(queue)
         queue_for(queue).size
       end
 
-      def clear(queue_name = 'default')
+      def clear(queue_name)
         queue_for(queue_name) { |queue| queue.clear }
       end
 

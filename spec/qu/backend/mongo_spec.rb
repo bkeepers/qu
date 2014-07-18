@@ -44,12 +44,12 @@ describe Qu::Backend::Mongo do
         end
 
         it "raise error" do
-          expect { subject.size }.to raise_error(Mongo::ConnectionFailure)
+          expect { subject.size(SimpleJob.queue) }.to raise_error(Mongo::ConnectionFailure)
         end
 
         it "trying to reconnect" do
           subject.connection.should_receive(:[]).exactly(4).times.and_raise(Mongo::ConnectionFailure)
-          expect { subject.size }.to raise_error
+          expect { subject.size(SimpleJob.queue) }.to raise_error
         end
 
         it "sleep between tries" do
@@ -57,18 +57,18 @@ describe Qu::Backend::Mongo do
           subject.should_receive(:sleep).with(10).ordered
           subject.should_receive(:sleep).with(15).ordered
 
-          expect { subject.size }.to raise_error
+          expect { subject.size(SimpleJob.queue) }.to raise_error
         end
 
       end
     end
 
     describe 'pop' do
-      let(:worker) { Qu::Worker.new }
+      let(:worker) { Qu::Worker.new(SimpleJob.queue) }
 
       describe "on mongo >=2" do
         it 'should return nil when no jobs exist' do
-          subject.clear
+          subject.clear(SimpleJob.queue)
           Mongo::Collection.any_instance.should_receive(:find_and_modify).and_return(nil)
           lambda { subject.pop(worker).should be_nil }.should_not raise_error
         end
@@ -76,7 +76,7 @@ describe Qu::Backend::Mongo do
 
       describe 'on mongo <2' do
         it 'should return nil when no jobs exist' do
-          subject.clear
+          subject.clear(SimpleJob.queue)
           Mongo::Collection.any_instance.should_receive(:find_and_modify).and_raise(Mongo::OperationFailure)
           lambda { subject.pop(worker).should be_nil }.should_not raise_error
         end

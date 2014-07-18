@@ -11,11 +11,13 @@ describe Qu::Job do
 
   describe '.queue' do
     it 'should allow setting the queue name' do
-      CustomQueue.queue.should == 'custom'
-    end
-
-    it 'should default to default' do
-      SimpleJob.queue.should == 'default'
+      begin
+        original = SimpleJob.queue
+        SimpleJob.queue("foobar")
+        SimpleJob.queue.should eq("foobar")
+      ensure
+        SimpleJob.queue(original)
+      end
     end
   end
 
@@ -53,7 +55,7 @@ describe Qu::Job do
   describe 'create' do
     it 'should call push with a payload' do
       Qu.should_receive(:push) do |payload|
-        payload.queue.should eq('default')
+        payload.queue.should eq(SimpleJob.queue)
         payload.should be_instance_of(Qu::Payload)
         payload.klass.should == SimpleJob
         payload.args.should == [9]
