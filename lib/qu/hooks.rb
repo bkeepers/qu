@@ -57,7 +57,7 @@ module Qu
       private
 
       def run_hook_by_type( name, type, *args, &block )
-        if hook = find_hooks_for(name).find { |hook| hook.type == type }
+        if hook = find_hooks_for(name).find { |h| h.type == type }
           hook.call(self, args, &block)
         end
       end
