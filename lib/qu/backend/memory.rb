@@ -40,15 +40,17 @@ module Qu
 
       def pop(queue_name = 'default')
         queue_for(queue_name) do |queue|
-          begin
-            if id = queue.pop(true) # nonblocking pop
-              payload = Payload.new(load(@messages[id]))
-              @pending[id] = payload
-              payload
-            end
-          rescue ThreadError => e
-            unless e.message =~ /queue empty/
-              raise e
+          unless queue.empty?
+            begin
+              if id = queue.pop(true) # nonblocking pop
+                payload = Payload.new(load(@messages[id]))
+                @pending[id] = payload
+                payload
+              end
+            rescue ThreadError => e
+              unless e.message =~ /queue empty/
+                raise e
+              end
             end
           end
         end
