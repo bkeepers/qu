@@ -111,30 +111,31 @@ describe Qu::BatchJob do
       end
 
       it 'returns true when batch is full' do
-        job.push(1)
+        job.append(1)
         job.full?.should == true
       end
 
       it 'returns false when custom-sized batch is partially full' do
-        custom_job.push(1)
+        custom_job.append(1)
         custom_job.full?.should == false
       end
 
       it 'returns true when custom-sized batch is full' do
-        custom_job.push(*[1]*10)
+        custom_job.append(*[1]*10)
         custom_job.full?.should == true
       end
     end
 
-    describe 'push' do
+    describe '.append' do
       it 'adds a payload to the batch' do
-        job.push(1)
+        job.append(1)
         job.batch.should == [1]
       end
 
       it 'adds multiple payloads to the batch' do
-        job.push(1,2)
-        job.batch.should == [1,2]
+        job.append(1,2)
+        job.append(3,4)
+        job.batch.should == [1,2,3,4]
       end
 
       it 'adds a payload via <<' do
@@ -143,7 +144,7 @@ describe Qu::BatchJob do
       end
     end
 
-    describe 'each' do
+    describe '.each' do
       it 'yields each set of payload args' do
         job << Qu::Payload.new(:klass => job.class, :args => [1])
         job_args = []
@@ -155,7 +156,7 @@ describe Qu::BatchJob do
 
       it 'yields each set of payload args in custom-sized batch' do
         5.times do |i|
-          custom_job.push(Qu::Payload.new(:klass => custom_job.class, :args => [i]))
+          custom_job.append(Qu::Payload.new(:klass => custom_job.class, :args => [i]))
         end
         job_args = []
         custom_job.each do |*args|
@@ -166,13 +167,13 @@ describe Qu::BatchJob do
 
       it 'supports enumerable methods' do
         5.times do |i|
-          custom_job.push(Qu::Payload.new(:klass => custom_job.class, :args => [i, 'a']))
+          custom_job.append(Qu::Payload.new(:klass => custom_job.class, :args => [i, 'a']))
         end
         job_args = custom_job.collect.to_a.should == [[0, 'a'], [1, 'a'], [2, 'a'], [3, 'a'], [4, 'a']]
       end
     end
 
-    describe 'each_payload' do
+    describe '.each_payload' do
       it 'yields each payload' do
         job_payload = Qu::Payload.new(:klass => job.class, :args => [1])
         job << job_payload

@@ -19,10 +19,10 @@ module Qu
       @batch ||= []
     end
 
-    def push(*payloads)
+    def append(*payloads)
       batch.push(*payloads)
     end
-    alias_method :<<, :push
+    alias_method :<<, :append
 
     def each(&block)
       batch.each { |payload| yield *payload.args }
