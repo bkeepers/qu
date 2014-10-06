@@ -25,17 +25,13 @@ module Qu
 
     def each(&block)
       batch.each do |current_payload|
-        @current_payload = current_payload
         yield *current_payload.args
-        @current_payload = nil
       end
     end
 
     def each_payload(&block)
       batch.each do |current_payload|
-        @current_payload = current_payload
         yield current_payload
-        @current_payload = nil
       end
     end
   end
