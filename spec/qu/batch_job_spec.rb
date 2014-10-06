@@ -107,46 +107,46 @@ describe Qu::BatchJob do
 
     describe '.full?' do
       it 'returns false when batch is not full' do
+        job.payload.should == nil
+
         job.full?.should == false
       end
 
       it 'returns true when batch is full' do
-        job.append(1)
+        job.payload = 1
         job.full?.should == true
       end
 
       it 'returns false when custom-sized batch is partially full' do
-        custom_job.append(1)
+        custom_job.payload = 1
         custom_job.full?.should == false
       end
 
       it 'returns true when custom-sized batch is full' do
-        custom_job.append(*[1]*10)
+        custom_job.payload = [1]*10
         custom_job.full?.should == true
       end
     end
 
-    describe '.append' do
-      it 'adds a payload to the batch' do
-        job.append(1)
+    describe '.batch' do
+      it 'returns an empty array without a payload' do
+        job.batch.should == []
+      end
+
+      it 'returns payload if payload is a collection' do
+        job.payload = [1]
         job.batch.should == [1]
       end
 
-      it 'adds multiple payloads to the batch' do
-        job.append(1,2)
-        job.append(3,4)
-        job.batch.should == [1,2,3,4]
-      end
-
-      it 'adds a payload via <<' do
-        job << 1
+      it 'returns an array if payload is not a collection' do
+        job.payload = 1
         job.batch.should == [1]
       end
     end
 
     describe '.each' do
       it 'yields each set of payload args' do
-        job << Qu::Payload.new(:klass => job.class, :args => [1])
+        job.payload = Qu::Payload.new(:klass => job.class, :args => [1])
         job_args = []
         job.each do |*args|
           job_args << args
@@ -155,9 +155,11 @@ describe Qu::BatchJob do
       end
 
       it 'yields each set of payload args in custom-sized batch' do
+        batch = []
         5.times do |i|
-          custom_job.append(Qu::Payload.new(:klass => custom_job.class, :args => [i]))
+          batch << Qu::Payload.new(:klass => custom_job.class, :args => [i])
         end
+        custom_job.payload = batch
         job_args = []
         custom_job.each do |*args|
           job_args << args
@@ -166,22 +168,23 @@ describe Qu::BatchJob do
       end
 
       it 'supports enumerable methods' do
+        batch = []
         5.times do |i|
-          custom_job.append(Qu::Payload.new(:klass => custom_job.class, :args => [i, 'a']))
+          batch << Qu::Payload.new(:klass => custom_job.class, :args => [i, 'a'])
         end
+        custom_job.payload = batch
         job_args = custom_job.collect.to_a.should == [[0, 'a'], [1, 'a'], [2, 'a'], [3, 'a'], [4, 'a']]
       end
     end
 
     describe '.each_payload' do
       it 'yields each payload' do
-        job_payload = Qu::Payload.new(:klass => job.class, :args => [1])
-        job << job_payload
+        job.payload = Qu::Payload.new(:klass => job.class, :args => [1])
         payloads = []
         job.each_payload do |payload|
           payloads << payload
         end
-        payloads.should == [job_payload]
+        payloads.should == [job.payload]
       end
     end
   end

@@ -16,20 +16,27 @@ module Qu
     end
 
     def batch
-      @batch ||= []
+      if payload.respond_to?(:each)
+        payload
+      else
+        payload.nil? ? [] : [payload]
+      end
     end
-
-    def append(*payloads)
-      batch.push(*payloads)
-    end
-    alias_method :<<, :append
 
     def each(&block)
-      batch.each { |payload| yield *payload.args }
+      batch.each do |current_payload|
+        @current_payload = current_payload
+        yield *current_payload.args
+        @current_payload = nil
+      end
     end
 
     def each_payload(&block)
-      batch.each { |payload| yield payload }
+      batch.each do |current_payload|
+        @current_payload = current_payload
+        yield current_payload
+        @current_payload = nil
+      end
     end
   end
 end
