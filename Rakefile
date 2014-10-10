@@ -29,14 +29,14 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 namespace :spec do
-  Backends = %w(mongo redis)
+  Backends = %w(mongo redis nsq)
 
   Backends.each do |backend|
     desc "Run specs for #{backend} backend"
     RSpec::Core::RakeTask.new(backend) do |t|
       t.rspec_opts = %w[--color]
       t.verbose = false
-      t.pattern = "spec/qu/backend/#{backend}_spec.rb"
+      t.pattern = "spec/qu/backend/#{backend}*_spec.rb"
     end
   end
 
