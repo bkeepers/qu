@@ -51,8 +51,8 @@ module Qu
         client.ping
         true
       when "nsq"
-        uri = 'http://127.0.0.1:4151'
-        Net::HTTP.get(uri, '/ping')
+        uri = URI('http://127.0.0.1:4151/ping')
+        Net::HTTP.get(uri)
         true
       else
         false
