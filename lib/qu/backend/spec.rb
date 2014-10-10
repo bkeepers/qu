@@ -55,38 +55,12 @@ shared_examples_for 'a backend interface' do
 end
 
 shared_examples_for 'a backend' do
+  it_should_behave_like 'a pushing backend'
+
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   before do
     subject.clear(payload.queue)
-  end
-
-  describe 'push' do
-    it 'should return a payload' do
-      subject.push(payload).should be_instance_of(Qu::Payload)
-    end
-
-    it 'should set the payload id' do
-      subject.push(payload)
-      payload.id.should_not be_nil
-    end
-
-    it 'should add a job to the queue' do
-      subject.push(payload)
-      payload.queue.should == 'default'
-      subject.size(payload.queue).should == 1
-    end
-
-    it 'should assign a different job id for the same job pushed multiple times' do
-      first = subject.push(payload).id
-      second = subject.push(payload).id
-      first.should_not eq(second)
-    end
-
-    it 'should enqueue the attributes for push' do
-      payload.should_receive(:attributes_for_push).and_return({})
-      subject.push(payload)
-    end
   end
 
   describe 'pop' do
@@ -145,6 +119,54 @@ shared_examples_for 'a backend' do
     end
   end
 
+  describe 'connection=' do
+    it 'should allow setting the connection' do
+      connection = double('a connection')
+      subject.connection = connection
+      subject.connection.should == connection
+    end
+
+    it 'should provide a default connection' do
+      subject.connection.should_not be_nil
+    end
+  end
+end
+
+shared_examples_for 'a pushing backend' do
+  let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
+
+  before do
+    subject.clear(payload.queue)
+  end
+
+  describe 'push' do
+    it 'should return a payload' do
+      subject.push(payload).should be_instance_of(Qu::Payload)
+    end
+
+    it 'should set the payload id' do
+      subject.push(payload)
+      payload.id.should_not be_nil
+    end
+
+    it 'should add a job to the queue' do
+      subject.push(payload)
+      payload.queue.should == 'default'
+      subject.size(payload.queue).should == 1
+    end
+
+    it 'should assign a different job id for the same job pushed multiple times' do
+      first = subject.push(payload).id
+      second = subject.push(payload).id
+      first.should_not eq(second)
+    end
+
+    it 'should enqueue the attributes for push' do
+      payload.should_receive(:attributes_for_push).and_return({})
+      subject.push(payload)
+    end
+  end
+
   describe 'size' do
     it 'should use the default queue by default' do
       subject.size.should == 0
@@ -165,18 +187,6 @@ shared_examples_for 'a backend' do
       subject.push(payload)
       subject.clear('other')
       subject.size(payload.queue).should == 1
-    end
-  end
-
-  describe 'connection=' do
-    it 'should allow setting the connection' do
-      connection = double('a connection')
-      subject.connection = connection
-      subject.connection.should == connection
-    end
-
-    it 'should provide a default connection' do
-      subject.connection.should_not be_nil
     end
   end
 end
