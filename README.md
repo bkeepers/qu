@@ -139,7 +139,7 @@ require 'qu-immediate'
 
 ## Why another queuing library?
 
-Resque and delayed_job are both great, but both of them have shortcomings that can be frustrating in production applications.
+[Resque](https://github.com/resque/resque) and [delayed_job](https://github.com/collectiveidea/delayed_job) are both great, but both of them have shortcomings that can be frustrating in production applications.
 
 delayed_job was a brilliantly simple pioneer in the world of database-backed queues. While most asynchronous queuing systems were tending toward overly complex, it made use of your existing database and just worked. But there are a few flaws:
 
@@ -158,13 +158,12 @@ Those shortcomings lead us to write Qu. It is not perfect, but we hope to overco
 
 If you find what looks like a bug:
 
-1. Search the [mailing list](http://groups.google.com/group/qu-users) to see if anyone else had the same issue.
-2. Check the [GitHub issue tracker](http://github.com/bkeepers/qu/issues/) to see if anyone else has reported issue.
-3. If you don't see anything, create an issue with information on how to reproduce it.
+1. Search the [issues on GitHub](http://github.com/bkeepers/qu/issues/) to see if anyone else has reported issue.
+2. If you don't see anything, [create an issue](http://github.com/bkeepers/qu/issues/new) with information on how to reproduce it.
 
 If you want to contribute an enhancement or a fix:
 
-1. Fork the project on GitHub.
+1. [Fork the project](https://github.com/bkeepers/qu/fork) on GitHub.
 2. Make your changes with tests.
 3. Commit the changes without making changes to the Rakefile, Gemfile, gemspec, or any other files that aren't related to your enhancement or fix
 4. Send a pull request.
