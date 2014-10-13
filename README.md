@@ -158,9 +158,8 @@ Those shortcomings lead us to write Qu. It is not perfect, but we hope to overco
 
 If you find what looks like a bug:
 
-1. Search the [mailing list](http://groups.google.com/group/qu-users) to see if anyone else had the same issue.
-2. Check the [GitHub issue tracker](http://github.com/bkeepers/qu/issues/) to see if anyone else has reported issue.
-3. If you don't see anything, create an issue with information on how to reproduce it.
+1. Search the [issues on GitHub](http://github.com/bkeepers/qu/issues/) to see if anyone else has reported issue.
+2. If you don't see anything, create an issue with information on how to reproduce it.
 
 If you want to contribute an enhancement or a fix:
 
