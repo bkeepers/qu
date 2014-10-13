@@ -139,7 +139,7 @@ require 'qu-immediate'
 
 ## Why another queuing library?
 
-Resque and delayed_job are both great, but both of them have shortcomings that can be frustrating in production applications.
+[Resque](https://github.com/resque/resque) and [delayed_job](https://github.com/collectiveidea/delayed_job) are both great, but both of them have shortcomings that can be frustrating in production applications.
 
 delayed_job was a brilliantly simple pioneer in the world of database-backed queues. While most asynchronous queuing systems were tending toward overly complex, it made use of your existing database and just worked. But there are a few flaws:
 
@@ -159,7 +159,7 @@ Those shortcomings lead us to write Qu. It is not perfect, but we hope to overco
 If you find what looks like a bug:
 
 1. Search the [issues on GitHub](http://github.com/bkeepers/qu/issues/) to see if anyone else has reported issue.
-2. If you don't see anything, create an issue with information on how to reproduce it.
+2. If you don't see anything, [create an issue](http://github.com/bkeepers/qu/issues/new) with information on how to reproduce it.
 
 If you want to contribute an enhancement or a fix:
 
