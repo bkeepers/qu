@@ -163,7 +163,7 @@ If you find what looks like a bug:
 
 If you want to contribute an enhancement or a fix:
 
-1. Fork the project on GitHub.
+1. [Fork the project](https://github.com/bkeepers/qu/fork) on GitHub.
 2. Make your changes with tests.
 3. Commit the changes without making changes to the Rakefile, Gemfile, gemspec, or any other files that aren't related to your enhancement or fix
 4. Send a pull request.
