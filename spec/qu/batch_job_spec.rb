@@ -5,7 +5,6 @@ end
 
 class CustomBatchJob < Qu::BatchJob
   queue 'custom'
-  batch_size 10
 end
 
 describe Qu::BatchJob do
@@ -94,16 +93,6 @@ describe Qu::BatchJob do
   describe 'batch' do
     let(:job) { SimpleBatchJob.new }
     let(:custom_job) { CustomBatchJob.new }
-
-    describe '.batch_size' do
-      it 'returns a default batch size' do
-        SimpleBatchJob.batch_size.should == 1
-      end
-
-      it 'configures the batch size' do
-        CustomBatchJob.batch_size.should == 10
-      end
-    end
 
     describe '.batch' do
       it 'returns an empty array without a payload' do
