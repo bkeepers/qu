@@ -11,10 +11,6 @@ module Qu
       true
     end
 
-    def full?
-      batch.size >= self.class.batch_size
-    end
-
     def batch
       if payload.respond_to?(:each)
         payload

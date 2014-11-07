@@ -105,29 +105,6 @@ describe Qu::BatchJob do
       end
     end
 
-    describe '.full?' do
-      it 'returns false when batch is not full' do
-        job.payload.should == nil
-
-        job.full?.should == false
-      end
-
-      it 'returns true when batch is full' do
-        job.payload = 1
-        job.full?.should == true
-      end
-
-      it 'returns false when custom-sized batch is partially full' do
-        custom_job.payload = 1
-        custom_job.full?.should == false
-      end
-
-      it 'returns true when custom-sized batch is full' do
-        custom_job.payload = [1]*10
-        custom_job.full?.should == true
-      end
-    end
-
     describe '.batch' do
       it 'returns an empty array without a payload' do
         job.batch.should == []
