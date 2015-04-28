@@ -29,7 +29,9 @@ module Qu
   end
 
   def register(name, instance)
-    queues[name.to_sym] = Queues::Instrumented.wrap(instance)
+    name = name.to_sym
+    instance.name = name
+    queues[name] = Queues::Instrumented.wrap(instance)
   end
 
   def unregister_queues

@@ -14,7 +14,7 @@ module Qu
         @messages = {}
         @pending = {}
         @connection = @messages
-        @name = name
+        self.name = name
       end
 
       def push(payload)

@@ -55,7 +55,7 @@ module Qu
       end
 
       def queue
-        @queue ||= connection.queues.named(name)
+        @queue ||= connection.queues.named(name.to_s)
       end
     end
   end

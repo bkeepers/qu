@@ -6,8 +6,7 @@ end
 
 shared_examples_for 'a queue interface' do
   before do
-    Qu.register :default, Qu::Queues::Memory.new
-    Qu.register :default, subject
+    Qu.register SimpleJob.queue, subject
   end
 
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
@@ -49,7 +48,7 @@ shared_examples_for 'a queue' do
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   before do
-    Qu.register :default, subject
+    Qu.register SimpleJob.queue, subject
     subject.clear
   end
 

@@ -38,4 +38,13 @@ describe Qu do
       Qu.should respond_to(method_name)
     end
   end
+
+  describe "#register" do
+    it "sets instance to name in queues hash" do
+      Qu.register :foo, Qu::Queues::Memory.new
+      Qu.queues[:foo].should be_instance_of(Qu::Queues::Instrumented)
+      Qu.queues[:foo].queue.should be_instance_of(Qu::Queues::Memory)
+      Qu.queues[:foo].name.should eq(:foo)
+    end
+  end
 end
