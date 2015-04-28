@@ -1,4 +1,3 @@
-# Example of how Qu works with graceful shutdown turned on.
 require 'socket'
 require_relative './example_setup'
 require 'qu/instrumentation/statsd'
@@ -20,7 +19,7 @@ end
 Qu::Instrumentation::StatsdSubscriber.client = Statsd.new('localhost', 6868)
 
 class SimpleJob < Qu::Job
-  queue :simple
+  queue :redis
 end
 
 SimpleJob.create

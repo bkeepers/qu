@@ -6,6 +6,8 @@ Qu.configure do |config|
 end
 
 class SleepJob < Qu::Job
+  queue :redis
+
   def initialize(sleep_for = 3)
     @sleep_for = sleep_for
   end
@@ -19,4 +21,4 @@ end
 
 SleepJob.create 3
 
-work_and_die 1
+work_and_die 1, :redis

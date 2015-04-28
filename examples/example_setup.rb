@@ -9,20 +9,22 @@ require 'qu-redis'
 queue = Qu::Queues::Redis.new
 queue.connection.flushdb
 
+Qu.register :default, queue
+
 Qu.configure do |config|
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::DEBUG
-  config.queue = queue
 end
 
 def work_and_die(die_after_seconds = 1, *queues)
+  queues = [:redis] if queues.empty?
+  worker = Qu::Worker.new(queues)
+
   # tell qu worker to terminate after N seconds by sending terminate signal
   Thread.new {
     sleep die_after_seconds
     Process.kill 'SIGTERM', $$
   }
-
-  worker = Qu::Worker.new(queues)
 
   begin
     worker.start

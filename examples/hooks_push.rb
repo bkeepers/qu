@@ -1,7 +1,8 @@
-# Example of how Qu works with graceful shutdown turned on.
 require_relative './example_setup'
 
 class MaybeJob < Qu::Job
+  queue :redis
+
   before_push :determine_for_real
   after_push :log_push
 
@@ -30,6 +31,6 @@ MaybeJob.create(true)
 MaybeJob.create(false)
 MaybeJob.create(false)
 
-Qu.logger.info "Qu size should be 1, actual: #{Qu.size}"
+Qu.logger.info "Qu size should be 1, actual: #{Qu.queues[:redis].size}"
 
 work_and_die

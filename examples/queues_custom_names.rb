@@ -1,5 +1,7 @@
-# Example of how Qu works with graceful shutdown turned on.
 require_relative './example_setup'
+
+Qu.register :low, Qu::Queues::Redis.new(:low)
+Qu.register :high, Qu::Queues::Redis.new(:high)
 
 class CallThePresidentJob < Qu::Job
   queue :low

@@ -1,7 +1,8 @@
-# Example of how Qu works with graceful shutdown turned on.
 require_relative './example_setup'
 
 class CookJob < Qu::Job
+  queue :redis
+
   around_perform :instrument
 
   before_perform :purchase
