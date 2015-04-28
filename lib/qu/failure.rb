@@ -1,10 +1,7 @@
 require "qu/failure/log"
-require "qu/instrumenter"
 
 module Qu
   module Failure
-    extend Qu::Instrumenter
-
     # Public: Creates a failure for the given payload and exception using the
     # current failure queue.
     #
@@ -13,7 +10,7 @@ module Qu
     #
     # Returns nothing.
     def self.create(payload, exception)
-      instrument("failure_create.#{InstrumentationNamespace}") do |ipayload|
+      Qu.instrument("failure_create") do |ipayload|
         ipayload[:payload] = payload
         ipayload[:exception] = exception
 

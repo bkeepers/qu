@@ -49,6 +49,10 @@ module Qu
   def load_json(object)
     JSON.load(object) if object
   end
+
+  def instrument(name, payload = {}, &block)
+    Qu.instrumenter.instrument("#{name}.#{InstrumentationNamespace}", payload, &block)
+  end
 end
 
 Qu.configure do |config|

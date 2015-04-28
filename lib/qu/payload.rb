@@ -2,7 +2,6 @@ require 'ostruct'
 
 module Qu
   class Payload < OpenStruct
-    include Qu::Instrumenter
     include Logger
 
     undef_method(:id) if method_defined?(:id)
@@ -32,7 +31,7 @@ module Qu
 
     def perform
       job.run_hook(:perform) do
-        instrument("perform.#{InstrumentationNamespace}") do |ipayload|
+        Qu.instrument("perform") do |ipayload|
           ipayload[:payload] = self
           job.perform
         end
