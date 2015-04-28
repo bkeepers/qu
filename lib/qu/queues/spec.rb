@@ -146,16 +146,4 @@ shared_examples_for 'a queue' do
       subject.size.should == 0
     end
   end
-
-  describe 'connection=' do
-    it 'should allow setting the connection' do
-      connection = double('a connection')
-      subject.connection = connection
-      subject.connection.should == connection
-    end
-
-    it 'should provide a default connection' do
-      subject.connection.should_not be_nil
-    end
-  end
 end

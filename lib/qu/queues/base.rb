@@ -4,7 +4,6 @@ module Qu
   module Queues
     class Base
       include Logger
-      attr_accessor :connection
 
       # Public: The name the queue was registered as.
       attr_accessor :name
