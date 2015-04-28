@@ -16,6 +16,8 @@ module Qu
 
       def_delegators :@queue, :connection, :connection=, :reconnect, :name
 
+      attr_reader :queue
+
       def initialize(queue)
         @queue = queue
       end
