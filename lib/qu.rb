@@ -24,8 +24,6 @@ module Qu
 
   attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval, :runner
 
-  def_delegators :queue, :push, :pop, :complete, :abort, :fail, :size, :clear
-
   def queues
     @queues ||= Util::ThreadSafeHash.new
   end
