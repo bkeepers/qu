@@ -4,10 +4,8 @@ require 'securerandom'
 module Qu
   module Queues
     class SQS < Base
-      attr_reader :name
-
       def initialize(name = "default")
-        @name = name
+        self.name = name
       end
 
       def push(payload)

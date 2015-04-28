@@ -4,7 +4,6 @@ require 'securerandom'
 module Qu
   module Queues
     class Redis < Base
-      attr_accessor :name
       attr_accessor :namespace
 
       def initialize(name = "default")

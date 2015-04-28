@@ -3,9 +3,6 @@ require 'mongo'
 module Qu
   module Queues
     class Mongo < Base
-
-      attr_accessor :name
-
       # Number of times to retry connection on connection failure (default: 5)
       attr_accessor :max_retries
 

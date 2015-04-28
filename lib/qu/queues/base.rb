@@ -5,6 +5,7 @@ module Qu
     class Base
       include Logger
       attr_accessor :connection
+      attr_accessor :name
 
       # Public: Override in subclass.
       def push(payload)

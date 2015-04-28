@@ -8,8 +8,6 @@ module Qu
 
       def_delegator :@monitor, :synchronize
 
-      attr_reader :name
-
       def initialize(name = "default")
         @monitor = Monitor.new
         @queue = []
