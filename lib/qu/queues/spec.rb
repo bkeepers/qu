@@ -1,5 +1,4 @@
 require "qu/queues/memory"
-Qu.register :default, Qu::Queues::Memory.new
 
 class SimpleJob < Qu::Job
   queue :default
@@ -7,6 +6,7 @@ end
 
 shared_examples_for 'a queue interface' do
   before do
+    Qu.register :default, Qu::Queues::Memory.new
     Qu.register :default, subject
   end
 

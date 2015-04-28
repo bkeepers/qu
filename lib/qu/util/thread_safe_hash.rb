@@ -30,6 +30,10 @@ module Qu
       def values
         synchronize { @items.values }
       end
+
+      def clear
+        synchronize { @items.clear }
+      end
     end
   end
 end

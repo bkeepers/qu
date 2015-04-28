@@ -34,6 +34,10 @@ module Qu
     queues[name.to_sym] = Queues::Instrumented.wrap(instance)
   end
 
+  def unregister_queues
+    queues.clear
+  end
+
   def configure(&block)
     block.call(self)
   end

@@ -24,6 +24,10 @@ end
 shared_examples_for 'a runner interface' do
   let(:payload) { Qu::Payload.new(:klass => RunnerJob) }
 
+  before do
+    Qu.register :default, Qu::Queues::Memory.new
+  end
+
   it 'can run a payload' do
     subject.run(double("worker"), payload)
   end
@@ -43,6 +47,7 @@ shared_examples_for 'a single job runner' do
   let(:timeout) { 5 }
 
   before do
+    Qu.register :redis, Qu::Queues::Redis.new
     RedisPusherJob.client.del(list)
   end
 

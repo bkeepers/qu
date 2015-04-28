@@ -65,3 +65,10 @@ log_file = log_path.join("qu.log")
 log_to = ENV.fetch("QU_LOG_STDOUT", false) ? STDOUT : log_file
 
 Qu.logger = Logger.new(log_to)
+
+RSpec.configure do |config|
+  config.before(:each) do
+    Qu.unregister_queues
+    Qu.register :default, Qu::Queues::Memory.new
+  end
+end
