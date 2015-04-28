@@ -6,3 +6,4 @@ log/*.log
 script/config/kestrel/target
 tmp
 .ruby-version
+bin
