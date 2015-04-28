@@ -108,8 +108,8 @@ Note that if you still want your worker to process the default queue, you must s
 You can also get the size or clear a specific queue:
 
 ``` ruby
-Qu.size(:urgent)
-Qu.clear(:urgent)
+Qu.size
+Qu.clear
 ```
 
 ## Configuration

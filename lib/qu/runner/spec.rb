@@ -1,14 +1,14 @@
 require 'qu/queues/redis'
 
 class RunnerJob < Qu::Job
-  queue :runner
+  queue :default
 end
 
 class RedisPusherJob < Qu::Job
-  queue :redis_pusher
+  queue :redis
 
   def self.client
-    @client ||= Qu.queue.connection
+    @client ||= Qu.queues[:redis].connection
   end
 
   def initialize(list, value)
@@ -22,7 +22,6 @@ class RedisPusherJob < Qu::Job
 end
 
 shared_examples_for 'a runner interface' do
-
   let(:payload) { Qu::Payload.new(:klass => RunnerJob) }
 
   it 'can run a payload' do
@@ -39,13 +38,11 @@ shared_examples_for 'a runner interface' do
 end
 
 shared_examples_for 'a single job runner' do
-
   let(:list) { 'push-test-list' }
   let(:payload) { Qu::Payload.new(:klass => RedisPusherJob, :args => [list, '1']) }
   let(:timeout) { 5 }
 
   before do
-    Qu.queue = Qu::Queues::Redis.new
     RedisPusherJob.client.del(list)
   end
 

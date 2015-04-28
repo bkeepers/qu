@@ -7,8 +7,7 @@ describe Qu::Instrumentation::LogSubscriber do
   let(:log) { io.string }
 
   before(:each) do
-    Qu.queue = Qu::Queues::Redis.new
-    Qu.clear(SimpleJob.queue)
+    Qu.register :default, Qu::Queues::Memory.new
     @original_instrumenter = Qu.instrumenter
     Qu.instrumenter = ActiveSupport::Notifications
     described_class.logger = Logger.new(io).tap { |logger|

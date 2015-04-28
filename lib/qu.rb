@@ -9,6 +9,7 @@ require 'qu/queues/instrumented'
 require 'qu/instrumenters/noop'
 require 'qu/runner/direct'
 require 'qu/worker'
+require 'qu/util/thread_safe_hash'
 
 require 'forwardable'
 require 'logger'
@@ -31,6 +32,14 @@ module Qu
 
   def queue=(queue)
     @queue = Queues::Instrumented.wrap(queue)
+  end
+
+  def queues
+    @queues ||= Util::ThreadSafeHash.new
+  end
+
+  def register(name, instance)
+    queues[name.to_sym] = Queues::Instrumented.wrap(instance)
   end
 
   def configure(&block)

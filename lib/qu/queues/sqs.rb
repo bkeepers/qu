@@ -4,15 +4,15 @@ require 'securerandom'
 module Qu
   module Queues
     class SQS < Base
-      def initialize
-        @queues = Hash.new { |h, k|
-          h[k] = connection.queues.named(k)
-        }
+      attr_reader :name
+
+      def initialize(name = "default")
+        @name = name
       end
 
       def push(payload)
         payload.id = SecureRandom.uuid
-        @queues[payload.queue].send_message(dump(payload.attributes_for_push))
+        queue.send_message(dump(payload.attributes_for_push))
         payload
       end
 
@@ -28,44 +28,36 @@ module Qu
         payload.message.visibility_timeout = 0 if payload.message
       end
 
-      def pop(queue_name = 'default')
-        begin
-          if message = @queues[queue_name].receive_message
-            doc = load(message.body)
-            payload = Payload.new(doc)
-            payload.message = message
-            return payload
-          end
-        rescue ::AWS::SQS::Errors::NonExistentQueue
+      def pop
+        if message = queue.receive_message
+          doc = load(message.body)
+          payload = Payload.new(doc)
+          payload.message = message
+          payload
         end
       end
 
-      def size(queue_name = 'default')
-        begin
-          @queues[queue_name].visible_messages
-        rescue ::AWS::SQS::Errors::NonExistentQueue
-          0
-        end
+      def size
+        queue.visible_messages
       end
 
-      def clear(queue_name = 'default')
+      def clear
+        messages = []
         begin
-          queue = @queues[queue_name]
-          messages = []
           begin
-            begin
-              messages = queue.receive_message(:limit => 10)
-              queue.batch_delete(messages)
-            rescue ::AWS::SQS::Errors::BatchDeleteSend
-            end
-          end while messages.size > 0
-        rescue ::AWS::SQS::Errors::NonExistentQueue
-          # doesn't exist so no need to flush
-        end
+            messages = queue.receive_message(:limit => 10)
+            queue.batch_delete(messages)
+          rescue ::AWS::SQS::Errors::BatchDeleteSend
+          end
+        end while messages.size > 0
       end
 
       def connection
         @connection ||= ::AWS::SQS.new
+      end
+
+      def queue
+        @queue ||= connection.queues.named(name)
       end
     end
   end

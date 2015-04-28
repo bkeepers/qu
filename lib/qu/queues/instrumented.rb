@@ -15,7 +15,7 @@ module Qu
         end
       end
 
-      def_delegators :@queue, :connection, :connection=, :reconnect
+      def_delegators :@queue, :connection, :connection=, :reconnect, :name
 
       def initialize(queue)
         @queue = queue
@@ -49,26 +49,26 @@ module Qu
         }
       end
 
-      def pop(queue_name)
+      def pop
         instrument("pop.#{InstrumentationNamespace}") { |ipayload|
-          result = @queue.pop(queue_name)
-          ipayload[:payload] = result
-          ipayload[:queue_name] = queue_name
-          result
+          payload = @queue.pop
+          ipayload[:payload] = payload
+          ipayload[:queue_name] = @queue.name
+          payload
         }
       end
 
-      def size(queue_name)
+      def size
         instrument("size.#{InstrumentationNamespace}") { |ipayload|
-          ipayload[:queue_name] = queue_name
-          @queue.size(queue_name)
+          ipayload[:queue_name] = @queue.name
+          @queue.size
         }
       end
 
-      def clear(queue_name)
+      def clear
         instrument("clear.#{InstrumentationNamespace}") { |ipayload|
-          ipayload[:queue_name] = queue_name
-          @queue.clear(queue_name)
+          ipayload[:queue_name] = @queue.name
+          @queue.clear
         }
       end
     end

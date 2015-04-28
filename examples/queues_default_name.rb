@@ -9,6 +9,6 @@ end
 
 payload = CallTheNunes.create
 
-Qu.logger.info "Queue used: #{payload.queue}"
+Qu.logger.info "Queue used: #{payload.queue.inspect}"
 
 work_and_die

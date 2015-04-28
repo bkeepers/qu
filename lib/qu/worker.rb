@@ -7,7 +7,7 @@ module Qu
 
     SIGNALS = [:INT, :TERM]
 
-    attr_accessor :queues
+    attr_accessor :queue_names
 
     # Internal: Raised when signal received, no job is being performed, and
     # graceful shutdown is disabled.
@@ -18,23 +18,27 @@ module Qu
     class Stop < StandardError
     end
 
-    def initialize(*queues)
-      @queues = queues.flatten.map { |q| q.to_s.strip }
-      raise("Please provide one or more queues to work on.") if @queues.empty?
+    def initialize(*queue_names)
+      @queue_names = queue_names.flatten.map { |q| q.to_s.strip }
+      raise("Please provide one or more queue_names to work on.") if @queue_names.empty?
       @running = false
       @performing = false
     end
 
+    def queues
+      @queues ||= @queue_names.map { |name| Qu.queues[name.to_sym] }.compact
+    end
+
     def id
-      @id ||= "#{hostname}:#{pid}:#{queues.join(',')}"
+      @id ||= "#{hostname}:#{pid}:#{queue_names.join(',')}"
     end
 
     def work
       did_work = false
 
       unless Qu.runner.full?
-        queues.each do |queue_name|
-          if payload = Qu.pop(queue_name)
+        queues.each do |queue|
+          if payload = queue.pop
             begin
               @performing = true
               Qu.runner.run(self, payload)

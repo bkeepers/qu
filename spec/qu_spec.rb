@@ -1,25 +1,11 @@
 require 'spec_helper'
 
 describe Qu do
-  %w(push pop complete abort size clear).each do |method|
-    it "should delegate #{method} to queue" do
-      Qu.queue.should_receive(method).with(:arg)
-      Qu.send(method, :arg)
-    end
-  end
-
   describe 'configure' do
     it 'should yield Qu' do
       Qu.configure do |c|
         c.should == Qu
       end
-    end
-  end
-
-  describe 'queue' do
-    it 'should raise error if queue not configured' do
-      Qu.queue = nil
-      lambda { Qu.queue }.should raise_error
     end
   end
 

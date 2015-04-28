@@ -36,7 +36,7 @@ module Qu
         case op
         when "push"
           if payload = @payload[:payload]
-            update_timer "qu.queue.#{payload.queue}.#{op}"
+            update_timer "qu.queue.#{payload.queue.name}.#{op}"
             update_timer "qu.job.#{payload.klass}.#{op}"
           end
         when "pop"

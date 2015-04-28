@@ -21,7 +21,13 @@ module Qu
     end
 
     def queue
-      @queue ||= (klass && klass.queue.to_s) || raise("Please set the klass for the payload.")
+      @queue ||= begin
+        if klass
+          Qu.queues[klass.queue] || raise("Queue #{klass.queue} is not registered")
+        else
+          raise "Please set the klass for the payload."
+        end
+      end
     end
 
     def perform
@@ -32,7 +38,7 @@ module Qu
         end
       end
 
-      job.run_hook(:complete) { Qu.complete(self) }
+      job.run_hook(:complete) { queue.complete(self) }
     rescue Qu::Worker::Abort
       abort
     rescue => exception
@@ -40,12 +46,12 @@ module Qu
     end
 
     def abort
-      job.run_hook(:abort) { Qu.abort(self) }
+      job.run_hook(:abort) { queue.abort(self) }
       raise
     end
 
     def fail(exception)
-      job.run_hook(:fail, exception) { Qu.fail(self) }
+      job.run_hook(:fail, exception) { queue.fail(self) }
       Qu::Failure.create(self, exception)
     end
 
@@ -53,7 +59,7 @@ module Qu
     def push
       self.pushed_at = Time.now.utc
 
-      job.run_hook(:push) { Qu.push(self) }
+      job.run_hook(:push) { queue.push(self) }
     end
 
     def attributes

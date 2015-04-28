@@ -13,8 +13,8 @@ describe Qu::Job do
     it 'should allow setting the queue name' do
       begin
         original = SimpleJob.queue
-        SimpleJob.queue("foobar")
-        SimpleJob.queue.should eq("foobar")
+        SimpleJob.queue(:foobar)
+        SimpleJob.queue.should eq(:foobar)
       ensure
         SimpleJob.queue(original)
       end
@@ -54,8 +54,8 @@ describe Qu::Job do
 
   describe 'create' do
     it 'should call push with a payload' do
-      Qu.should_receive(:push) do |payload|
-        payload.queue.should eq(SimpleJob.queue)
+      Qu.queues[SimpleJob.queue].should_receive(:push) do |payload|
+        payload.queue.should eq(Qu.queues[SimpleJob.queue])
         payload.should be_instance_of(Qu::Payload)
         payload.klass.should == SimpleJob
         payload.args.should == [9]
@@ -71,7 +71,7 @@ describe Qu::Job do
 
     it 'should not push job if hook halts' do
       SimpleJob.any_instance.stub(:run_hook)
-      Qu.should_not_receive(:push)
+      Qu.queues[SimpleJob.queue].should_not_receive(:push)
 
       SimpleJob.create(9)
     end

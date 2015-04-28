@@ -17,13 +17,13 @@ describe Qu::Payload do
     end
 
     it 'should get queue from klass' do
-      Qu::Payload.new(:klass => CustomQueue).queue.should == 'custom'
+      Qu::Payload.new(:klass => SimpleJob).queue.should eq(Qu.queues[:default])
     end
   end
 
   describe 'klass' do
     it 'should constantize string' do
-      Qu::Payload.new(:klass => 'CustomQueue').klass.should == CustomQueue
+      Qu::Payload.new(:klass => 'SimpleJob').klass.should == SimpleJob
     end
 
     it 'should find namespaced class' do
@@ -71,7 +71,7 @@ describe Qu::Payload do
     end
 
     it 'should call complete on queue' do
-      Qu.should_receive(:complete)
+      subject.queue.should_receive(:complete)
       subject.perform
     end
 
@@ -87,12 +87,12 @@ describe Qu::Payload do
       end
 
       it 'should abort the job and re-raise the error' do
-        Qu.should_receive(:abort).with(subject)
+        subject.queue.should_receive(:abort).with(subject)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
 
       it 'should not call complete' do
-        Qu.should_not_receive(:complete)
+        subject.queue.should_not_receive(:complete)
         lambda { subject.perform }.should raise_error(Qu::Worker::Abort)
       end
 
@@ -111,12 +111,12 @@ describe Qu::Payload do
       end
 
       it 'should not call complete' do
-        Qu.should_not_receive(:complete)
+        subject.queue.should_not_receive(:complete)
         subject.perform
       end
 
       it 'should call fail' do
-        Qu.should_receive(:fail).with(subject)
+        subject.queue.should_receive(:fail).with(subject)
         subject.perform
       end
 
@@ -137,7 +137,7 @@ describe Qu::Payload do
     subject { Qu::Payload.new(:klass => SimpleJob) }
 
     it "pushes payload to queue" do
-      Qu.should_receive(:push).with(subject)
+      subject.queue.should_receive(:push).with(subject)
       subject.push
     end
 

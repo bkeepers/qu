@@ -1,4 +1,4 @@
 require 'qu'
 require 'qu/queues/sqs'
 
-Qu.queue = Qu::Queues::SQS.new
+Qu.register :sqs, Qu::Queues::SQS.new

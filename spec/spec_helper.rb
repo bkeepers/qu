@@ -59,18 +59,6 @@ module Qu
   end
 end
 
-RSpec.configure do |config|
-  config.before(:each) do
-    Qu.queue = double('a queue', {
-      :push => nil,
-      :pop => nil,
-      :complete => nil,
-      :abort => nil,
-      :fail => nil,
-    })
-  end
-end
-
 log_path = root_path.join("log")
 log_path.mkpath
 log_file = log_path.join("qu.log")

@@ -4,6 +4,8 @@ module Qu
   module Queues
     class Mongo < Base
 
+      attr_accessor :name
+
       # Number of times to retry connection on connection failure (default: 5)
       attr_accessor :max_retries
 
@@ -11,7 +13,8 @@ module Qu
       # failure (default: 1)
       attr_accessor :retry_frequency
 
-      def initialize
+      def initialize(name = "default")
+        self.name            = name
         self.max_retries     = 5
         self.retry_frequency = 1
       end
@@ -19,21 +22,21 @@ module Qu
       def push(payload)
         payload.id = BSON::ObjectId.new
         with_connection_retries do
-          jobs(payload.queue).insert(payload_attributes(payload))
+          jobs.insert(payload_attributes(payload))
         end
         payload
       end
 
       def abort(payload)
         with_connection_retries do
-          jobs(payload.queue).insert(payload_attributes(payload))
+          jobs.insert(payload_attributes(payload))
         end
       end
 
-      def pop(queue)
+      def pop
         begin
           doc = with_connection_retries do
-            jobs(queue).find_and_modify(:remove => true)
+            jobs.find_and_modify(:remove => true)
           end
 
           if doc
@@ -45,15 +48,15 @@ module Qu
         end
       end
 
-      def size(queue)
+      def size
         with_connection_retries do
-          jobs(queue).count
+          jobs.count
         end
       end
 
-      def clear(queue)
+      def clear
         with_connection_retries do
-          jobs(queue).drop
+          jobs.drop
         end
       end
 
@@ -87,8 +90,8 @@ module Qu
         attrs
       end
 
-      def jobs(queue)
-        connection["qu:queue:#{queue}"]
+      def jobs
+        connection["qu:queue:#{name}"]
       end
 
       def with_connection_retries

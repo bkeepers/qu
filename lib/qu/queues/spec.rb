@@ -1,12 +1,15 @@
-class SimpleJob < Qu::Job
-  queue :simple
-end
+require "qu/queues/memory"
+Qu.register :default, Qu::Queues::Memory.new
 
-class CustomQueue < Qu::Job
-  queue :custom
+class SimpleJob < Qu::Job
+  queue :default
 end
 
 shared_examples_for 'a queue interface' do
+  before do
+    Qu.register :default, subject
+  end
+
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   it "can push a payload" do
@@ -26,28 +29,28 @@ shared_examples_for 'a queue interface' do
   end
 
   it "can pop from a queue" do
-    subject.pop('foo')
+    subject.pop
   end
 
   it "can get size of a queue" do
-    subject.size('foo')
+    subject.size
   end
 
   it "can clear a queue" do
-    subject.clear('foo')
+    subject.clear
   end
 
   it 'can reconnect' do
     subject.reconnect
   end
-
 end
 
 shared_examples_for 'a queue' do
   let(:payload) { Qu::Payload.new(:klass => SimpleJob) }
 
   before do
-    subject.clear(payload.queue)
+    Qu.register :default, subject
+    subject.clear
   end
 
   describe 'push' do
@@ -62,8 +65,7 @@ shared_examples_for 'a queue' do
 
     it 'should add a job to the queue' do
       subject.push(payload)
-      payload.queue.should == SimpleJob.queue
-      subject.size(payload.queue).should == 1
+      subject.size.should == 1
     end
 
     it 'should assign a different job id for the same job pushed multiple times' do
@@ -81,30 +83,25 @@ shared_examples_for 'a queue' do
   describe 'pop' do
     it 'should return next job' do
       subject.push(payload)
-      subject.pop(payload.queue).id.should == payload.id
+      subject.pop.id.should == payload.id
     end
 
     it 'should not return an already popped job' do
       subject.push(payload)
       subject.push(payload.dup)
-      subject.pop(payload.queue).id.should_not == subject.pop(payload.queue).id
-    end
-
-    it 'should not return job from different queue' do
-      subject.push(payload)
-      subject.pop('video').should be_nil
+      subject.pop.id.should_not == subject.pop.id
     end
 
     it 'should properly persist args' do
       payload.args = ['a', 'b']
       subject.push(payload)
-      subject.pop(payload.queue).args.should == ['a', 'b']
+      subject.pop.args.should == ['a', 'b']
     end
 
     it 'should properly persist a hash argument' do
       payload.args = [{:a => 1, :b => 2}]
       subject.push(payload)
-      subject.pop(payload.queue).args.should == [{'a' => 1, 'b' => 2}]
+      subject.pop.args.should == [{'a' => 1, 'b' => 2}]
     end
   end
 
@@ -119,12 +116,12 @@ shared_examples_for 'a queue' do
       subject.push(payload)
     end
 
-    it 'should add the job back on the queue' do
-      popped_payload = subject.pop(payload.queue)
+    it 'should add the job back' do
+      popped_payload = subject.pop
       popped_payload.id.should == payload.id
-      subject.size(payload.queue).should == 0
+      subject.size.should == 0
       subject.abort(popped_payload)
-      subject.size(payload.queue).should == 1
+      subject.size.should == 1
     end
   end
 
@@ -135,25 +132,19 @@ shared_examples_for 'a queue' do
   end
 
   describe 'size' do
-    it 'should return number of items in queue' do
-      subject.size(SimpleJob.queue).should == 0
+    it 'should return number of jobs' do
+      subject.size.should == 0
       subject.push(payload)
-      subject.size(SimpleJob.queue).should == 1
+      subject.size.should == 1
     end
   end
 
   describe 'clear' do
-    it 'should clear jobs for given queue' do
+    it 'should clear jobs' do
       subject.push(payload)
-      subject.size(payload.queue).should == 1
-      subject.clear(payload.queue)
-      subject.size(payload.queue).should == 0
-    end
-
-    it 'should not clear jobs for a different queue' do
-      subject.push(payload)
-      subject.clear('other')
-      subject.size(payload.queue).should == 1
+      subject.size.should == 1
+      subject.clear
+      subject.size.should == 0
     end
   end
 

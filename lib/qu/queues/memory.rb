@@ -8,17 +8,20 @@ module Qu
 
       def_delegator :@monitor, :synchronize
 
-      def initialize
+      attr_reader :name
+
+      def initialize(name = "default")
         @monitor = Monitor.new
-        @queues = {}
+        @queue = []
         @messages = {}
         @pending = {}
         @connection = @messages
+        @name = name
       end
 
       def push(payload)
         payload.id = SecureRandom.uuid
-        queue_for(payload.queue) do |queue|
+        with_queue do |queue|
           queue << payload.id
           @messages[payload.id] = dump(payload.attributes_for_push)
           payload
@@ -38,8 +41,8 @@ module Qu
 
       alias fail abort
 
-      def pop(queue_name)
-        queue_for(queue_name) do |queue|
+      def pop
+        with_queue do |queue|
           if id = queue.shift
             payload = Payload.new(load(@messages[id]))
             @pending[id] = payload
@@ -48,22 +51,18 @@ module Qu
         end
       end
 
-      def size(queue)
-        queue_for(queue).size
+      def size
+        with_queue { |queue| queue.size }
       end
 
-      def clear(queue_name)
-        queue_for(queue_name) { |queue| queue.clear }
+      def clear
+        with_queue { |queue| queue.clear }
       end
 
       private
 
-      def queue_for(queue)
-        if block_given?
-          synchronize { yield(@queues[queue] ||= []) }
-        else
-          synchronize { @queues[queue] ||= [] }
-        end
+      def with_queue
+        synchronize { yield(@queue) }
       end
     end
   end

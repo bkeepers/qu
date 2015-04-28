@@ -6,20 +6,20 @@ describe Qu::Worker do
 
   subject { described_class.new(SimpleJob.queue)}
 
-  describe 'queues' do
+  describe 'queue_names' do
     it 'should raise error if no queue specified' do
-      expect { described_class.new }.to raise_error(RuntimeError, "Please provide one or more queues to work on.")
+      expect { described_class.new }.to raise_error(RuntimeError, "Please provide one or more queue_names to work on.")
     end
 
     it 'should use specified if any' do
-      described_class.new('a', 'b').queues.should == ['a', 'b']
-      described_class.new(['a', 'b']).queues.should == ['a', 'b']
-      described_class.new(:a, :b).queues.should == ['a', 'b']
-      described_class.new([:a, :b]).queues.should == ['a', 'b']
+      described_class.new('a', 'b').queue_names.should == ['a', 'b']
+      described_class.new(['a', 'b']).queue_names.should == ['a', 'b']
+      described_class.new(:a, :b).queue_names.should == ['a', 'b']
+      described_class.new([:a, :b]).queue_names.should == ['a', 'b']
     end
 
     it 'should drop queue name whitespace' do
-      described_class.new(' a ', ' b ').queues.should == ['a', 'b']
+      described_class.new(' a ', ' b ').queue_names.should == ['a', 'b']
     end
   end
 
@@ -40,7 +40,10 @@ describe Qu::Worker do
     it 'sleeps for interval if no work performed' do
       begin
         original_interval = Qu.interval
-        Qu.stub(:pop).and_return(nil)
+        Qu.register :a, Qu::Queues::Memory.new
+        Qu.register :b, Qu::Queues::Memory.new
+        Qu.register :c, Qu::Queues::Memory.new
+        Qu.queues.each { |q| q.stub(:pop).and_return(nil) }
 
         Timeout.timeout(0.1) do
           described_class.new('a', 'b', 'c').start
@@ -94,7 +97,8 @@ describe Qu::Worker do
     context 'with job in first queue' do
 
       before do
-        expect(Qu).to receive(:pop).with(subject.queues.first).and_return(job)
+        queue = subject.queue_names.first
+        expect(Qu.queues[queue.to_sym]).to receive(:pop).and_return(job)
       end
 
       it 'should pop a payload and perform it' do
@@ -109,19 +113,30 @@ describe Qu::Worker do
 
     context 'with job in a middle of queue' do
       before do
-        Qu.stub(:pop).and_return(nil, job)
+        Qu.register :a, Qu::Queues::Memory.new
+        Qu.register :b, Qu::Queues::Memory.new
+        Qu.register :c, Qu::Queues::Memory.new
+        Qu.queues[:a].stub(:pop).and_return(nil)
+        Qu.queues[:b].stub(:pop).and_return(job)
       end
 
       it 'should not pop once job is found' do
         job.should_receive(:perform)
-        Qu.should_not_receive(:pop).with('c')
+        Qu.queues[:c].should_not_receive(:pop)
         described_class.new('a', 'b', 'c').work.should be(true)
       end
     end
 
     context 'with job in last queue' do
       before do
-        Qu.stub(:pop).and_return(nil, nil, nil, job)
+        Qu.register :a, Qu::Queues::Memory.new
+        Qu.register :b, Qu::Queues::Memory.new
+        Qu.register :c, Qu::Queues::Memory.new
+        Qu.register :d, Qu::Queues::Memory.new
+        Qu.queues[:a].stub(:pop).and_return(nil)
+        Qu.queues[:b].stub(:pop).and_return(nil)
+        Qu.queues[:c].stub(:pop).and_return(nil)
+        Qu.queues[:d].stub(:pop).and_return(job)
       end
 
       it 'pops until job found and performs it' do
@@ -136,7 +151,12 @@ describe Qu::Worker do
 
     context 'with no job in any queue' do
       before do
-        Qu.stub(:pop).and_return(nil)
+        Qu.register :a, Qu::Queues::Memory.new
+        Qu.register :b, Qu::Queues::Memory.new
+        Qu.register :c, Qu::Queues::Memory.new
+        Qu.queues[:a].stub(:pop).and_return(nil)
+        Qu.queues[:b].stub(:pop).and_return(nil)
+        Qu.queues[:c].stub(:pop).and_return(nil)
       end
 
       it 'not error' do
@@ -144,9 +164,10 @@ describe Qu::Worker do
       end
 
       it 'pops once for each queue' do
-        Qu.should_receive(:pop).with('a').once.ordered.and_return(nil)
-        Qu.should_receive(:pop).with('b').once.ordered.and_return(nil)
-        Qu.should_receive(:pop).with('c').once.ordered.and_return(nil)
+        Qu.queues[:a].should_receive(:pop).and_return(nil)
+        Qu.queues[:b].should_receive(:pop).and_return(nil)
+        Qu.queues[:c].should_receive(:pop).and_return(nil)
+
         described_class.new('a', 'b', 'c').work
       end
 

@@ -7,7 +7,7 @@ module Qu
     attr_accessor :payload
 
     def self.queue(name = nil)
-      @queue = name.to_s if name
+      @queue = name.to_sym if name
       @queue || raise("Please set the queue name")
     end
 

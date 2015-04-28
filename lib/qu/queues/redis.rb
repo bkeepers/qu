@@ -4,27 +4,29 @@ require 'securerandom'
 module Qu
   module Queues
     class Redis < Base
+      attr_accessor :name
       attr_accessor :namespace
 
-      def initialize
+      def initialize(name = "default")
+        self.name = name
         self.namespace = :qu
       end
 
       def push(payload)
         payload.id = SecureRandom.uuid
-        connection.rpush("queue:#{payload.queue}", dump(payload.attributes_for_push))
+        connection.rpush("queue:#{name}", dump(payload.attributes_for_push))
         payload
       end
 
       def abort(payload)
-        connection.rpush("queue:#{payload.queue}", dump(payload.attributes_for_push))
+        connection.rpush("queue:#{name}", dump(payload.attributes_for_push))
       end
 
       def complete(payload)
       end
 
-      def pop(queue = 'default')
-        if data = connection.lpop("queue:#{queue}")
+      def pop
+        if data = connection.lpop("queue:#{name}")
           data = load(data)
           return Payload.new({
             id: data['id'],
@@ -34,12 +36,12 @@ module Qu
         end
       end
 
-      def size(queue = 'default')
-        connection.llen("queue:#{queue}")
+      def size
+        connection.llen("queue:#{name}")
       end
 
-      def clear(queue = 'default')
-        connection.del("queue:#{queue}")
+      def clear
+        connection.del("queue:#{name}")
       end
 
       def connection
