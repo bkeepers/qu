@@ -25,8 +25,12 @@ describe Qu::Queues::SQS do
   if Qu::Specs.perform?(described_class, :sqs)
     before(:each) do
       reset_service(:sqs)
-      subject.connection.queues.create(SimpleJob.queue.to_s)
+      subject.connection.queues.create("default")
     end
+
+    subject {
+      described_class.new("default")
+    }
 
     it_should_behave_like 'a queue'
     it_should_behave_like 'a queue interface'

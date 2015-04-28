@@ -24,8 +24,8 @@ describe Qu::Queues::Redis do
       end
 
       it 'should allow customizing the namespace' do
-        subject.namespace = :foobar
-        subject.connection.namespace.should == :foobar
+        instance = Qu::Queues::Redis.new("default", :foobar)
+        instance.connection.namespace.should eq(:foobar)
       end
     end
   end

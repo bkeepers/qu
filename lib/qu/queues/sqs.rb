@@ -4,8 +4,8 @@ require 'securerandom'
 module Qu
   module Queues
     class SQS < Base
-      def initialize(name = "default")
-        self.name = name
+      def initialize(queue_name = "default")
+        @queue_name = queue_name
       end
 
       def push(payload)
@@ -55,7 +55,7 @@ module Qu
       end
 
       def queue
-        @queue ||= connection.queues.named(name.to_s)
+        @queue ||= connection.queues.named(@queue_name.to_s)
       end
     end
   end

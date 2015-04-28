@@ -8,13 +8,12 @@ module Qu
 
       def_delegator :@monitor, :synchronize
 
-      def initialize(name = "default")
+      def initialize
         @monitor = Monitor.new
         @queue = []
         @messages = {}
         @pending = {}
         @connection = @messages
-        self.name = name
       end
 
       def push(payload)

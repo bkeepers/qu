@@ -10,10 +10,10 @@ module Qu
       # failure (default: 1)
       attr_accessor :retry_frequency
 
-      def initialize(name = "default")
-        self.name            = name
+      def initialize(queue_name = :default)
         self.max_retries     = 5
         self.retry_frequency = 1
+        @queue_name = queue_name
       end
 
       def push(payload)
@@ -88,7 +88,7 @@ module Qu
       end
 
       def jobs
-        connection["qu:queue:#{name}"]
+        connection["qu:queue:#{@queue_name}"]
       end
 
       def with_connection_retries
