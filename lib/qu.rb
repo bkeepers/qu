@@ -26,14 +26,6 @@ module Qu
 
   def_delegators :queue, :push, :pop, :complete, :abort, :fail, :size, :clear
 
-  def queue
-    @queue || raise("Qu queue not configured. Install one of the queue gems like qu-redis.")
-  end
-
-  def queue=(queue)
-    @queue = Queues::Instrumented.wrap(queue)
-  end
-
   def queues
     @queues ||= Util::ThreadSafeHash.new
   end
