@@ -69,6 +69,6 @@ Qu.logger = Logger.new(log_to)
 RSpec.configure do |config|
   config.before(:each) do
     Qu.unregister_queues
-    Qu.register :default, Qu::Queues::Memory.new
+    Qu.register SimpleJob.queue, Qu::Queues::Memory.new
   end
 end

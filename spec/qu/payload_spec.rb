@@ -17,7 +17,7 @@ describe Qu::Payload do
     end
 
     it 'should get queue from klass' do
-      Qu::Payload.new(:klass => SimpleJob).queue.should eq(Qu.queues[:default])
+      Qu::Payload.new(:klass => SimpleJob).queue.should eq(Qu.queues[SimpleJob.queue])
     end
   end
 
