@@ -31,23 +31,23 @@ describe Qu::Job do
     it 'should initialize with args' do
       payload.args = [:foo]
 
-      c = Class.new(Qu::Job) do
+      job_class = Class.new(Qu::Job) do
         def initialize(arg)
           @arg = arg
         end
       end
-      c.load(payload).instance_variable_get(:@arg).should == :foo
+      job_class.load(payload).instance_variable_get(:@arg).should == :foo
     end
 
     it 'should assign payload before initializing' do
-      c = Class.new(Qu::Job) do
+      job_class = Class.new(Qu::Job) do
         def initialize
           payload.foo = :bar
         end
       end
 
-      job = c.load(payload)
-      job.payload.should == payload
+      job = job_class.load(payload)
+      job.payload.should eq(payload)
       payload.foo.should == :bar
     end
   end
