@@ -22,7 +22,7 @@ describe Qu::Job do
   end
 
   describe '.load' do
-    let(:payload) { Qu::Payload.new(:klass => 'SimpleJob')}
+    let(:payload) { Qu::Payload.new(:klass => 'SimpleJob') }
 
     it 'should return an instance' do
       SimpleJob.load(payload).should be_instance_of(SimpleJob)
