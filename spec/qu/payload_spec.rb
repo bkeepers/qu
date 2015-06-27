@@ -9,6 +9,12 @@ describe Qu::Payload do
     Qu::Payload.new(:id => 5).id.should == 5
   end
 
+  it 'should allow getting and setting arbitrary attributes' do
+    payload = Qu::Payload.new
+    payload.foo = :bar
+    payload.foo.should eq(:bar)
+  end
+
   describe 'queue' do
     it 'should require the klass attribute' do
       expect {
