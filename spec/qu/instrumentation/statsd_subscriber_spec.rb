@@ -86,8 +86,8 @@ describe Qu::Instrumentation::StatsdSubscriber do
       payload.perform
       flunk # should not get here
     rescue => exception
-      assert_timer "qu.op.failure_create"
-      assert_timer "qu.job.SimpleJob.failure_create"
+      assert_timer "qu.op.failure_report"
+      assert_timer "qu.job.SimpleJob.failure_report"
     end
   end
 end
