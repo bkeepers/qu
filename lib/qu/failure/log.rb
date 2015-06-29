@@ -5,7 +5,7 @@ module Qu
     class Log
       extend ::Qu::Logger
 
-      def self.create(payload, exception)
+      def self.report(payload, exception)
         logger.fatal "Qu failure #{payload.to_s}"
         log_exception(exception)
       end

@@ -132,8 +132,8 @@ describe Qu::Payload do
         subject.perform
       end
 
-      it 'should call create for failure queue' do
-        Qu::Failure.should_receive(:create).with(subject, error)
+      it 'should call report for failure queue' do
+        Qu::Failure.should_receive(:report).with(subject, error)
         subject.perform
       end
     end

@@ -51,7 +51,7 @@ module Qu
 
     def fail(exception)
       job.run_hook(:fail, exception) { queue.fail(self) }
-      Qu::Failure.create(self, exception)
+      Qu::Failure.report(self, exception)
     end
 
     # Internal: Pushes payload to queue.

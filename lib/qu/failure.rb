@@ -9,12 +9,12 @@ module Qu
     # exception - The exception raised.
     #
     # Returns nothing.
-    def self.create(payload, exception)
+    def self.report(payload, exception)
       Qu.instrument("failure_create") do |ipayload|
         ipayload[:payload] = payload
         ipayload[:exception] = exception
 
-        queue.create(payload, exception)
+        queue.report(payload, exception)
       end
     end
 

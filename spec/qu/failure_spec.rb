@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe Qu::Failure do
-  describe "#create" do
-    it "calls create on queue" do
+  describe "#report" do
+    it "calls report on queue" do
       payload = Qu::Payload.new(:klass => SimpleJob)
       exception = StandardError.new
-      Qu::Failure.queue.should_receive(:create).with(payload, exception)
-      Qu::Failure.create(payload, exception)
+      Qu::Failure.queue.should_receive(:report).with(payload, exception)
+      Qu::Failure.report(payload, exception)
     end
   end
 
