@@ -79,7 +79,7 @@ describe Qu::Instrumentation::StatsdSubscriber do
     end
   end
 
-  it "instruments failure create" do
+  it "instruments failure report" do
     payload = SimpleJob.create
     payload.job.stub(:perform).and_raise(StandardError.new)
     begin
