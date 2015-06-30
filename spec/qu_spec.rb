@@ -30,6 +30,14 @@ describe Qu do
     end
   end
 
+  it 'can load json' do
+    Qu.load_json('{"foo":"bar"}').should eq({"foo" => "bar"})
+  end
+
+  it 'can dump json' do
+    Qu.dump_json({"foo" => "bar"}).should eq('{"foo":"bar"}')
+  end
+
   [
     :instrumenter,
     :instrumenter=,

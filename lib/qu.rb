@@ -23,6 +23,7 @@ module Qu
 
   attr_accessor :logger, :graceful_shutdown, :instrumenter, :interval, :runner
 
+  # Private
   def queues
     @queues ||= Util::ThreadSafeHash.new
   end
