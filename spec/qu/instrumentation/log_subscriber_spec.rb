@@ -88,6 +88,20 @@ describe Qu::Instrumentation::LogSubscriber do
     end
   end
 
+  it "logs failure_report" do
+    payload = SimpleJob.create
+    payload.job.stub(:perform).and_raise(StandardError.new)
+
+    begin
+      payload.perform
+      fail # should not get here
+    rescue => exception
+      line = find_line('Qu failure_report')
+      line.should include("exception=StandardError")
+      line.should include(payload.to_s)
+    end
+  end
+
   def find_line(str)
     regex = /#{Regexp.escape(str)}/
     lines = log.split("\n")

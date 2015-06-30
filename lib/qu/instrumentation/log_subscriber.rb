@@ -34,6 +34,10 @@ module Qu
         log_event(:fail, event)
       end
 
+      def failure_report(event)
+        log_event(:failure_report, event)
+      end
+
       private
 
       def log_event(type, event)
@@ -44,6 +48,10 @@ module Qu
 
         if queue_name = event.payload[:queue_name]
           details << "queue_name=#{queue_name}"
+        end
+
+        if exception = event.payload[:exception]
+          details << "exception=#{exception}"
         end
 
         if payload = event.payload[:payload]
