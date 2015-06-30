@@ -57,7 +57,7 @@ module Qu
 
   def subscribe(string_or_regex, &block)
     pattern = if string_or_regex.is_a?(Regexp)
-      Regexp.new('^' + string_or_regex.source + '\.#{InstrumentationNamespace}')
+      Regexp.new("^#{string_or_regex.source}\\.#{InstrumentationNamespace}$")
     else
       "#{string_or_regex}.#{InstrumentationNamespace}"
     end

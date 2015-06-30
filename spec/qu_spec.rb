@@ -51,16 +51,24 @@ describe Qu do
   it "can subscribe, unsubscribe and instrument events within the qu namespace" do
     events = events_for("test.qu") do
       subscribed_args = []
+      regex_subscribed_args = []
+
       subscriber = Qu.subscribe("test") do |*args|
         subscribed_args << args
+      end
+
+      regex_subscriber = Qu.subscribe(/test/) do |*args|
+        regex_subscribed_args << args
       end
 
       Qu.instrument("test")
       Qu.instrumenter.instrument("test") # no qu namespace, doesn't count
       Qu.unsubscribe(subscriber)
+      Qu.unsubscribe(regex_subscriber)
       Qu.instrument("test") # unsubscribed, doesn't count
 
       subscribed_args.size.should be(1)
+      regex_subscribed_args.size.should be(1)
     end
 
     events.size.should be(2)
