@@ -3,8 +3,6 @@ require 'json'
 module Qu
   module Queues
     class Base
-      include Logger
-
       # Public: The name the queue was registered as.
       attr_accessor :name
 
@@ -51,6 +49,10 @@ module Qu
 
       def load(data)
         Qu.load_json(data)
+      end
+
+      def logger
+        Qu.logger
       end
     end
   end

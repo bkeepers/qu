@@ -3,8 +3,6 @@ require 'qu/util/signal_handler'
 
 module Qu
   class Worker
-    include Logger
-
     SIGNALS = [:INT, :TERM]
 
     attr_accessor :queue_names
@@ -112,6 +110,10 @@ module Qu
         logger.info("Worker #{id} received #{signal}, stopping")
         stop
       end
+    end
+
+    def logger
+      Qu.logger
     end
   end
 end
