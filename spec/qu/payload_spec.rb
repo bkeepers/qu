@@ -132,9 +132,15 @@ describe Qu::Payload do
         subject.perform
       end
 
-      it 'should call report for failure queue' do
-        Qu::Failure.should_receive(:report).with(subject, error)
-        subject.perform
+      it 'should instrument failure' do
+        events = events_for("failure_report.qu") do
+          subject.perform
+        end
+
+        event = events.first
+        event.should_not be_nil
+        event.payload[:payload].should be_instance_of(Qu::Payload)
+        event.payload[:exception].should eq(error)
       end
     end
   end

@@ -71,4 +71,6 @@ RSpec.configure do |config|
     Qu.unregister_queues
     Qu.register SimpleJob.queue, Qu::Queues::Memory.new
   end
+
+  config.include InstrumentationSpecHelpers
 end

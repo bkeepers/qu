@@ -47,4 +47,13 @@ describe Qu do
       Qu.queues[:foo].name.should eq(:foo)
     end
   end
+
+  describe "#instrument" do
+    it "instruments to instrumenter" do
+      events = events_for("test.qu") do
+        Qu.instrument("test")
+      end
+      events.size.should be(1)
+    end
+  end
 end

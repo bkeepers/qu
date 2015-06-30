@@ -1,6 +1,5 @@
 require 'qu/version'
 require 'qu/logger'
-require 'qu/failure'
 require 'qu/hooks'
 require 'qu/payload'
 require 'qu/job'
@@ -54,6 +53,20 @@ module Qu
 
   def instrument(name, payload = {}, &block)
     Qu.instrumenter.instrument("#{name}.#{InstrumentationNamespace}", payload, &block)
+  end
+
+  def subscribe(string_or_regex, &block)
+    pattern = if string_or_regex.is_a?(Regexp)
+      Regexp.new('^' + string_or_regex.source + '\.#{InstrumentationNamespace}')
+    else
+      "#{string_or_regex}.#{InstrumentationNamespace}"
+    end
+
+    Qu.instrumenter.subscribe(pattern, &block)
+  end
+
+  def unsubscribe(subscriber)
+    Qu.instrumenter.unsubscribe(subscriber)
   end
 end
 
