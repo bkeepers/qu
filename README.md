@@ -27,20 +27,6 @@ gem 'qu-redis'
 
 That's all you need to do!
 
-### Rails 2
-
-Decide which backend you want to use and add the gem to `config.gems` in `environment.rb`:
-
-``` ruby
-config.gem 'qu-redis'
-````
-
-To load the rake tasks, add the following to your `Rakefile`:
-
-``` ruby
-require 'qu/tasks'
-```
-
 ## Usage
 
 Jobs are defined by extending the `Qu::Job` class:
