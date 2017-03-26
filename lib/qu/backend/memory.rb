@@ -19,7 +19,7 @@ module Qu
       def push(payload)
         payload.id = SecureRandom.uuid
         queue_for(payload.queue) do |queue|
-          queue << payload.id
+          queue.push(payload.id)
           @messages[payload.id] = dump(payload.attributes_for_push)
           payload
         end
@@ -40,10 +40,18 @@ module Qu
 
       def pop(queue_name = 'default')
         queue_for(queue_name) do |queue|
-          if id = queue.shift
-            payload = Payload.new(load(@messages[id]))
-            @pending[id] = payload
-            payload
+          unless queue.empty?
+            begin
+              if id = queue.pop(true) # nonblocking pop
+                payload = Payload.new(load(@messages[id]))
+                @pending[id] = payload
+                payload
+              end
+            rescue ThreadError => e
+              unless e.message =~ /queue empty/
+                raise e
+              end
+            end
           end
         end
       end
@@ -60,9 +68,9 @@ module Qu
 
       def queue_for(queue)
         if block_given?
-          synchronize { yield(@queues[queue] ||= []) }
+          synchronize { yield(@queues[queue] ||= Queue.new) }
         else
-          synchronize { @queues[queue] ||= [] }
+          synchronize { @queues[queue] ||= Queue.new }
         end
       end
     end
